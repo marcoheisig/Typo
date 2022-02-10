@@ -52,9 +52,9 @@
     (argmin-aux real 0 0 more-reals)))
 
 (define-differentiator min (real &rest more-reals) index
-  (funcall (specializer 'if)
-           (funcall (specializer '=)
+  (funcall (function-specializer 'if)
+           (funcall (function-specializer '=)
                     (wrap-constant index)
-                    (apply (specializer 'argmin) real more-reals))
+                    (apply (function-specializer 'argmin) real more-reals))
            (wrap-constant 1)
            (wrap-constant 0)))

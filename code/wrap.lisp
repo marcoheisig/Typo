@@ -27,7 +27,7 @@
 (defun expand-wrap (form)
   (cond ((consp form)
          `(funcall
-           (specializer ',(first form))
+           (function-specializer ',(first form))
            ,@(mapcar #'expand-wrap (rest form))))
         ((member form '(nil t))
          `(wrap-constant ,form))

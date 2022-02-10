@@ -65,7 +65,7 @@
         (the-number number)
         t))
       (apply
-       (specializer 'and)
+       (function-specializer 'and)
        (mapcar
         (lambda (other-number)
           (wrap (cmpeq number other-number)))

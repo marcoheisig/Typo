@@ -11,8 +11,10 @@
 
 (defun lambda-list-arity (lambda-list)
   "Return two values:
-   1. the number of mandatory arguments
-   2. the maximal number of permissible arguments"
+
+   1. The number of mandatory arguments
+
+   2. The maximal number of permissible arguments"
   (let ((mandatory-arguments 0)
         (max-arguments 0)
         (upper-bound-p t)

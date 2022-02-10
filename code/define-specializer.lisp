@@ -21,7 +21,7 @@
          ;; Define the specializer...
          (%define-specializer (,function ,name) ,lambda-list ,@body)
          ;; ... and place it in the function database.
-         (setf (specializer ',function) #',name)))))
+         (setf (function-specializer ',function) #',name)))))
 
 (defmacro %define-specializer ((function name) lambda-list &body body)
   (multiple-value-bind (required optional rest keyword)

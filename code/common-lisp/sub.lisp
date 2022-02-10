@@ -27,7 +27,7 @@
                 ((and (eql-ntype-p ntype-of-b)
                       (numberp ntype-of-b)
                       (= ntype-of-b 0))
-                 (funcall (specializer 'coerce)
+                 (funcall (function-specializer 'coerce)
                           a
                           (wrap-constant (type-specifier result-ntype))))
                 (t

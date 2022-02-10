@@ -22,7 +22,7 @@
               :index index
               :arguments wrappers))
       (t
-       (apply (differentiator function) index wrappers)))))
+       (apply (function-differentiator function) index wrappers)))))
 
 (defun diff (function arguments n)
   (flet ((wrap-constant (object)

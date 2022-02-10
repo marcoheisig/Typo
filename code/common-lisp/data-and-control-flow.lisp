@@ -7,7 +7,7 @@
                   (car (last more-args)))))
     (ntype-subtypecase (wrapper-ntype tail)
       ((not list) (abort-specialization))
-      (null (apply (specializer 'funcall) function arg (butlast more-args)))
+      (null (apply (function-specializer 'funcall) function arg (butlast more-args)))
       ;; We give up here, because we cannot determine the number of values
       ;; returned by APPLY.
       (t (give-up-specialization)))))
@@ -27,7 +27,7 @@
 (define-specializer funcall (function &rest arguments)
   (let ((function-ntype (wrapper-ntype function)))
     (if (eql-ntype-p function-ntype)
-        (apply (specializer function-ntype) arguments)
+        (apply (function-specializer function-ntype) arguments)
         (progn
           (check-ntype function function)
           (give-up-specialization)))))

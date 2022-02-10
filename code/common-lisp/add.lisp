@@ -22,11 +22,11 @@
                      (result-ntype (numeric-contagion ntype-of-a ntype-of-b)))
                 (cond
                   ((zero-ntype-p ntype-of-a)
-                   (funcall (specializer 'coerce)
+                   (funcall (function-specializer 'coerce)
                             b
                             (wrap-constant (type-specifier result-ntype))))
                   ((zero-ntype-p ntype-of-b)
-                   (funcall (specializer 'coerce)
+                   (funcall (function-specializer 'coerce)
                             a
                             (wrap-constant (type-specifier result-ntype))))
                   (t

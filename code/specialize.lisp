@@ -37,7 +37,7 @@ supplied FUNCTION.
   (let ((*wrapper-ntype* wrapper-ntype)
         (*wrap-constant* wrap-constant)
         (*wrap-function* wrap-function))
-    (handler-case (apply (specializer function) wrappers)
+    (handler-case (apply (function-specializer function) wrappers)
       ;; A program error is an indication that we had an argument
       ;; mismatch.
       (give-up-specialization ()

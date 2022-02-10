@@ -9,11 +9,6 @@
 ;;; hand, this convention makes ntypes much more useful and allows
 ;;; reasoning about forms such as (coerce x 'single-float) or (expt n 2).
 
-(defconstant +word-bits+
-  #+32-bit 32
-  #+64-bit 64
-  #-(or 32-bit 64-bit) 64)
-
 (defstruct (ntype
             (:predicate %ntypep)
             (:copier nil)

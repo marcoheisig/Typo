@@ -22,11 +22,11 @@
                  (zero-ntype-p ntype-of-b))
              (wrap-constant (coerce 0 (type-specifier result-ntype))))
             ((one-ntype-p ntype-of-a)
-             (funcall (specializer 'coerce)
+             (funcall (function-specializer 'coerce)
                       b
                       (wrap-constant (type-specifier result-ntype))))
             ((one-ntype-p ntype-of-b)
-             (funcall (specializer 'coerce)
+             (funcall (function-specializer 'coerce)
                       a
                       (wrap-constant (type-specifier result-ntype))))
             (t
@@ -89,7 +89,7 @@
 (define-simple-instruction (* complex-long-float*) (complex-long-float) (complex-long-float complex-long-float))
 
 (define-differentiator * (&rest numbers) index
-  (apply (specializer '*)
+  (apply (function-specializer '*)
          (loop for number in numbers
                for position from 0
                unless (= position index)

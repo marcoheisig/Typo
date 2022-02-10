@@ -60,11 +60,12 @@
 
 (define-fndb-accessor parent fndb-record-parent)
 
-(define-fndb-accessor specializer fndb-record-specializer
-  (lambda (&rest arguments)
-    (declare (ignore arguments))
-    (give-up-specialization)))
+(define-fndb-accessor function-specializer fndb-record-specializer
+    (lambda (&rest arguments)
+      (declare (ignore arguments))
+      (give-up-specialization)))
 
-(define-fndb-accessor differentiator fndb-record-differentiator
-  (lambda (&rest arguments)
-    (break "TODO")))
+(define-fndb-accessor function-differentiator fndb-record-differentiator
+    (lambda (&rest arguments)
+      (declare (ignore arguments))
+      (break "TODO")))

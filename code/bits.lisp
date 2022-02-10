@@ -1,5 +1,10 @@
 (in-package #:typo)
 
+(defconstant +word-bits+
+  #+32-bit 32
+  #+64-bit 64
+  #-(or 32-bit 64-bit) 64)
+
 ;;; A Common Lisp implementation may provide up to four distinct floating
 ;;; point types - short-float, single-float, double-float and long-float.
 ;;; This code figures out how many bits an implementation uses to represent

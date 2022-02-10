@@ -21,7 +21,7 @@
          ;; Define the differentiator...
          (%define-differentiator (,function ,name) ,lambda-list ,index ,@body)
          ;; ... and place it in the function database.
-         (setf (differentiator ',function) #',name)))))
+         (setf (function-differentiator ',function) #',name)))))
 
 (defmacro %define-differentiator ((function name) lambda-list index &body body)
   (multiple-value-bind (required optional rest keyword)

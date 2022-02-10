@@ -1,10 +1,16 @@
 (cl:in-package #:common-lisp-user)
 
 (defpackage #:typo
-  (:use #:common-lisp)
+  (:use #:closer-common-lisp)
   (:export
-   ;; Utilities.
+   ;; Miscellaneous
    #:function-arity
+   #:lambda-list-arity
+   #:+word-bits+
+   #:+short-float-bits+
+   #:+single-float-bits+
+   #:+double-float-bits+
+   #:+long-float-bits+
 
    ;; Auxiliary types.
    #:function-name

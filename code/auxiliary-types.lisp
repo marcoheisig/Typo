@@ -35,15 +35,14 @@
 
 ;; The representation of byte specifiers is implementation-dependent.
 ;; However, under the not-so-bold assumption that each implementation
-;; consistently uses a uniform representation, we can get surprisingly far.
+;; consistently uses a certain representation, we can get surprisingly far.
 (deftype byte-specifier ()
-  (load-time-value
-   (let ((a (byte 0 0))
-         (b (byte 16 253)))
-     (if (equal (type-of a)
-                (type-of b))
-         (type-of a)
-         't))))
+  '#.(let ((a (byte 0 0))
+           (b (byte 16 253)))
+       (if (equal (type-of a)
+                  (type-of b))
+           (type-of a)
+           't)))
 
 (deftype complex-short-float ()
   '(complex short-float))
@@ -59,9 +58,6 @@
 
 (deftype generalized-boolean ()
   't)
-
-(deftype multiple-value-count ()
-  `(integer 0 ,multiple-values-limit))
 
 (deftype type-specifier ()
   t)

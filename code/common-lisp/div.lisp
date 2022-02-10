@@ -5,9 +5,9 @@
   (cond ((null more-numbers)
          (wrap (* -1 (expt number 2))))
         ((zerop index)
-         (apply (specializer '/) (wrap 1) more-numbers))
+         (apply (function-specializer '/) (wrap 1) more-numbers))
         (t
-         (apply (specializer '/)
+         (apply (function-specializer '/)
                 (wrap (- number))
                 (loop for number in more-numbers
                       for position from 1
@@ -38,7 +38,7 @@
                       ((and (eql-ntype-p ntype-of-b)
                             (numberp ntype-of-b)
                             (= ntype-of-b 1))
-                       (funcall (specializer 'coerce)
+                       (funcall (function-specializer 'coerce)
                                 a
                                 (wrap-constant (type-specifier result-ntype))))
                       ;; Multiplication by a reciprocal is always

@@ -4,6 +4,7 @@
 
   :depends-on
   ("alexandria"
+   "closer-mop"
    "trivia"
    "trivial-arguments")
 
@@ -13,8 +14,8 @@
   :components
   ((:file "packages")
    (:file "auxiliary-types")
+   (:file "bits")
    (:file "function-lambda-lists")
-   (:file "float-bits")
    (:file "ntype-1")
    (:file "ntype-2")
    (:file "ntype-3")
