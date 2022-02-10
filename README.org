@@ -1,0 +1,16 @@
+#+TITLE: Typo - A Fast, Approximate Type Inference Library for Common Lisp
+#+AUTHOR: Marco Heisig
+
+Notable Features:
+
+- Blazingly fast (approximate) handling of types
+- Handles almost all functions in the Common Lisp package
+- Extensible
+
+Bonus Features:
+
+- Function specialization: Replace a call to a function by one ore more
+  calls to more specialized functions, depending on the argument types.
+
+- Automatic differentiation: Obtain an expression for computing the
+  derivative of the supplied expression.
