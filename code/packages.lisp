@@ -28,8 +28,8 @@
    #:complex-double-float
    #:complex-long-float
    #:generalized-boolean
-   #:multiple-value-count
    #:type-specifier
+   #:zero
 
    ;; Ntype manipulation.
    #:*ntypes*

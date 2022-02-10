@@ -1,8 +1,8 @@
 (in-package #:typo)
 
 ;;; Some objects in the Common Lisp standard have a straightforward
-;;; definition, but there is no corresponding type in the CL package.
-;;; Instead, we define them here.
+;;; definition, but the CL package defines no corresponding type.  We
+;;; define those types here.
 
 (deftype function-name ()
   '(or
@@ -63,8 +63,9 @@
   t)
 
 (deftype zero ()
-  '(member 0 0S0 -0S0 0F0 -0F0 0D0 -0D0 0L0 -0L0
-    #C(0S0 0S0) #C(0S0 -0S0) #C(-0S0 0S0) #C(-0S0 -0S0)
-    #C(0F0 0F0) #C(0F0 -0F0) #C(-0F0 0F0) #C(-0F0 -0F0)
-    #C(0D0 0D0) #C(0D0 -0D0) #C(-0D0 0D0) #C(-0D0 -0D0)
-    #C(0L0 0L0) #C(0L0 -0L0) #C(-0L0 0L0) #C(-0L0 -0L0)))
+  '#.(remove-duplicates
+      '(0 0S0 -0S0 0F0 -0F0 0D0 -0D0 0L0 -0L0
+        #C(0S0 0S0) #C(0S0 -0S0) #C(-0S0 0S0) #C(-0S0 -0S0)
+        #C(0F0 0F0) #C(0F0 -0F0) #C(-0F0 0F0) #C(-0F0 -0F0)
+        #C(0D0 0D0) #C(0D0 -0D0) #C(-0D0 0D0) #C(-0D0 -0D0)
+        #C(0L0 0L0) #C(0L0 -0L0) #C(-0L0 0L0) #C(-0L0 -0L0))))
