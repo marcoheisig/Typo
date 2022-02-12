@@ -8,37 +8,31 @@
   "Execute the forms in the first clause that starts with a type that is a
 subtype of the supplied NTYPE."
   (alexandria:once-only (ntype)
-    (labels ((match-form (type-specifier)
-               (trivia:match type-specifier
-                 ((list* 'or type-specifiers)
-                  `(or ,@(mapcar #'match-form type-specifiers)))
-                 ((list* 'and type-specifiers)
-                  `(or ,@(mapcar #'match-form type-specifiers)))
-                 ((list 'not type-specifier)
-                  (multiple-value-bind (match-ntype precise-p)
-                      (type-specifier-ntype type-specifier)
-                    (unless precise-p (trivia.fail:fail))
-                    `(ntype-subtypepc2 ,ntype ,match-ntype)))
-                 (_
-                  (multiple-value-bind (match-ntype precise-p)
-                      (type-specifier-ntype type-specifier)
-                    (if precise-p
-                        `(ntype-subtypep ,ntype ,match-ntype)
-                        `(and (logbitp (ntype-index ,ntype) ,(match-mask type-specifier))
-                              (etypecase ,ntype
-                                (eql-ntype
-                                 (typep (eql-ntype-object ,ntype) ',type-specifier))
-                                ,@(unless (ntype-subtypepc2 match-ntype (type-specifier-ntype 'array))
-                                    `((array-ntype
-                                       (subtypep (ntype-type-specifier ,ntype) ',type-specifier))))
-                                (primitive-ntype
-                                 (ntype-subtypep ,ntype ,match-ntype)))))))))
-             (match-mask (type-specifier)
-               (let ((mask 0))
-                 (loop for p across *primitive-ntypes* do
-                   (unless (subtypep `(and ,type-specifier ,(primitive-ntype-type-specifier p)) nil)
-                     (setf mask (logior mask (ash 1 (ntype-index p))))))
-                 mask)))
+    (labels
+        ((match-form (type-specifier)
+           (trivia:match type-specifier
+             ((list* 'or type-specifiers)
+              `(or ,@(mapcar #'match-form type-specifiers)))
+             ((list* 'and type-specifiers)
+              `(or ,@(mapcar #'match-form type-specifiers)))
+             ((list 'not type-specifier)
+              (multiple-value-bind (match-ntype precise-p)
+                  (type-specifier-ntype type-specifier)
+                (unless precise-p (trivia.fail:fail))
+                `(ntype-subtypepc2 ,ntype ,match-ntype)))
+             (_
+              (multiple-value-bind (match-ntype precise-p)
+                  (type-specifier-ntype type-specifier)
+                (if precise-p
+                    `(ntype-subtypep ,ntype ,match-ntype)
+                    `(and (ntype-subtypep ,ntype ,match-ntype)
+                          (typecase ,ntype
+                            (eql-ntype
+                             (typep (eql-ntype-object ,ntype) ',type-specifier))
+                            ,@(unless (ntype-subtypepc2 match-ntype (type-specifier-ntype 'array))
+                                `((array-ntype
+                                   (subtypep (ntype-type-specifier ,ntype) ',type-specifier))))
+                            (primitive-ntype t)))))))))
       `(cond
          ,@(loop for clause in clauses
                  collect
