@@ -1,4 +1,5 @@
 (defsystem "typo"
+  :description "A portable type inference library for Common Lisp"
   :author "Marco Heisig <marco.heisig@fau.de>"
   :license "AGPLv3"
 
