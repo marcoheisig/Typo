@@ -5,6 +5,10 @@
   #+64-bit 64
   #-(or 32-bit 64-bit) 64)
 
+(defconstant +fixnum-bits+
+  (max (integer-length most-positive-fixnum)
+       (integer-length most-negative-fixnum)))
+
 ;;; A Common Lisp implementation may provide up to four distinct floating
 ;;; point types - short-float, single-float, double-float and long-float.
 ;;; This code figures out how many bits an implementation uses to represent

@@ -1,0 +1,26 @@
+(in-package #:typo)
+
+(defmethod ntype= ((ntype1 ntype) (ntype2 ntype))
+  (and (ntype-subtypep ntype1 ntype2)
+       (ntype-subtypep ntype2 ntype1)))
+
+(defmethod ntype= ((ntype1 eql-ntype) (ntype2 eql-ntype))
+  (eql (eql-ntype-object ntype1)
+       (eql-ntype-object ntype2)))
+
+(defmethod ntype= ((ntype1 primitive-ntype) (ntype2 primitive-ntype))
+  (eq ntype1 ntype2))
+
+(defmethod ntype= ((ntype1 array-ntype) (ntype2 array-ntype))
+  (flet ((element-ntype= (t1 t2)
+           (cond ((and (eql t1 '*) (eql t2 '*))
+                  t)
+                 ((and (ntypep t1) (ntypep t2))
+                  (ntype= t1 t2))
+                 (t nil))))
+    (and (eql (array-ntype-simplep ntype1)
+              (array-ntype-simplep ntype2))
+         (equal (array-ntype-element-ntype ntype1)
+                (array-ntype-element-ntype ntype2))
+         (element-ntype= (array-ntype-element-ntype ntype1)
+                         (array-ntype-element-ntype ntype2)))))

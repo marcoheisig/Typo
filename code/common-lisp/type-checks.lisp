@@ -15,7 +15,7 @@
          (ntype-subtypecase (wrapper-ntype object)
            ((not ,type) (abort-specialization))
            (,type object)
-           (t (wrap-default (ntype ',type))))))))
+           (t (wrap-default (type-specifier-ntype ',type))))))))
 
 (define-type-check number)
 (define-type-check real)

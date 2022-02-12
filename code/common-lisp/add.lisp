@@ -19,23 +19,23 @@
      (flet ((two-arg-+ (a b)
               (let* ((ntype-of-a (wrapper-ntype a))
                      (ntype-of-b (wrapper-ntype b))
-                     (result-ntype (numeric-contagion ntype-of-a ntype-of-b)))
+                     (result-ntype (ntype-contagion ntype-of-a ntype-of-b)))
                 (cond
                   ((zero-ntype-p ntype-of-a)
                    (funcall (function-specializer 'coerce)
                             b
-                            (wrap-constant (type-specifier result-ntype))))
+                            (wrap-constant (ntype-type-specifier result-ntype))))
                   ((zero-ntype-p ntype-of-b)
                    (funcall (function-specializer 'coerce)
                             a
-                            (wrap-constant (type-specifier result-ntype))))
+                            (wrap-constant (ntype-type-specifier result-ntype))))
                   (t
                    (ntype-subtypecase result-ntype
                      ((not number) (abort-specialization))
                      (integer
                       (cond ((zero-ntype-p ntype-of-a) b)
                             ((zero-ntype-p ntype-of-b) a)
-                            (t (wrap-default (ntype 'integer)))))
+                            (t (wrap-default (type-specifier-ntype 'integer)))))
                      (short-float
                       (wrap
                        (short-float+
@@ -76,7 +76,7 @@
                        (complex-long-float+
                         (coerce-to-complex-long-float a)
                         (coerce-to-complex-long-float b))))
-                     (t (wrap-default (ntype 'number)))))))))
+                     (t (wrap-default (type-specifier-ntype 'number)))))))))
        (reduce #'two-arg-+ numbers)))))
 
 (define-simple-instruction (+ short-float+) (short-float) (short-float short-float))

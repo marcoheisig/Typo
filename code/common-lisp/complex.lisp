@@ -11,14 +11,15 @@
 
 (define-specializer complex (realpart &optional (imagpart nil imagpart-supplied-p))
   (let* ((realpart-ntype (wrapper-ntype realpart))
-         (imagpart-ntype (if imagpart-supplied-p
-                             (wrapper-ntype imagpart)
-                             (coerce 0 (type-specifier (generalize-ntype realpart-ntype))))))
+         (imagpart-ntype
+           (if imagpart-supplied-p
+               (wrapper-ntype imagpart)
+               (coerce 0 (ntype-type-specifier (upgraded-complex-part-ntype realpart-ntype))))))
     (with-constant-folding (complex (realpart-ntype real) (imagpart-ntype real))
       (if (and (eql-ntype-p imagpart)
                (eql imagpart 0))
           (wrap realpart)
-          (ntype-subtypecase (numeric-contagion realpart-ntype imagpart-ntype)
+          (ntype-subtypecase (ntype-contagion realpart-ntype imagpart-ntype)
             (short-float
              (wrap
               (short-float-complex
@@ -62,7 +63,7 @@
         (complex-double-float (wrap (complex-double-float-realpart number)))
         (complex-long-float (wrap (complex-long-float-realpart number)))
         (real (wrap number))
-        (t (wrap-default (ntype 'real)))))))
+        (t (wrap-default (type-specifier-ntype 'real)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -82,7 +83,7 @@
         (complex-double-float (wrap (complex-double-float-imagpart number)))
         (complex-long-float (wrap (complex-long-float-imagpart number)))
         (real (wrap (* 0 number)))
-        (t (wrap-default (ntype 'real)))))))
+        (t (wrap-default (type-specifier-ntype 'real)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -98,7 +99,7 @@
           ((not number) (abort-specialization))
           (real (wrap number))
           (complex (wrap (complex (realpart number) (- (imagpart number)))))
-          (t (wrap-default (ntype 'number)))))))
+          (t (wrap-default (type-specifier-ntype 'number)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -117,7 +118,7 @@
           ((float * (0e0)) (wrap (float #.pi number)))
           ((rational * (0)) (wrap-constant (coerce pi 'single-float)))
           ((complex float) (wrap-default (complex-part-ntype ntype)))
-          (t (wrap-default (ntype 'number)))))))
+          (t (wrap-default (type-specifier-ntype 'number)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -146,4 +147,4 @@
       (long-float-cis x)))
     (t
      (wrap-default
-      (ntype 'complex)))))
+      (type-specifier-ntype 'complex)))))

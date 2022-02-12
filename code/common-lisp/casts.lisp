@@ -32,7 +32,7 @@
          (wrap
           (short-float-from-long-float real)))
         (t
-         (wrap-default (ntype 'short-float)))))))
+         (wrap-default (type-specifier-ntype 'short-float)))))))
 
 (declaim (inline coerce-to-single-float))
 (defun coerce-to-single-float (number)
@@ -62,7 +62,7 @@
          (wrap
           (single-float-from-long-float real)))
         (t
-         (wrap-default (ntype 'single-float)))))))
+         (wrap-default (type-specifier-ntype 'single-float)))))))
 
 (declaim (inline coerce-to-double-float))
 (defun coerce-to-double-float (number)
@@ -92,7 +92,7 @@
          (wrap
           (double-float-from-long-float real)))
         (t
-         (wrap-default (ntype 'double-float)))))))
+         (wrap-default (type-specifier-ntype 'double-float)))))))
 
 (declaim (inline coerce-to-long-float))
 (defun coerce-to-long-float (number)
@@ -122,7 +122,7 @@
          (wrap
           (long-float-from-double-float real)))
         (t
-         (wrap-default (ntype 'long-float)))))))
+         (wrap-default (type-specifier-ntype 'long-float)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -168,7 +168,7 @@
          (wrap
           (complex-short-float-from-complex-long-float number)))
         (t
-         (wrap-default (ntype 'complex-short-float)))))))
+         (wrap-default (type-specifier-ntype 'complex-short-float)))))))
 
 (declaim (inline coerce-to-complex-single-float))
 (defun coerce-to-complex-single-float (number)
@@ -210,7 +210,7 @@
          (wrap
           (complex-single-float-from-complex-long-float number)))
         (t
-         (wrap-default (ntype 'complex-single-float)))))))
+         (wrap-default (type-specifier-ntype 'complex-single-float)))))))
 
 (declaim (inline coerce-to-complex-double-float))
 (defun coerce-to-complex-double-float (number)
@@ -252,7 +252,7 @@
          (wrap
           (complex-double-float-from-complex-long-float number)))
         (t
-         (wrap-default (ntype 'complex-double-float)))))))
+         (wrap-default (type-specifier-ntype 'complex-double-float)))))))
 
 (declaim (inline coerce-to-complex-long-float))
 (defun coerce-to-complex-long-float (number)
@@ -294,7 +294,7 @@
          (wrap
           (complex-long-float-from-complex-double-float number)))
         (t
-         (wrap-default (ntype 'complex-long-float)))))))
+         (wrap-default (type-specifier-ntype 'complex-long-float)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -308,12 +308,12 @@
         (single-float (wrap (coerce-to-single-float number)))
         (double-float (wrap (coerce-to-double-float number)))
         (long-float (wrap (coerce-to-long-float number)))
-        (t (wrap-default (ntype 'float))))
+        (t (wrap-default (type-specifier-ntype 'float))))
       (ntype-subtypecase (wrapper-ntype number)
         ((not real) (abort-specialization))
         (float (wrap number))
         ((not float) (wrap (coerce-to-single-float number)))
-        (t (wrap-default (ntype 'float))))))
+        (t (wrap-default (type-specifier-ntype 'float))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -325,7 +325,7 @@
     (with-constant-folding (coerce (object-ntype t)
                                    (type-specifier-ntype type-specifier))
       (if (eql-ntype-p type-specifier-ntype)
-          (let ((result-ntype (ntype type-specifier-ntype)))
+          (let ((result-ntype (type-specifier-ntype type-specifier-ntype)))
             (if (ntype-subtypep object-ntype result-ntype)
                 (wrap object)
                 (ntype-subtypecase result-ntype
@@ -363,7 +363,7 @@
                      (float
                       (wrap object))
                      (t
-                      (wrap-default (ntype 'float)))))
+                      (wrap-default (type-specifier-ntype 'float)))))
                   (complex
                    (ntype-subtypecase object-ntype
                      ((not number) (abort-specialization))
@@ -382,4 +382,4 @@
                      (t (wrap-default 'complex))))
                   (t
                    (wrap-default result-ntype)))))
-          (wrap-default (ntype 't))))))
+          (wrap-default (universal-ntype))))))

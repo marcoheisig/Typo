@@ -19,7 +19,7 @@
     (single-float (wrap (single-float-ln x)))
     (double-float (wrap (double-float-ln x)))
     (long-float (wrap (long-float-ln x)))
-    (t (wrap-default (ntype 'number)))))
+    (t (wrap-default (type-specifier-ntype 'number)))))
 
 (define-differentiator log (number &optional (base nil base-supplied-p)) index
   (if (not base-supplied-p)

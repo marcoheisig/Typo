@@ -35,7 +35,7 @@
                    ((not real) (abort-specialization))
                    (long-float (wrap (long-float-min a b)))
                    (t (wrap-default (ntype-union ntype-of-a ntype-of-b)))))
-                (t (wrap-default (ntype 'real))))))
+                (t (wrap-default (type-specifier-ntype 'real))))))
           more-reals
           :initial-value real))))
 

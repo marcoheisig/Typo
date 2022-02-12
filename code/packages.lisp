@@ -2,6 +2,7 @@
 
 (defpackage #:typo
   (:use #:closer-common-lisp)
+  (:import-from #:trivia #:place #:<> #:access)
   (:export
    ;; Miscellaneous
    #:function-arity

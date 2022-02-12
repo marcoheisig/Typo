@@ -10,7 +10,7 @@
 (define-simple-instruction (/= complex-long-float/=) (generalized-boolean) (complex-long-float complex-long-float))
 (define-instruction (= cmpneq) (generalized-boolean) (a b)
   (ntype-subtypecase
-      (numeric-contagion
+      (ntype-contagion
        (wrapper-ntype a)
        (wrapper-ntype b))
     ((not number) (abort-specialization))
@@ -56,7 +56,7 @@
        (coerce-to-complex-long-float b))))
     (t
      (wrap-default
-      (ntype 'generalized-boolean)))))
+      (type-specifier-ntype 'generalized-boolean)))))
 
 (defun map-unique-pairs (fn list)
   (loop for sublist on list

@@ -5,8 +5,10 @@
   :depends-on
   ("alexandria"
    "closer-mop"
+   "introspect-environment"
    "trivia"
-   "trivial-arguments")
+   "trivial-arguments"
+   "trivial-garbage")
 
   :in-order-to ((test-op (test-op "petalisp.test-suite")))
 
@@ -16,9 +18,25 @@
    (:file "auxiliary-types")
    (:file "bits")
    (:file "function-lambda-lists")
-   (:file "ntype-1")
-   (:file "ntype-2")
-   (:file "ntype-3")
+   (:file "class-subclasses")
+   (:module "ntype"
+    :components
+    ((:file "primitive-ntype-information")
+     (:file "ntype")
+     (:file "primitive-ntype")
+     (:file "make-eql-ntype")
+     (:file "make-array-ntype")
+     (:file "type-specifier-ntype")
+     (:file "ntype-subtypep")
+     (:file "ntype-subtypepc2")
+     (:file "ntype=")
+     (:file "ntype-union")
+     (:file "ntype-subtypecase")
+     (:file "ntype-contagion")
+     (:file "array-element-ntype")
+     (:file "complex-part-ntype")
+     (:file "upgraded-array-element-ntype")
+     (:file "upgraded-complex-part-ntype")))
    (:file "conditions")
    (:file "wrap")
    (:file "fndb")

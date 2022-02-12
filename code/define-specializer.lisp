@@ -40,7 +40,7 @@
                    (list* ,@required ,@(mapcar #'first optional) ,rest)))
                 (wrap-default (&rest ntypes)
                   (wrap-function
-                   (apply #'list-ntypes ntypes)
+                   ntypes
                    ',function
                    (list* ,@required ,@(mapcar #'first optional) ,rest))))
            (declare (ignorable #'abort-specialization #'wrap-default))
@@ -64,4 +64,4 @@
   (error 'invalid-arguments
          :function function
          :argument-types
-         (mapcar (alexandria:compose #'type-specifier #'wrapper-ntype) arguments)))
+         (mapcar (alexandria:compose #'ntype-type-specifier #'wrapper-ntype) arguments)))

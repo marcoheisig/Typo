@@ -20,7 +20,7 @@
       (* (exp (realpart x))
          (cis (imagpart x)))))
     (t
-     (wrap-default (ntype 'number)))))
+     (wrap-default (type-specifier-ntype 'number)))))
 
 (define-simple-instruction (exp short-float-exp) ((short-float 0S0 *)) (short-float))
 (define-simple-instruction (exp single-float-exp) ((single-float 0F0 *)) (single-float))
@@ -47,7 +47,7 @@
          ((complex float)
           (wrap (complex (float 1 base) 0)))
          (t
-          (wrap-default (ntype 'number)))))
+          (wrap-default (type-specifier-ntype 'number)))))
       (2 (wrap (* base base)))
       (3 (wrap (* base base base)))
       (4 (let ((tmp (wrap (* base base))))
@@ -68,11 +68,11 @@
              (integer
               (ntype-subtypecase base-ntype
                 ((not number) (abort-specialization))
-                (rational (wrap-default (ntype 'rational)))
-                (short-float (wrap-default (ntype 'short-float)))
-                (single-float (wrap-default (ntype 'single-float)))
-                (double-float (wrap-default (ntype 'double-float)))
-                (long-float (wrap-default (ntype 'long-float)))
-                (t (wrap-default (ntype 'number)))))
+                (rational (wrap-default (type-specifier-ntype 'rational)))
+                (short-float (wrap-default (type-specifier-ntype 'short-float)))
+                (single-float (wrap-default (type-specifier-ntype 'single-float)))
+                (double-float (wrap-default (type-specifier-ntype 'double-float)))
+                (long-float (wrap-default (type-specifier-ntype 'long-float)))
+                (t (wrap-default (type-specifier-ntype 'number)))))
              (t
-              (wrap-default (ntype 'number)))))))))
+              (wrap-default (type-specifier-ntype 'number)))))))))

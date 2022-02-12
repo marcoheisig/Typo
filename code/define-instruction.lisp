@@ -30,7 +30,7 @@
            (wrap-default
             ,@(loop for type in result-types
                     collect
-                    `(ntype ',type))))))))
+                    `(type-specifier-ntype ',type))))))))
 
 (defun gensymify (x)
   (if (symbolp x)

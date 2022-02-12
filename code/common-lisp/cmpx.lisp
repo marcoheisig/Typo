@@ -17,7 +17,7 @@
                t))
              (labels ((cmp (a b)
                         (ntype-subtypecase
-                            (numeric-contagion
+                            (ntype-contagion
                              (wrapper-ntype a)
                              (wrapper-ntype b))
                           ((not real) (abort-specialization))
@@ -43,7 +43,7 @@
                              (coerce-to-long-float b))))
                           (t
                            (wrap-default
-                            (ntype 'generalized-boolean))))))
+                            (type-specifier-ntype 'generalized-boolean))))))
                (let ((a real)
                      (value (wrap t)))
                  (loop for b in more-reals for boolean = (cmp a b) do

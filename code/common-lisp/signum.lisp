@@ -4,9 +4,9 @@
   (let ((ntype (wrapper-ntype number)))
     (with-constant-folding (signum (ntype number))
       (ntype-subtypecase ntype
-        (rational (wrap-default (ntype 'integer)))
+        (rational (wrap-default (type-specifier-ntype 'integer)))
         ((or float (complex float)) (wrap-default ntype))
-        (complex (wrap-default (ntype 'complex)))
+        (complex (wrap-default (type-specifier-ntype 'complex)))
         (t (wrap-default 'number))))))
 
 (define-differentiator signum (number) index

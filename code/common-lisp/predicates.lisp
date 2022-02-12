@@ -8,8 +8,8 @@
              (,predicate ,ntype)
              (ntype-subtypecase ,ntype
                ((not ,type-specifier) (wrap nil))
-               (,type-specifier (wrap-default (ntype '(not null))))
-               (t (wrap-default (ntype 'generalized-boolean)))))))))
+               (,type-specifier (wrap-default (type-specifier-ntype '(not null))))
+               (t (wrap-default (type-specifier-ntype 'generalized-boolean)))))))))
 
 (define-predicate-rule arrayp array)
 (define-predicate-rule bit-vector-p bit-vector)
@@ -37,30 +37,30 @@
   (let ((ntype (wrapper-ntype real)))
     (with-constant-folding (minusp (ntype real))
       (ntype-subtypecase ntype
-        ((real * (0)) (wrap-default (ntype '(not null))))
+        ((real * (0)) (wrap-default (type-specifier-ntype '(not null))))
         ((real 0 *) (wrap nil))
-        (t (wrap-default (ntype 'generalized-boolean)))))))
+        (t (wrap-default (type-specifier-ntype 'generalized-boolean)))))))
 
 (define-specializer plusp (real)
   (let ((ntype (wrapper-ntype real)))
     (with-constant-folding (plusp (ntype real))
       (ntype-subtypecase ntype
-        ((real (0) *) (wrap-default (ntype '(not null))))
+        ((real (0) *) (wrap-default (type-specifier-ntype '(not null))))
         ((real * 0) (wrap nil))
-        (t (wrap-default (ntype 'generalized-boolean)))))))
+        (t (wrap-default (type-specifier-ntype 'generalized-boolean)))))))
 
 (define-specializer zerop (number)
   (let ((ntype (wrapper-ntype number)))
     (with-constant-folding (zerop (ntype number))
       (ntype-subtypecase ntype
-        (zero (wrap-default (ntype '(not null))))
+        (zero (wrap-default (type-specifier-ntype '(not null))))
         ((not zero) (wrap nil))
-        (t (wrap-default (ntype 'generalized-boolean)))))))
+        (t (wrap-default (type-specifier-ntype 'generalized-boolean)))))))
 
 (define-specializer evenp (integer)
   (with-constant-folding (evenp ((wrapper-ntype integer) integer))
-    (wrap-default (ntype 'generalized-boolean))))
+    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-specializer oddp (integer)
   (with-constant-folding (oddp ((wrapper-ntype integer) integer))
-    (wrap-default (ntype 'generalized-boolean))))
+    (wrap-default (type-specifier-ntype 'generalized-boolean))))

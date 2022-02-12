@@ -29,7 +29,7 @@
      (wrap
       (complex-long-float-sin x)))
     (t
-     (wrap-default (ntype 'number)))))
+     (wrap-default (type-specifier-ntype 'number)))))
 
 (define-differentiator sin (x) _
   (wrap (cos x)))

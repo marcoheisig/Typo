@@ -14,15 +14,15 @@
 
 (define-specializer fdefinition (name)
   (check-ntype name function-name)
-  (wrap-default (ntype 't)))
+  (wrap-default (type-specifier-ntype 't)))
 
 (define-specializer fboundp (name)
   (check-ntype name function-name)
-  (wrap-default (ntype 't)))
+  (wrap-default (type-specifier-ntype 't)))
 
 (define-specializer fmakunbound (name)
   (check-ntype name function-name)
-  (wrap-default (ntype 'function-name)))
+  (wrap-default (type-specifier-ntype 'function-name)))
 
 (define-specializer funcall (function &rest arguments)
   (let ((function-ntype (wrapper-ntype function)))
@@ -34,7 +34,7 @@
 
 (define-specializer function-lambda-expression (function)
   (check-ntype function function)
-  (wrap-default (ntype 'list)))
+  (wrap-default (type-specifier-ntype 'list)))
 
 (define-specializer not (x)
   (let ((ntype (wrapper-ntype x)))
@@ -43,37 +43,37 @@
         (ntype-subtypecase ntype
           (null (wrap t))
           ((not null) (wrap nil))
-          (t (wrap-default (ntype 'boolean)))))))
+          (t (wrap-default (type-specifier-ntype 'boolean)))))))
 
 (define-specializer eq (a b)
   (with-constant-folding (eq ((wrapper-ntype a) t) ((wrapper-ntype b) t))
     (wrap-default
-     (ntype 'generalized-boolean))))
+     (type-specifier-ntype 'generalized-boolean))))
 
 (define-specializer eql (a b)
   (with-constant-folding (eql ((wrapper-ntype a) t) ((wrapper-ntype b) t))
     (wrap-default
-     (ntype 'generalized-boolean))))
+     (type-specifier-ntype 'generalized-boolean))))
 
 (define-specializer equal (a b)
   (with-constant-folding (equal ((wrapper-ntype a) t) ((wrapper-ntype b) t))
     (wrap-default
-     (ntype 'generalized-boolean))))
+     (type-specifier-ntype 'generalized-boolean))))
 
 (define-specializer equalp (a b)
   (with-constant-folding (equalp ((wrapper-ntype a) t) ((wrapper-ntype b) t))
     (wrap-default
-     (ntype 'generalized-boolean))))
+     (type-specifier-ntype 'generalized-boolean))))
 
 (define-specializer identity (object)
   (wrap object))
 
 (define-specializer complement (function)
   (check-ntype function function)
-  (wrap-default (ntype 'function)))
+  (wrap-default (type-specifier-ntype 'function)))
 
 (define-specializer constantly (value)
-  (wrap-default (ntype 'function)))
+  (wrap-default (type-specifier-ntype 'function)))
 
 (define-specializer values (&rest objects)
   (wrap-function
@@ -116,7 +116,7 @@
         (wrap nil))
        (t
         (wrap-default
-         (ntype 'generalized-boolean)))))))
+         (type-specifier-ntype 'generalized-boolean)))))))
 
 (define-specializer and (&rest forms)
   (if (null forms)
@@ -134,7 +134,7 @@
      (wrap b))
     (t
      (wrap-default
-      (ntype 'generalized-boolean)))))
+      (type-specifier-ntype 'generalized-boolean)))))
 
 (define-specializer or (&rest forms)
   (if (null forms)
@@ -146,6 +146,6 @@
 
 (define-instruction (prog2 prog2-fn) (t) (a b)
   (wrap-function
-   (list-ntypes (wrapper-ntype b))
+   (list (wrapper-ntype b))
    'prog2-fn
    (list a b)))

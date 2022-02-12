@@ -33,14 +33,14 @@
          (flet ((two-arg-/ (a b)
                   (let* ((ntype-of-a (wrapper-ntype a))
                          (ntype-of-b (wrapper-ntype b))
-                         (result-ntype (numeric-contagion ntype-of-a ntype-of-b)))
+                         (result-ntype (ntype-contagion ntype-of-a ntype-of-b)))
                     (cond
                       ((and (eql-ntype-p ntype-of-b)
                             (numberp ntype-of-b)
                             (= ntype-of-b 1))
                        (funcall (function-specializer 'coerce)
                                 a
-                                (wrap-constant (type-specifier result-ntype))))
+                                (wrap-constant (ntype-type-specifier result-ntype))))
                       ;; Multiplication by a reciprocal is always
                       ;; faster than the division, as long as we can
                       ;; statically determine the reciprocal.
@@ -49,10 +49,10 @@
                             (not (eql-ntype-p ntype-of-a)))
                        (wrap (* a (/ b))))
                       (t
-                       (ntype-subtypecase (numeric-contagion ntype-of-a ntype-of-b)
+                       (ntype-subtypecase (ntype-contagion ntype-of-a ntype-of-b)
                          ((not number) (abort-specialization))
                          ((or integer rational)
-                          (wrap-default (ntype 'rational)))
+                          (wrap-default (type-specifier-ntype 'rational)))
                          (short-float
                           (wrap
                            (short-float/
@@ -95,5 +95,5 @@
                             (coerce-to-complex-long-float b))))
                          (t
                           (wrap-default
-                           (ntype 'number)))))))))
+                           (type-specifier-ntype 'number)))))))))
            (reduce #'two-arg-/ more-numbers :initial-value number)))))

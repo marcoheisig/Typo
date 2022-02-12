@@ -38,4 +38,4 @@
      (wrap
       (complex-long-float-tan x)))
     (t
-     (wrap-default (ntype 'number)))))
+     (wrap-default (type-specifier-ntype 'number)))))

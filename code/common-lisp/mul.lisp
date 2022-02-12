@@ -16,22 +16,22 @@
       (lambda (a b)
         (let* ((ntype-of-a (wrapper-ntype a))
                (ntype-of-b (wrapper-ntype b))
-               (result-ntype (numeric-contagion ntype-of-a ntype-of-b)))
+               (result-ntype (ntype-contagion ntype-of-a ntype-of-b)))
           (cond
             ((or (zero-ntype-p ntype-of-a)
                  (zero-ntype-p ntype-of-b))
-             (wrap-constant (coerce 0 (type-specifier result-ntype))))
+             (wrap-constant (coerce 0 (ntype-type-specifier result-ntype))))
             ((one-ntype-p ntype-of-a)
              (funcall (function-specializer 'coerce)
                       b
-                      (wrap-constant (type-specifier result-ntype))))
+                      (wrap-constant (ntype-type-specifier result-ntype))))
             ((one-ntype-p ntype-of-b)
              (funcall (function-specializer 'coerce)
                       a
-                      (wrap-constant (type-specifier result-ntype))))
+                      (wrap-constant (ntype-type-specifier result-ntype))))
             (t
              (ntype-subtypecase
-                 (numeric-contagion
+                 (ntype-contagion
                   (wrapper-ntype a)
                   (wrapper-ntype b))
                ((not number) (abort-specialization))
@@ -76,7 +76,7 @@
                   (coerce-to-complex-long-float a)
                   (coerce-to-complex-long-float b))))
                (t
-                (wrap-default (ntype 'number))))))))
+                (wrap-default (type-specifier-ntype 'number))))))))
       numbers))))
 
 (define-simple-instruction (* short-float*) (short-float) (short-float short-float))

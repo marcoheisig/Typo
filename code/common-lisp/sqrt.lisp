@@ -21,7 +21,7 @@
      (wrap
       (exp (/ (log x) 2))))
     (t
-     (wrap-default (ntype 'number)))))
+     (wrap-default (type-specifier-ntype 'number)))))
 
 (define-differentiator sqrt (x) index
   (wrap (/ (* 2 (sqrt x)))))

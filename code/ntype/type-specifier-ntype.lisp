@@ -1,0 +1,362 @@
+(in-package #:typo)
+
+(defmethod type-specifier-ntype (type-specifier)
+  (multiple-value-bind (expansion expansionp)
+      (introspect-environment:typexpand-1 type-specifier)
+    (if expansionp
+        (type-specifier-ntype expansion)
+        (find-primitive-ntype type-specifier))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Atomic Type Specifiers
+
+(defvar *atomic-type-specifier-table*
+  (make-hash-table :test #'eq))
+
+(defmethod type-specifier-ntype :around ((atomic-type-specifier symbol))
+  (values-list
+   (alexandria:ensure-gethash
+    atomic-type-specifier
+    *atomic-type-specifier-table*
+    (multiple-value-list
+     (call-next-method)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Class as Type Specifiers
+
+(defvar *class-type-specifier-table*
+  (trivial-garbage:make-weak-hash-table
+   :test #'eq
+   ;; Retain the ntype as long as the class exists.
+   :weakness :key))
+
+(defmethod type-specifier-ntype :around ((class-type-specifier class))
+  (values-list
+   (alexandria:ensure-gethash
+    class-type-specifier
+    *class-type-specifier-table*
+    (multiple-value-list
+     (call-next-method)))))
+
+(defmethod type-specifier-ntype ((class-type-specifier class))
+  ;; TODO handle specialized array classes.
+  (find-primitive-ntype class-type-specifier))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Compound Type Specifiers
+
+(defgeneric compound-type-specifier-ntype (first rest whole))
+
+(defmethod type-specifier-ntype ((compound-type-specifier cons))
+  (compound-type-specifier-ntype
+   (first compound-type-specifier)
+   (rest compound-type-specifier)
+   compound-type-specifier))
+
+(defmethod compound-type-specifier-ntype (first rest whole)
+  (multiple-value-bind (expansion expansionp)
+      (introspect-environment:typexpand-1 whole)
+    (if expansionp
+        (type-specifier-ntype expansion)
+        (find-primitive-ntype whole))))
+
+;;; Set Theoretic Type Specifiers
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'eql)) rest whole)
+  (trivia:match rest
+    ((list object)
+     (values (make-eql-ntype object) t))
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'member)) rest whole)
+  (let ((ntype (empty-ntype))
+        (ntype-precise-p t))
+    (dolist (object rest)
+      (multiple-value-bind (union union-precise-p)
+          (ntype-union ntype (make-eql-ntype object))
+        (setf ntype union)
+        (setf ntype-precise-p (and ntype-precise-p union-precise-p))))
+    (values ntype ntype-precise-p)))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'not)) rest whole)
+  (trivia:match rest
+    ((list type-specifier)
+     (multiple-value-bind (ntype precise-p)
+         (type-specifier-ntype type-specifier)
+       (cond ((ntype= ntype (universal-ntype))
+              (if precise-p
+                  (values (empty-ntype) t)
+                  (values (universal-ntype) nil)))
+             ((ntype= ntype (empty-ntype))
+              (values (universal-ntype) precise-p))
+             (t
+              (values (universal-ntype) nil)))))
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'or)) rest whole)
+  (let ((ntype (empty-ntype))
+        (ntype-precise-p t))
+    (dolist (type-specifier rest)
+      (multiple-value-bind (union union-precise-p)
+          (ntype-union ntype (type-specifier-ntype type-specifier))
+        (setf ntype union)
+        (setf ntype-precise-p (and ntype-precise-p union-precise-p))))
+    (values ntype ntype-precise-p)))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'satisfies)) rest whole)
+  (values (universal-ntype) t))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'and)) rest whole)
+  (let ((ntype (universal-ntype))
+        (ntype-precise-p t))
+    (dolist (type-specifier rest)
+      (multiple-value-bind (other-ntype other-ntype-precise-p)
+          (type-specifier-ntype type-specifier)
+        (if (ntype-subtypep other-ntype ntype)
+            (setf ntype other-ntype)
+            (if other-ntype-precise-p
+                (values (empty-ntype) t)
+                (setf ntype-precise-p nil)))))
+    (values ntype ntype-precise-p)))
+
+;;; Number Type Specifiers
+
+(defmacro search-interval-ntype (number-type expression)
+  (alexandria:with-gensyms (lower-bound upper-bound)
+    (alexandria:once-only (expression)
+      `(trivia:match ,expression
+         ((or (list ',number-type '* '*)
+              (list ',number-type '*)
+              (list ',number-type))
+          (find-primitive-ntype ',number-type))
+         ((list ',number-type
+                 (and ,lower-bound (type ,number-type))
+                 (and ,upper-bound (type ,number-type)))
+          (if (eql ,lower-bound ,upper-bound)
+              (values (make-eql-ntype ,lower-bound) t)
+              (if (< ,lower-bound ,upper-bound)
+                  (values (find-primitive-ntype ',number-type) nil)
+                  (trivia.fail:fail))))
+         ((list ',number-type
+                 (or '* (type ,number-type) (list (type ,number-type)))
+                 (or '* (type ,number-type) (list (type ,number-type))))
+          (values (find-primitive-ntype ',number-type) nil))
+         (_ (call-next-method))))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'short-float)) rest whole)
+  (search-interval-ntype short-float whole))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'single-float)) rest whole)
+  (search-interval-ntype single-float whole))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'double-float)) rest whole)
+  (search-interval-ntype double-float whole))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'long-float)) rest whole)
+  (search-interval-ntype long-float whole))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'float)) rest whole)
+  (search-interval-ntype float whole))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'real)) rest whole)
+  (search-interval-ntype real whole))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'rational)) rest whole)
+  (search-interval-ntype rational whole))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'unsigned-byte)) rest whole)
+  (trivia:match rest
+    ((or (list) (list '*))
+     (find-primitive-ntype 'unsigned-byte))
+    ((list (and bits (type (integer 1))))
+     (find-unsigned-byte-ntype bits))
+    (_ (call-next-method))))
+
+(defun find-unsigned-byte-ntype (bits)
+  (macrolet ((body ()
+               `(cond
+                  ,@(loop for primitive-ntype across *primitive-ntypes*
+                          for type = (primitive-ntype-type-specifier primitive-ntype)
+                          when (and (consp type)
+                                    (= 2 (length type))
+                                    (subtypep type 'unsigned-byte))
+                            collect `((<= bits ,(second type))
+                                      (values (find-primitive-ntype ',type)
+                                              (= bits ,(second type)))))
+                  (t (values (find-primitive-ntype 'unsigned-byte) nil)))))
+    (body)))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'signed-byte)) rest whole)
+  (trivia:match rest
+    ((or (list) (list '*))
+     (find-primitive-ntype 'signed-byte))
+    ((list (and bits (type (integer 1))))
+     (find-signed-byte-ntype bits))
+    (_ (call-next-method))))
+
+(defun find-signed-byte-ntype (bits)
+  (macrolet ((body ()
+               `(cond
+                  ,@(loop for primitive-ntype across *primitive-ntypes*
+                          for type = (primitive-ntype-type-specifier primitive-ntype)
+                          when (eq type 'fixnum)
+                            collect
+                          `((<= bits ,(integer-length most-positive-fixnum))
+                            (values (find-primitive-ntype 'fixnum)
+                                    (= bits +fixnum-bits+)))
+                          when (trivia:match type
+                                 ((list 'signed-byte _) t)
+                                 (_ nil))
+                            collect
+                          `((<= bits ,(second type))
+                            (values (find-primitive-ntype ',type)
+                                    (= bits ,(second type)))))
+                  (t (values (find-primitive-ntype 'signed-byte) nil)))))
+    (body)))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'integer)) rest whole)
+  (trivia:match rest
+    ;; Two unknown bounds.
+    ((or (list) (list '*) (list '* '*))
+     (values (find-primitive-ntype 'integer) t))
+    ;; Two known bounds.
+    ((list (and lower-bound (or (type integer) (list (type integer))))
+           (and upper-bound (or (type integer) (list (type integer)))))
+     (when (listp lower-bound)
+       (setf lower-bound (1+ (first lower-bound))))
+     (when (listp upper-bound)
+       (setf upper-bound (1- (first upper-bound))))
+     (find-integer-ntype lower-bound upper-bound whole))
+    ;; A known lower bound.
+    ((list (and lower-bound (or (type integer) (list (type integer)))))
+     (when (listp lower-bound)
+       (setf lower-bound (1+ (first lower-bound))))
+     (cond ((= lower-bound 0)
+            (find-primitive-ntype 'unsigned-byte))
+           ((> lower-bound 0)
+            (values (find-primitive-ntype 'unsigned-byte) nil))
+           ((< lower-bound 0)
+            (values (find-primitive-ntype 'signed-byte) nil))))
+    ;; Any other valid case
+    ((or (list (or '* (type integer) (list (type integer))))
+         (list (or '* (type integer) (list (type integer)))
+               (or '* (type integer) (list (type integer)))))
+     (values (find-primitive-ntype 'integer) nil))
+    (_ (call-next-method))))
+
+(defun find-integer-ntype (lb ub whole)
+  (declare (integer lb ub))
+  (unless (< lb ub)
+    (error "Malformed integer type specifier: ~S" whole))
+  (if (= lb ub)
+      (make-eql-ntype lb)
+      (if (minusp lb)
+          ;; Signed Integers
+          (if (minusp ub)
+              (values (find-signed-byte-ntype (integer-length lb)) nil)
+              (let ((lb-bits (integer-length lb))
+                    (ub-bits (integer-length ub)))
+                (multiple-value-bind (ntype precise-p)
+                    (find-signed-byte-ntype (max lb-bits ub-bits))
+                  (values ntype
+                          (and precise-p
+                               (< lb-bits (integer-length (1- lb)))
+                               (< ub-bits (integer-length (1+ ub))))))))
+          ;; Unsigned Integers
+          (let ((ub-bits (integer-length ub)))
+            (multiple-value-bind (ntype precise-p)
+                (find-unsigned-byte-ntype ub-bits)
+              (values ntype
+                      (and precise-p
+                           (zerop lb)
+                           (< ub-bits (integer-length (1+ ub))))))))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'mod)) rest whole)
+  (trivia:match rest
+    ((list)
+     (find-primitive-ntype 'unsigned-byte))
+    ((list (and n (type (integer 1))))
+     (find-integer-ntype 0 (1- n) whole))
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'complex)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+;;; Array Type Specifiers
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'array)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'simple-array)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'vector)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'bit-vector)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'simple-bit-vector)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'simple-vector)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'string)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'base-string)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'simple-string)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'simple-base-string)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+;;; Miscellaneous Compound Type Specifiers
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'cons)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'values)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'function)) rest whole)
+  ;; TODO
+  (trivia:match rest
+    (_ (call-next-method))))
+
+;;; Populate the Caches
+
+(mapc #'type-specifier-ntype *standardized-atomic-type-specifiers*)
+(mapc #'type-specifier-ntype (remove nil (map 'list #'primitive-ntype-class *primitive-ntypes*)))

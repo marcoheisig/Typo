@@ -24,13 +24,13 @@
     (complex-long-float
      (wrap (complex-long-float-abs x)))
     (integer
-     (wrap-default (ntype '(integer 0 *))))
+     (wrap-default (type-specifier-ntype '(integer 0 *))))
     (real
-     (wrap-default (ntype '(real 0 *))))
+     (wrap-default (type-specifier-ntype '(real 0 *))))
     (rational
-     (wrap-default (ntype '(rational 0 *))))
+     (wrap-default (type-specifier-ntype '(rational 0 *))))
     (t
-     (wrap-default (ntype '(real 0 *))))))
+     (wrap-default (type-specifier-ntype '(real 0 *))))))
 
 (define-simple-instruction (abs short-float-abs) ((short-float 0S0 *)) (short-float))
 (define-simple-instruction (abs single-float-abs) ((single-float 0F0 *)) (single-float))

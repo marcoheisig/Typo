@@ -13,23 +13,24 @@
              (complex-single-float (wrap (complex-single-float-unary- x)))
              (complex-double-float (wrap (complex-double-float-unary- x)))
              (complex-long-float (wrap (complex-long-float-unary- x)))
-             (integer (wrap-default (ntype 'integer)))
-             (rational (wrap-default (ntype 'rational)))
-             (real (wrap-default (ntype 'real)))
-             (t (wrap-default (ntype 'number))))))
+             (integer (wrap-default (type-specifier-ntype 'integer)))
+             (rational (wrap-default (type-specifier-ntype 'rational)))
+             (real (wrap-default (type-specifier-ntype 'real)))
+             (t (wrap-default (type-specifier-ntype 'number))))))
         (t
          (reduce
           (lambda (a b)
             (let* ((ntype-of-a (wrapper-ntype a))
                    (ntype-of-b (wrapper-ntype b))
-                   (result-ntype (numeric-contagion ntype-of-a ntype-of-b)))
+                   (result-ntype (ntype-contagion ntype-of-a ntype-of-b)))
               (cond
                 ((and (eql-ntype-p ntype-of-b)
                       (numberp ntype-of-b)
                       (= ntype-of-b 0))
                  (funcall (function-specializer 'coerce)
                           a
-                          (wrap-constant (type-specifier result-ntype))))
+                          (wrap-constant
+                           (ntype-type-specifier result-ntype))))
                 (t
                  (ntype-subtypecase result-ntype
                    ((not number) (abort-specialization))
@@ -74,13 +75,13 @@
                       (coerce-to-complex-long-float a)
                       (coerce-to-complex-long-float b))))
                    (integer
-                    (wrap-default (ntype 'integer)))
+                    (wrap-default (type-specifier-ntype 'integer)))
                    (rational
-                    (wrap-default (ntype 'rational)))
+                    (wrap-default (type-specifier-ntype 'rational)))
                    (real
-                    (wrap-default (ntype 'real)))
+                    (wrap-default (type-specifier-ntype 'real)))
                    (t
-                    (wrap-default (ntype 'number))))))))
+                    (wrap-default (type-specifier-ntype 'number))))))))
           more-numbers
           :initial-value number))))
 

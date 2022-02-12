@@ -81,6 +81,7 @@ supplied FUNCTION.
              #'wrap-constant
              #'wrap-function
              (lambda ()
-               (cons (ntype 't) (list* function (mapcar #'cdr arguments)))))))
+               (cons (type-specifier-ntype 't)
+                     (list* function (mapcar #'cdr arguments)))))))
       (values (cdr result) (car result)))))
 
