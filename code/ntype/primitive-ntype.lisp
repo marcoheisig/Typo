@@ -12,7 +12,7 @@
                               (find-class type-specifier nil))))
    'vector))
 
-(declaim (type (vector primitive-ntype #.(length *primitive-ntype-information*))
+(declaim (type (simple-array primitive-ntype (#.(length *primitive-ntype-information*)))
                *primitive-ntypes*))
 
 (defconstant +primitive-ntype-limit+
@@ -22,16 +22,6 @@
 (defun primitive-ntype-from-index (index)
   (declare (ntype-index index))
   (aref *primitive-ntypes* index))
-
-(declaim (inline ntype-primitive-ntype))
-(defun ntype-primitive-ntype (ntype)
-  (declare (ntype ntype))
-  (primitive-ntype-from-index
-   (ntype-index ntype)))
-
-(defmethod ntype-bits ((ntype ntype))
-  (primitive-ntype-bits
-   (ntype-primitive-ntype ntype)))
 
 (defmethod make-load-form ((primitive-ntype primitive-ntype) &optional env)
   (declare (ignore env))

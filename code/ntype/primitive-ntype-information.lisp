@@ -14,17 +14,16 @@
       (mapc #'scan-class (class-direct-subclasses (find-class 't))))
     built-in-classes))
 
+(defun external-symbol-p (symbol)
+  (and (symbolp symbol)
+       (eq (nth-value 1 (find-symbol (symbol-name symbol) (symbol-package symbol)))
+           :external)))
+
 (defun relevant-built-in-class-p (class)
   (and
    ;; Relevant classes must have a class name that is exported from its
-   ;; home package, or the CL package.
-   (symbolp (class-name class))
-   (let* ((symbol (class-name class))
-          (name (symbol-name symbol))
-          (package (symbol-package symbol)))
-     (or (eq package (find-package "CL"))
-         (eq (nth-value 1 (find-symbol name package))
-             :external)))
+   ;; home package.
+   (external-symbol-p (class-name class))
    ;; Array classes are handled elsewhere.
    (not (subtypep class 'array))))
 

@@ -14,6 +14,9 @@
 (defvar *atomic-type-specifier-table*
   (make-hash-table :test #'eq))
 
+(setf (gethash 'null *atomic-type-specifier-table*)
+      (list (make-eql-ntype nil) t))
+
 (defmethod type-specifier-ntype :around ((atomic-type-specifier symbol))
   (values-list
    (alexandria:ensure-gethash
@@ -100,10 +103,13 @@
   (let ((ntype (empty-ntype))
         (ntype-precise-p t))
     (dolist (type-specifier rest)
-      (multiple-value-bind (union union-precise-p)
-          (ntype-union ntype (type-specifier-ntype type-specifier))
-        (setf ntype union)
-        (setf ntype-precise-p (and ntype-precise-p union-precise-p))))
+      (multiple-value-bind (other-ntype other-ntype-precise-p)
+          (type-specifier-ntype type-specifier)
+        (multiple-value-bind (union union-precise-p)
+            (ntype-union ntype other-ntype)
+          (setf ntype union)
+          (unless (and other-ntype-precise-p union-precise-p)
+            (setf ntype-precise-p nil)))))
     (values ntype ntype-precise-p)))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'satisfies)) rest whole)
@@ -115,11 +121,11 @@
     (dolist (type-specifier rest)
       (multiple-value-bind (other-ntype other-ntype-precise-p)
           (type-specifier-ntype type-specifier)
-        (if (ntype-subtypep other-ntype ntype)
-            (setf ntype other-ntype)
-            (if other-ntype-precise-p
-                (values (empty-ntype) t)
-                (setf ntype-precise-p nil)))))
+        (multiple-value-bind (intersection intersection-precise-p)
+            (ntype-intersection ntype other-ntype)
+          (setf ntype intersection)
+          (unless (and other-ntype-precise-p intersection-precise-p)
+            (setf ntype-precise-p nil)))))
     (values ntype ntype-precise-p)))
 
 ;;; Number Type Specifiers

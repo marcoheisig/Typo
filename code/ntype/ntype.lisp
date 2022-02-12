@@ -30,6 +30,14 @@ NTYPE2.
 A second value of T means the result is precise, while a second value of
 NIL means the result is a generalization."))
 
+(defgeneric ntype-intersection (ntype1 ntype2)
+  (:documentation
+   "Returns the most specific ntype that encompasses the intersection of
+NTYPE1 and NTYPE2.
+
+A second value of T means the result is precise, while a second value of
+NIL means the result is a generalization."))
+
 (defgeneric ntype-contagion (ntype1 ntype2)
   (:documentation
    "Returns the most specific ntype that encompasses the result of an
