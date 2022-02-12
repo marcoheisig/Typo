@@ -24,24 +24,21 @@ subtype of the supplied NTYPE."
                       (type-specifier-ntype type-specifier)
                     (if precise-p
                         `(ntype-subtypep ,ntype ,match-ntype)
-                        `(and (ntype-subtypep ,ntype ,match-ntype)
+                        `(and (logbitp (ntype-index ,ntype) ,(match-mask type-specifier))
                               (etypecase ,ntype
                                 (eql-ntype
                                  (typep (eql-ntype-object ,ntype) ',type-specifier))
-                                (array-ntype
-                                 (subtypep (ntype-type-specifier ,ntype) ',type-specifier))
+                                ,@(unless (ntype-subtypepc2 match-ntype (type-specifier-ntype 'array))
+                                    `((array-ntype
+                                       (subtypep (ntype-type-specifier ,ntype) ',type-specifier))))
                                 (primitive-ntype
-                                 (logbitp
-                                  (ntype-index ,ntype)
-                                  ,(let ((mask 0))
-                                     (loop for p across *primitive-ntypes* do
-                                       (when (and (ntype-subtypep p match-ntype)
-                                                     (not (eq p match-ntype))
-                                                     (subtypep
-                                                      (primitive-ntype-type-specifier p)
-                                                      type-specifier))
-                                         (setf mask (logior mask (ash 1 (ntype-index p))))))
-                                     mask)))))))))))
+                                 (ntype-subtypep ,ntype ,match-ntype)))))))))
+             (match-mask (type-specifier)
+               (let ((mask 0))
+                 (loop for p across *primitive-ntypes* do
+                   (unless (subtypep `(and ,type-specifier ,(primitive-ntype-type-specifier p)) nil)
+                     (setf mask (logior mask (ash 1 (ntype-index p))))))
+                 mask)))
       `(cond
          ,@(loop for clause in clauses
                  collect
