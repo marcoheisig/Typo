@@ -44,6 +44,7 @@
        (character ,(integer-length (1- char-code-limit)))
        (logical-pathname ,+word-bits+)
        (pathname ,+word-bits+)
+       (class ,+word-bits+)
        ((not null) ,+word-bits+)))
     :key #'first
     :test #'alexandria:type=
