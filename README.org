@@ -4,8 +4,13 @@
 * Notable Features
 
 ** Blazingly fast (approximate) handling of types
+TODO
+
 ** Handles almost all functions in the Common Lisp package
+TODO
+
 ** Extensible
+TODO
 
 * Bonus Features
 
@@ -14,15 +19,15 @@ The cool thing about Typo is that it can (portably!) convert s-expressions
 to the most applicable specialized version applicable to its target types.
 For example, it can replace
 
-```lisp
+#+BEGIN_SRC lisp
 (cl:+ a b c)
-```
+#+END_SRC
 
-where `a` is an integer, `b` is a double-float, and `c` is a single-float with
+where a is an integer, b is a double-float, and c is a single-float with
 
-```lisp
+#+BEGIN_SRC lisp
 (two-arg-f64+ (two-arg-f64+ (f64-from-integer a) b) (f64-from-f32 c))
-```
+#+END_SRC
 
 ** Automatic differentiation
 TODO
