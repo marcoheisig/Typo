@@ -16,41 +16,35 @@
   (check-type simplep boolean)
   (multiple-value-bind (element-ntype precise-p)
       (canonicalize-array-element-type element-type)
-    (multiple-value-bind (dimensions vectorp)
-        (canonicalize-array-dimension-specifier dimensions)
-      (let ((key #1=(list element-ntype dimensions simplep)))
-        (declare (dynamic-extent key))
-        (values
-         (or (gethash key *array-ntype-table*)
-             (setf (gethash #1# *array-ntype-table*)
-                   (%make-array-ntype
-                    :element-ntype element-ntype
-                    :dimensions dimensions
-                    :simplep simplep
-                    :index
-                    (primitive-ntype-index
-                     (find-primitive-ntype 'array)))))
-         precise-p)))))
+    (let* ((dimensions (canonicalize-array-dimension-specifier dimensions))
+           (key #1=(list element-ntype dimensions simplep)))
+      (declare (dynamic-extent key))
+      (values
+       (or (gethash key *array-ntype-table*)
+           (setf (gethash #1# *array-ntype-table*)
+                 (%make-array-ntype
+                  :element-ntype element-ntype
+                  :dimensions dimensions
+                  :simplep simplep
+                  :index
+                  (primitive-ntype-index
+                   (find-primitive-ntype 'array)))))
+       precise-p))))
 
 (defun canonicalize-array-dimension-specifier (dimensions)
   (typecase dimensions
-    ((eql *)
-     (values '* nil))
-    ((integer 0 #.array-rank-limit)
-     (values dimensions (= dimensions 1)))
+    ((eql *) dimensions)
+    ((integer 0 #.array-rank-limit) dimensions)
     (list
-     (loop with simple = t
+     (loop with *-only = t
            for dimension in dimensions
            for length from 0 do
              (unless (eql dimension '*)
+               (setf *-only nil)
                (if (typep dimension '(integer 0 #.array-rank-limit))
-                   (setf simple nil)
                    (error "Invalid array dimension specifier: ~S"
                           dimension)))
-           finally
-              (return
-                (values (if simple length dimensions)
-                        (= length 1)))))
+           finally (return (if *-only length dimensions))))
     (otherwise
      (error "Invalid array dimensions specifier: ~S"
             dimensions))))

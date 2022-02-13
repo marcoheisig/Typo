@@ -289,9 +289,38 @@
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'complex)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((list '*)
+     (find-primitive-ntype 'complex))
+    ((list type-specifier)
+     (multiple-value-bind (part-ntype part-precise-p)
+         (type-specifier-ntype type-specifier)
+       (multiple-value-bind (complex-ntype complex-precise-p)
+           (make-complex-ntype part-ntype)
+         (values complex-ntype (and part-precise-p complex-precise-p)))))
     (_ (call-next-method))))
+
+(let ((v1-cache (make-array (list +primitive-ntype-limit+)
+                            :element-type 'ntype
+                            :initial-element (empty-ntype)))
+      (v2-cache (make-array (list +primitive-ntype-limit+)
+                            :element-type 'bit
+                            :initial-element 1)))
+  (loop for p across *primitive-ntypes* do
+    (when (ntype-subtypep p (find-primitive-ntype 'real))
+      (multiple-value-bind (complex-ntype precise-p)
+          (find-primitive-ntype `(complex ,(ntype-type-specifier p)))
+        (print (list complex-ntype precise-p))
+        (setf (aref v1-cache (ntype-index p))
+              complex-ntype)
+        (setf (aref v2-cache (ntype-index p))
+              (if precise-p 1 0)))))
+  (defun make-complex-ntype (part-ntype)
+    (declare (ntype part-ntype))
+    (values
+     (aref v1-cache (ntype-index part-ntype))
+     (if (plusp (aref v2-cache (ntype-index part-ntype))) t nil))))
+
 
 ;;; Array Type Specifiers
 
