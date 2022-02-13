@@ -1,16 +1,44 @@
 #+TITLE: Typo - A portable type inference library for Common Lisp
 #+AUTHOR: Marco Heisig
 
-Notable Features:
+* Notable Features
 
-- Blazingly fast (approximate) handling of types
-- Handles almost all functions in the Common Lisp package
-- Extensible
+** Blazingly fast (approximate) handling of types
+** Handles almost all functions in the Common Lisp package
+** Extensible
 
-Bonus Features:
+* Bonus Features
 
-- Function specialization: Replace a call to a function by one ore more
-  calls to more specialized functions, depending on the argument types.
+** Function Specialization
+The cool thing about Typo is that it can (portably!) convert s-expressions
+to the most applicable specialized version applicable to its target types.
+For example, it can replace
 
-- Automatic differentiation: Obtain an expression for computing the
-  derivative of the supplied expression.
+```lisp
+(cl:+ a b c)
+```
+
+where `a` is an integer, `b` is a double-float, and `c` is a single-float with
+
+```lisp
+(two-arg-f64+ (two-arg-f64+ (f64-from-integer a) b) (f64-from-f32 c))
+```
+
+** Automatic differentiation
+TODO
+
+* FAQ
+** What's the difference betwen NTYPE from this implementation and https://github.com/s-expressionists/ctype?
+
+CTYPE is a full-fledged, precise implementation of CL types, with its own
+versions of typep and subtypep. It requires some amount of implementation
+specific hooks to be useful.
+
+NTYPE is only does approximate reasoning about types, but is really fast
+and doesn't cons. It relies on the host's versions of typep and subtypep to
+do the heavy lifting. But it is faster (which matters for Petalisp), and
+fully portable. The main goal of NTYPE is not to narrow down the type of
+each value in a program enough to choose a specialized representation.
+
+So the main difference between NTYPE and CTYPE is that the former is mostly
+about fast type inference and not so much about answering type queries.
