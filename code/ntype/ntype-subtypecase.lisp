@@ -32,7 +32,7 @@ subtype of the supplied NTYPE."
                             ,@(unless (ntype-subtypepc2 match-ntype (type-specifier-ntype 'array))
                                 `((array-ntype
                                    (subtypep (ntype-type-specifier ,ntype) ',type-specifier))))
-                            (primitive-ntype t)))))))))
+                            (primitive-ntype nil)))))))))
       `(cond
          ,@(loop for clause in clauses
                  collect
