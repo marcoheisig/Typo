@@ -87,14 +87,8 @@
        ((unsigned-byte 16) 16)
        ((unsigned-byte 32) 32)
        ((unsigned-byte 64) 64))
-     ;; Array types.
-     `((vector 64)
-       (simple-vector 64)
-       (bit-vector 64)
-       (simple-bit-vector 64)
-       (string 64)
-       (simple-string 64)
-       (array 64))
+     ;; Arrays.
+     `((array 64))
      ;; Relevant built-in classes.
      (loop for built-in-class in *relevant-built-in-classes*
            collect (list (class-name built-in-class)
