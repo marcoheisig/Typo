@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defmethod type-specifier-ntype (type-specifier)
   (multiple-value-bind (expansion expansionp)

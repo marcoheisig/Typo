@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 ;;; The rules of numeric contagion are as follows:
 ;;;

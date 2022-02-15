@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 ;;; A list whose entry are of the form (type-specifier bits).
 (defparameter *primitive-ntype-information*

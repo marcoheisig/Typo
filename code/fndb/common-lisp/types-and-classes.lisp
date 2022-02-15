@@ -1,0 +1,32 @@
+(in-package #:typo.fndb)
+
+(define-specializer subtypep (type-1 type-2 &optional (environment nil environment-p))
+  (with-constant-folding (subtypep ((wrapper-ntype type-1) type-specifier)
+                                   ((wrapper-ntype type-2) type-specifier)
+                                   ((if environment-p
+                                        (wrapper-ntype environment)
+                                        (type-specifier-ntype 'null))
+                                    t))
+    (wrap-default (type-specifier-ntype 'type-specifier))))
+
+(define-specializer type-of (object)
+  (wrap-default (type-specifier-ntype 'type-specifier)))
+
+(define-specializer typep (object type-specifier &optional (environment nil environment-p))
+  (let ((object-ntype (wrapper-ntype object))
+        (type-specifier-ntype (wrapper-ntype type-specifier))
+        (environment-ntype (if environment-p
+                               (wrapper-ntype environment)
+                               (type-specifier-ntype 'null))))
+    (with-constant-folding (typep (object-ntype t)
+                                  (type-specifier-ntype type-specifier)
+                                  (environment-ntype t))
+      (if (eql-ntype-p type-specifier-ntype)
+          (multiple-value-bind (ntype precise-p)
+              (type-specifier-ntype (eql-ntype-object type-specifier-ntype))
+            (cond ((and precise-p (ntype-subtypep object-ntype ntype))
+                   (wrap-default (type-specifier-ntype '(not null))))
+                  ((ntype-subtypepc2 object-ntype ntype)
+                   (wrap nil))
+                  (t (wrap-default (type-specifier-ntype 'generalized-boolean)))))
+          (wrap-default (type-specifier-ntype 'generalized-boolean))))))

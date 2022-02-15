@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defvar *primitive-ntypes*
   (coerce

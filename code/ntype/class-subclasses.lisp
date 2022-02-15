@@ -1,0 +1,13 @@
+(in-package #:typo.ntype)
+
+(defun class-subclasses (class)
+  (declare (class class))
+  (let ((table (make-hash-table :test #'eq))
+        (classes '()))
+    (labels ((scan-class (class)
+               (unless (gethash class table)
+                 (setf (gethash class table) t)
+                 (push class classes)
+                 (mapc #'scan-class (class-direct-subclasses class)))))
+      (scan-class class))
+    (nreverse classes)))

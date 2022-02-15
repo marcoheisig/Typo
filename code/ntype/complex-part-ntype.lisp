@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defmacro define-complex-part-ntype-methods ()
   (let ((complex-classes (class-subclasses (find-class 'complex))))

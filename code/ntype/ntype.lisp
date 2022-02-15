@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defgeneric ntype-type-specifier (ntype)
   (:documentation

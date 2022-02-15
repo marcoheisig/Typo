@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defmethod upgraded-array-element-ntype ((primitive-ntype primitive-ntype))
   (primitive-ntype-upgraded-array-element-ntype primitive-ntype))

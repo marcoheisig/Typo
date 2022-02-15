@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defmethod ntype-union
     ((ntype1 ntype)

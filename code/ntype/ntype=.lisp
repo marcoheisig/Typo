@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defmethod ntype= ((ntype1 ntype) (ntype2 ntype))
   (and (ntype-subtypep ntype1 ntype2)

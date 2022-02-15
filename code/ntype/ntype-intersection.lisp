@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defmethod ntype-intersection
     ((ntype1 ntype)

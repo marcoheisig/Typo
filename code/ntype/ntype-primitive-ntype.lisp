@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (declaim (inline ntype-primitive-ntype))
 (defun ntype-primitive-ntype (ntype)

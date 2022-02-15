@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defvar *eql-ntype-table*
   (trivial-garbage:make-weak-hash-table

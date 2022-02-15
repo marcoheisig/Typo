@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 ;;; The NTYPE-SUBTYPECASE macro is the workhorse of ntype reasoning.  It
 ;;; allows a user to quickly select the first clause whose type denotes a

@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 ;;; A hash table whose keys are lists of the form (element-ntype dimensions
 ;;; simplep), and whose values are the corresponding array ntypes.

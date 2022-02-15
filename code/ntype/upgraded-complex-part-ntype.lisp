@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defmethod upgraded-complex-part-ntype ((primitive-ntype primitive-ntype))
   (primitive-ntype-upgraded-complex-part-ntype primitive-ntype))

@@ -1,4 +1,4 @@
-(in-package #:typo)
+(in-package #:typo.ntype)
 
 (defmacro define-array-element-ntype-methods ()
   (let ((array-classes (class-subclasses (find-class 'array))))
