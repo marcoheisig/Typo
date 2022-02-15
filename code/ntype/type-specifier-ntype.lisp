@@ -310,7 +310,6 @@
     (when (ntype-subtypep p (find-primitive-ntype 'real))
       (multiple-value-bind (complex-ntype precise-p)
           (find-primitive-ntype `(complex ,(ntype-type-specifier p)))
-        (print (list complex-ntype precise-p))
         (setf (aref v1-cache (ntype-index p))
               complex-ntype)
         (setf (aref v2-cache (ntype-index p))
