@@ -1,19 +1,23 @@
 (in-package #:typo.fndb)
 
 (defmacro define-fndb-record (function-name lambda-list &body options)
-  `(ensure-fndb-record
-    ',function-name ',lambda-list
-    ,@(loop for option in options
-            append
-            (trivia:ematch option
-              ((list :parent parent)
-               (list :parent `(find-fndb-record ',parent)))
-              ((list :pure purep)
-               (list :purep `(the boolean ,purep)))
-              ((list* :differentiator index body)
-               (list :differentiator `(define-differentiator ,function-name ,lambda-list ,index ,@body)))
-              ((list* :specializer body)
-               (list :specializer `(define-specializer ,function-name ,lambda-list ,@body)))))))
+  (multiple-value-bind (min-arguments max-arguments)
+      (lambda-list-arity lambda-list)
+    `(reinitialize-instance (ensure-fndb-record ',function-name)
+       :function-name ',function-name
+       :min-arguments ',min-arguments
+       :max-arguments ',max-arguments
+       ,@(loop for option in options
+               append
+               (trivia:ematch option
+                 ((list :parent parent)
+                  (list :parent `(find-fndb-record ',parent)))
+                 ((list :pure purep)
+                  (list :purep `(the boolean ,purep)))
+                 ((list* :differentiator index body)
+                  (list :differentiator `(define-differentiator ,function-name ,lambda-list ,index ,@body)))
+                 ((list* :specializer body)
+                  (list :specializer `(define-specializer ,function-name ,lambda-list ,@body))))))))
 
 (defun block-name (function-name)
   (trivia:ematch function-name
@@ -106,7 +110,7 @@
 
 (defmacro function-specializer (function)
   `(fndb-record-specializer
-    (find-fndb-record ,function nil)))
+    (ensure-fndb-record ,function)))
 
 (defmacro define-simple-instruction ((parent-name instruction-name)
                                      result-types argument-types)
