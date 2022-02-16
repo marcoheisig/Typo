@@ -83,10 +83,7 @@
 
 (define-fndb-record values (&rest objects)
   (:specializer
-   (wrap-function
-    (mapcar #'wrapper-ntype objects)
-    'values
-    objects)))
+   (wrap-function 'values objects (mapcar #'wrapper-ntype objects) '() nil)))
 
 (define-fndb-record values-list (list)
   (:specializer
@@ -135,4 +132,4 @@
  (define-fndb-record prog2-fn (a b)
    (:pure t)
    (:specializer
-    (wrap-function (list (wrapper-ntype b)) 'prog2-fn (list a b))))
+    (wrap-function 'prog2-fn (list a b) (list (wrapper-ntype b)) '() nil)))

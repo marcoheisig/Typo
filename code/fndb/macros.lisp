@@ -37,9 +37,11 @@
                    (list* ,@required ,@(mapcar #'first optional) ,rest)))
                 (wrap-default (&rest ntypes)
                   (wrap-function
-                   ntypes
                    ',function-name
-                   (list* ,@required ,@(mapcar #'first optional) ,rest))))
+                   (list* ,@required ,@(mapcar #'first optional) ,rest)
+                   ntypes
+                   '()
+                   nil)))
            (declare (ignorable #'abort-specialization #'wrap-default))
            (block ,(block-name function-name) ,@remaining-forms))))))
 
@@ -80,14 +82,13 @@
 (defun expand-wrap (form)
   (cond ((consp form)
          `(funcall
-           (fndb-record-specializer
-            (find-fndb-record ',(first form) nil))
+           (function-specializer ',(first form))
            ,@(mapcar #'expand-wrap (rest form))))
-        ((member form '(nil t))
+        ((constantp form)
          `(wrap-constant ,form))
         ((symbolp form)
          form)
-        (t `(wrap-constant ,form))))
+        (t (error "Don't know how to wrap ~S." form))))
 
 (defmacro define-instruction ((parent-name instruction-name)
                               result-types arguments

@@ -16,6 +16,7 @@
      (define-compiler-macro ,function (&rest args)
        `(funcall ,',variable ,@args))))
 
-(define-special-function wrapper-ntype *wrapper-ntype*)
 (define-special-function wrap-constant *wrap-constant*)
 (define-special-function wrap-function *wrap-function*)
+(define-special-function wrapper-nth-value-ntype *wrapper-nth-value-ntype*)
+(define-special-function wrapper-ntype *wrapper-ntype*)

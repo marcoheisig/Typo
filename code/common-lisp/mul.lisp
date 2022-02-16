@@ -33,7 +33,7 @@
        ((or (and (eql-ntype-p ntype-of-a)
                  (= 0 (eql-ntype-object ntype-of-a)))
             (and (eql-ntype-p ntype-of-b)
-                 (= 0 (eql-ntype-object ntype-of-a))))
+                 (= 0 (eql-ntype-object ntype-of-b))))
         (wrap-constant (coerce 0 (ntype-type-specifier result-ntype))))
        ((and (eql-ntype-p ntype-of-a)
              (= 1 (eql-ntype-object ntype-of-a)))

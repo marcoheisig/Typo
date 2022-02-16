@@ -1,47 +1,50 @@
 (in-package #:typo.fndb)
 
-(defun specialize (function
-                   wrappers
-                   wrapper-ntype
-                   wrap-constant
-                   wrap-function
-                   default)
+(defun specialize
+    (function wrappers
+     &key
+       wrap-constant wrap-function wrapper-nth-value-ntype
+       (wrapper-ntype (lambda (w) (funcall wrapper-nth-value-ntype 0 w))))
   "Traverses a decomposition of FUNCTION into successive calls to more
 specialized functions, using the supplied wrapping functions.  Returns the
-values returned by PROCESS-MULTIPLE-VALUE-FUNCTION.
+value returned by WRAP-FUNCTION.
 
 Arguments:
 
 FUNCTION - A function designator, or the name of a special operator.
 
-ARGUMENTS - A list of wrapped objects.
+WRAPPERS - A list of one wrapper per argument.  A wrapper is an arbitrary
+object that can be processed by WRAPPER-NTYPE and WRAPPER-NTH-VALUE-NTYPE.
 
-WRAPPER-NTYPE - A function that is applied to obtain the ntype of a wrapped
-object.
-
-WRAP-CONSTANT - A function that is applied to turn a constant into a
-wrapped object.
+WRAP-CONSTANT - A function that takes an object and returns a wrapper
+around this object.
 
 WRAP-FUNCTION - A function that is invoked with a first argument that is a
-list of ntypes of length K, a second argument that is a function
-designator, and a list of wrapped objects.  It must return K wrapped
-objects - one for each ntype.
+function designator, a second argument that is a list of wrapped objects, a
+third argument that is a list of ntypes of arguments that will definitely
+be returned, a fourth argument that is a list of ntypes of its optional
+values, and an ntype of all rest values or NIL if there are no rest values.
 
-DEFAULT - A thunk that is executed to produce a default value when the
-supplied FUNCTION and WRAPPERS are too complicated for specialization.
+WRAPPER-NTYPE - A function that takes a wrapper and returns the ntype of
+its first argument.
+
+WRAPPER-NTH-VALUE-NTYPE - A function that takes an index N and a wrapper W
+and returns the ntype of the Nth value of W.
 
 May signal an error of type WRONG-NUMBER-OF-ARGUMENTS or INVALID-ARGUMENTS
 when the number or type of the supplied WRAPPERS is not suitable for the
 supplied FUNCTION.
 "
-  (let ((*wrapper-ntype* wrapper-ntype)
-        (*wrap-constant* wrap-constant)
-        (*wrap-function* wrap-function))
-    (handler-case (apply (fndb-record-specializer (find-fndb-record function)) wrappers)
+  (let ((*wrap-constant* wrap-constant)
+        (*wrap-function* wrap-function)
+        (*wrapper-nth-value-ntype* wrapper-nth-value-ntype)
+        (*wrapper-ntype* wrapper-ntype)
+        (fndb-record (find-fndb-record function nil)))
+    (handler-case (apply (fndb-record-specializer fndb-record) wrappers)
       ;; A program error is an indication that we had an argument
       ;; mismatch.
       (give-up-specialization ()
-        (funcall default))
+        (wrap-function function wrappers '() '() (universal-ntype)))
       (program-error ()
         ;; FIXME: Actually make sure we have an invalid number of
         ;; arguments.
@@ -53,35 +56,31 @@ supplied FUNCTION.
 ;;;
 ;;; Derived Functionality
 
-(defun infer-ntypes (function ntypes default)
-  (specialize
-   function
-   ntypes
-   #'identity
-   #'ntype-of
-   (lambda (ntypes function arguments)
-     (declare (ignore function arguments))
-     (values-list ntypes))
-   default))
-
-(defun expression-builder (function arguments)
-  (flet ((wrap-constant (object)
-           (cons (ntype-of object) object))
-         (wrap-function (ntypes function arguments)
-           (let ((expression (cons function (mapcar #'cdr arguments))))
-             (values-list
-              (loop for ntype in ntypes
-                    collect
-                    (cons ntype expression))))))
-    (let ((result
-            (specialize
-             function
-             arguments
-             #'first
-             #'wrap-constant
-             #'wrap-function
-             (lambda ()
-               (cons (type-specifier-ntype 't)
-                     (list* function (mapcar #'cdr arguments)))))))
-      (values (cdr result) (car result)))))
+(defun infer-ntypes (function ntypes)
+;;; We represent wrappers as a (REQUIRED OPTIONAL REST) list.
+  (flet ((wrapper-nth-value-ntype (index wrapper)
+           (trivia:ematch wrapper
+             ((list required optional rest)
+              (let ((n-required (length required)))
+                (if (< index n-required)
+                    (nth index required)
+                    (let ((n-optional (length optional)))
+                      (if (< index (+ n-required n-optional))
+                          (nth (- index n-required) optional)
+                          (if (null rest)
+                              (type-specifier-ntype 'null)
+                              rest))))))))
+         (wrap-constant (c)
+           (list (list (ntype-of c)) '() nil))
+         (wrap-function (fn wrappers required optional rest)
+           (declare (ignore fn wrappers))
+           (list required optional rest)))
+    (destructuring-bind (required optional rest)
+        (specialize
+         function
+         (loop for ntype in ntypes collect (list (list ntype) '() nil))
+         :wrap-constant #'wrap-constant
+         :wrap-function #'wrap-function
+         :wrapper-nth-value-ntype #'wrapper-nth-value-ntype)
+      (values required optional rest))))
 

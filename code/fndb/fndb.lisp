@@ -123,31 +123,35 @@
             :differentiator differentiator))
         record))))
 
-(defun find-fndb-record (function-name &optional (errorp t))
+(defun find-fndb-record (function-designator &optional (errorp t))
   (multiple-value-bind (key table)
-      (trivia:ematch function-name
+      (trivia:ematch function-designator
         ((list 'setf (and name (type non-nil-symbol)))
          (values name (fndb-setf-function-table *fndb*)))
         ((type non-nil-symbol)
-         (values function-name (fndb-function-table *fndb*)))
-        (_ (error "Invalid function-name ~S" function-name)))
+         (values function-designator (fndb-function-table *fndb*)))
+        ((type function)
+         (values function-designator (fndb-function-table *fndb*)))
+        (_ (error "Invalid function designator ~S" function-designator)))
     (alexandria:ensure-gethash
      key
      table
      (if errorp
-         (error "There is no fndb record named ~S" function-name)
+         (error "There is no fndb record for ~S" function-designator)
          (make-instance 'fndb-record
-           :function-name function-name
+           :function-name (if (functionp function-designator)
+                              (gensym "UNKNOWN-FUNCTION")
+                              function-designator)
            :min-arguments (fndb-record-min-arguments *default-fndb-record*)
            :max-arguments (fndb-record-max-arguments *default-fndb-record*)
            :purep (fndb-record-purep *default-fndb-record*)
            :specializer (fndb-record-specializer *default-fndb-record*)
            :differentiator (fndb-record-differentiator *default-fndb-record*))))))
 
-(define-compiler-macro find-fndb-record (&whole form function-name &optional (errorp t))
-  (if (and (constantp function-name)
+(define-compiler-macro find-fndb-record (&whole form function-designator &optional (errorp t))
+  (if (and (constantp function-designator)
            (constantp errorp))
       `(load-time-value
         (locally (declare (notinline find-fndb-record))
-          (find-fndb-record ,function-name ,errorp)))
+          (find-fndb-record ,function-designator ,errorp)))
       form))
