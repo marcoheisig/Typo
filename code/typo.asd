@@ -43,6 +43,7 @@
     :components
     ((:file "function-lambda-lists")
      (:file "conditions")
+     (:file "special-functions")
      (:file "fndb")
      (:file "macros")
      (:file "specialize")

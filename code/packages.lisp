@@ -9,6 +9,7 @@
     (:export
      #:non-nil-symbol
      #:function-name
+     #:variable-name
      #:function-designator
      #:character-designator
      #:string-designator

@@ -49,38 +49,3 @@
 (defun function-arity (function)
   (lambda-list-arity
    (function-lambda-list function nil)))
-
-;;; Wrap a function called NAME around BODY.  This function can be used to
-;;; invoke a supplied function with the same values as the ones in
-;;; LAMBDA-LIST.
-;;;
-;;; Examples:
-;;;
-;;; (with-lambda-list-forwarding (call (a &optional (b 5) &key (c 9)))
-;;;   (call #'foo))
-;;;
-;;; => (funcall #'foo a b :c c)
-;;;
-;;; (with-lambda-list-forwarding (call (a b &rest rest))
-;;;   (call #'bar))
-;;;
-;;; => (apply #'bar a b rest)
-
-(defmacro with-lambda-list-forwarding ((name lambda-list) &body body)
-  (multiple-value-bind (required optional rest-sym keywords)
-      (alexandria:parse-ordinary-lambda-list lambda-list)
-    (let ((function (gensym "FUNCTION"))
-          (argument-list
-            (append
-             required
-             (mapcar #'first optional)
-             (mapcan #'first keywords))))
-      (if rest-sym
-          `(flet ((,name (,function)
-                    (apply ,function ,@argument-list ,rest-sym)))
-             (declare (inline ,name))
-             ,@body)
-          `(flet ((,name (,function)
-                    (funcall ,function ,@argument-list)))
-             (declare (inline ,name))
-             ,@body)))))
