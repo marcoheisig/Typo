@@ -1,69 +1,153 @@
 (in-package #:typo.fndb)
 
-(defvar *fndb* (make-hash-table :test #'eq))
+(defgeneric fndb-record-function-name (fndb-record))
 
-(defstruct (fndb-record
-            (:copier nil)
-            (:predicate fndb-record-p))
-  (function-name nil :type function-name :read-only t)
-  (parent nil)
-  (specializer nil :type (or function null))
-  (differentiator nil :type (or function null)))
+(defgeneric fndb-record-min-arguments (fndb-record))
 
-(defun ensure-fndb-record (function-name)
-  (declare (function-name function-name))
-  (multiple-value-bind (record present-p)
-      (gethash function-name *fndb*)
-    (if present-p
-        record
-        (let ((record (make-fndb-record :function-name function-name)))
-          (setf (gethash function-name *fndb*) record)
-          (when (fboundp function-name)
-            (unless (and (symbolp function-name)
-                         (special-operator-p function-name))
-              (setf (gethash (fdefinition function-name) *fndb*) record)))
-          record))))
+(defgeneric fndb-record-max-arguments (fndb-record))
 
-(define-compiler-macro ensure-fndb-record (&whole form function-name)
-  (if (typep function-name '(cons (eql quote) (cons function-name null)))
+(defgeneric fndb-record-purep (fndb-record))
+
+(defgeneric fndb-record-specializer (fndb-record))
+
+(defgeneric fndb-record-differentiator (fndb-record))
+
+(defstruct (fndb
+            (:predicate fndbp)
+            (:constructor make-fndb ()))
+  (function-table (make-hash-table :test #'eq)
+   :type hash-table
+   :read-only t)
+  (setf-function-table (make-hash-table :test #'eq)
+   :type hash-table
+   :read-only t))
+
+(defvar *fndb* (make-fndb))
+(declaim (type fndb *fndb*))
+
+(defclass fndb-record ()
+  ((%function-name
+    :initarg :function-name
+    :initform (alexandria:required-argument :function-name)
+    :type function-name
+    :reader fndb-record-function-name)
+   (%min-arguments
+    :initarg :min-arguments
+    :initform (alexandria:required-argument :min-arguments)
+    :type unsigned-byte
+    :reader fndb-record-min-arguments)
+   (%max-arguments
+    :initarg :max-arguments
+    :initform (alexandria:required-argument :max-arguments)
+    :type unsigned-byte
+    :reader fndb-record-max-arguments)
+   (%purep
+    :initarg :purep
+    :initform (alexandria:required-argument :purep)
+    :type (member t nil :inherited)
+    :reader fndb-record-purep)
+   (%specializer
+    :initarg :specializer
+    :initform (alexandria:required-argument :specializer)
+    :type (or function (eql :inherited))
+    :reader fndb-record-specializer)
+   (%differentiator
+    :initarg :differentiator
+    :initform (alexandria:required-argument :differentiator)
+    :type (or function (eql :inherited))
+    :reader fndb-record-differentiator)))
+
+(defvar *default-fndb-record*
+  (make-instance 'fndb-record
+    :function-name 'dummy
+    :min-arguments 0
+    :max-arguments (1- call-arguments-limit)
+    :purep nil
+    :specializer
+    (lambda (&rest arguments)
+      (declare (ignore arguments))
+      (give-up-specialization))
+    :differentiator
+    (lambda (&rest arguments)
+      (declare (ignore arguments))
+      (error "Cannot differentiate this function."))))
+
+(defun ensure-fndb-record
+    (function-name lambda-list
+     &key
+       (parent *default-fndb-record*)
+       (purep (fndb-record-purep parent))
+       (specializer (fndb-record-specializer parent))
+       (differentiator (fndb-record-differentiator parent)))
+  (declare (function-name function-name)
+           (list lambda-list)
+           (fndb-record parent)
+           (boolean purep)
+           (type (or function null) specializer differentiator))
+  ;; Check that the function of that name exists.
+  (assert (fboundp function-name))
+  (multiple-value-bind (min-arguments max-arguments)
+      (lambda-list-arity lambda-list)
+    ;; Check that the lambda list arity matches the arity of the
+    ;; corresponding function.
+    (multiple-value-bind (fn-min-arguments fn-max-arguments)
+        (function-arity function-name)
+      (assert (<= min-arguments fn-min-arguments))
+      (assert (>= max-arguments fn-max-arguments)))
+    ;; Ensure that the suitable record exists.
+    (multiple-value-bind (key table)
+        (trivia:ematch function-name
+          ((list 'setf (and name (type non-nil-symbol)))
+           (values name (fndb-setf-function-table *fndb*)))
+          ((type non-nil-symbol)
+           (values function-name (fndb-function-table *fndb*)))
+          (_ (error "Invalid function-name ~S" function-name)))
+      (multiple-value-bind (record present-p)
+          (alexandria:ensure-gethash
+           key
+           table
+           (make-instance 'fndb-record
+             :function-name function-name
+             :min-arguments min-arguments
+             :max-arguments max-arguments
+             :purep purep
+             :specializer specializer
+             :differentiator differentiator))
+        (when present-p
+          (reinitialize-instance record
+            :function-name function-name
+            :min-arguments min-arguments
+            :max-arguments max-arguments
+            :purep purep
+            :specializer specializer
+            :differentiator differentiator))
+        record))))
+
+(defun find-fndb-record (function-name &optional (errorp t))
+  (multiple-value-bind (key table)
+      (trivia:ematch function-name
+        ((list 'setf (and name (type non-nil-symbol)))
+         (values name (fndb-setf-function-table *fndb*)))
+        ((type non-nil-symbol)
+         (values function-name (fndb-function-table *fndb*)))
+        (_ (error "Invalid function-name ~S" function-name)))
+    (alexandria:ensure-gethash
+     key
+     table
+     (if errorp
+         (error "There is no fndb record named ~S" function-name)
+         (make-instance 'fndb-record
+           :function-name function-name
+           :min-arguments (fndb-record-min-arguments *default-fndb-record*)
+           :max-arguments (fndb-record-max-arguments *default-fndb-record*)
+           :purep (fndb-record-purep *default-fndb-record*)
+           :specializer (fndb-record-specializer *default-fndb-record*)
+           :differentiator (fndb-record-differentiator *default-fndb-record*))))))
+
+(define-compiler-macro find-fndb-record (&whole form function-name &optional (errorp t))
+  (if (and (constantp function-name)
+           (constantp errorp))
       `(load-time-value
-        (locally (declare (notinline ensure-fndb-record))
-          (ensure-fndb-record ,function-name)))
+        (locally (declare (notinline find-fndb-record))
+          (find-fndb-record ,function-name ,errorp)))
       form))
-
-(defmacro define-fndb-accessor (name accessor-name &optional (default nil))
-  (let ((finder (intern (concatenate 'string (symbol-name '#:find-) (symbol-name name))
-                        #.*package*)))
-    `(progn
-       ;; Define a writer.
-       (defun (setf ,name) (value function)
-         (setf (,accessor-name (ensure-fndb-record function)) value))
-       ;; Define a lookup function on records instead of functions.  This
-       ;; function makes use of a record's parent slot to provide a limited
-       ;; form of inheritance.
-       (defun ,finder (record)
-         (cond
-           ((null record) ,default)
-           ((,accessor-name record))
-           (t (,finder (fndb-record-parent record)))))
-       ;; Define a reader.
-       (defun ,name (function)
-         (,finder (gethash function *fndb*)))
-       ;; Define a compiler macro to move the hash table lookup to the load
-       ;; time whenever FUNCTION is a constant function name.
-       (define-compiler-macro ,name (&whole form function)
-         (if (typep function '(cons (eql quote) (cons function-name null)))
-             `(,',finder (ensure-fndb-record ,function))
-             form)))))
-
-(define-fndb-accessor parent fndb-record-parent)
-
-(define-fndb-accessor function-specializer fndb-record-specializer
-    (lambda (&rest arguments)
-      (declare (ignore arguments))
-      (give-up-specialization)))
-
-(define-fndb-accessor function-differentiator fndb-record-differentiator
-    (lambda (&rest arguments)
-      (declare (ignore arguments))
-      (break "TODO")))

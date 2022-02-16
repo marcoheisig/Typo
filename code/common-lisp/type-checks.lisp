@@ -4,18 +4,19 @@
   (check-type type symbol)
   (let ((name (intern (format nil "~@:(the-~A~)" type) #.*package*)))
     `(progn
-       (declaim (inline ,name))
-       (defun ,name (object)
-         (check-type object ,type)
-         object)
-       (define-differentiator ,name (object) _
-         (declare (ignore object))
-         1)
-       (define-specializer ,name (object)
-         (ntype-subtypecase (wrapper-ntype object)
-           ((not ,type) (abort-specialization))
-           (,type object)
-           (t (wrap-default (type-specifier-ntype ',type))))))))
+       (eval-when (:compile-toplevel :load-toplevel :execute)
+         (declaim (inline ,name))
+         (defun ,name (object)
+           (check-type object ,type)
+           object))
+       (define-fndb-record ,name (object)
+         ,@(when (subtypep type 'number)
+             `((:differentiator _ (declare (ignore object)) ,(coerce 1 type))))
+         (:specializer
+          (ntype-subtypecase (wrapper-ntype object)
+            ((not ,type) (abort-specialization))
+            (,type object)
+            (t (wrap-default (type-specifier-ntype ',type)))))))))
 
 (define-type-check number)
 (define-type-check real)
@@ -34,4 +35,3 @@
 (define-type-check function)
 (define-type-check character)
 (define-type-check symbol)
-

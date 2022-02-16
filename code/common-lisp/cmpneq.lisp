@@ -1,5 +1,29 @@
 (in-package #:typo.fndb)
 
+(define-fndb-record /= (number &rest more-numbers)
+  (:specializer
+   (if (null more-numbers)
+       (wrap
+        (prog2-fn
+         (the-number number)
+         t))
+       ;; This code produces (N^2-N)/2 comparisons for N supplied numbers.
+       ;; But whoever calls /= with more than two arguments deserves it.
+       (let ((value (wrap t)))
+         (map-unique-pairs
+          (lambda (a b)
+            (setf value
+                  (wrap
+                   (and-fn value (cmpneq a b)))))
+          (list* number more-numbers))
+         value))))
+
+(defun map-unique-pairs (fn list)
+  (loop for sublist on list
+        for a = (first sublist) do
+          (loop for b in (rest sublist) do
+            (funcall fn a b))))
+
 (define-simple-instruction (/= short-float/=) (generalized-boolean) (short-float short-float))
 (define-simple-instruction (/= single-float/=) (generalized-boolean) (single-float single-float))
 (define-simple-instruction (/= double-float/=) (generalized-boolean) (double-float double-float))
@@ -58,25 +82,6 @@
      (wrap-default
       (type-specifier-ntype 'generalized-boolean)))))
 
-(defun map-unique-pairs (fn list)
-  (loop for sublist on list
-        for a = (first sublist) do
-          (loop for b in (rest sublist) do
-                (funcall fn a b))))
 
-(define-specializer /= (number &rest more-numbers)
-  (if (null more-numbers)
-      (wrap
-       (prog2-fn
-        (the-number number)
-        t))
-      ;; This code produces (N^2-N)/2 comparisons for N supplied numbers.
-      ;; But whoever calls /= with more than two arguments deserves it.
-      (let ((value (wrap t)))
-        (map-unique-pairs
-         (lambda (a b)
-           (setf value
-                 (wrap
-                  (and-fn value (cmpneq a b)))))
-         (list* number more-numbers))
-        value)))
+
+

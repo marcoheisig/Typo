@@ -37,6 +37,7 @@
        (number ,+word-bits+)
        (array ,+word-bits+)
        (function ,+word-bits+)
+       (non-nil-symbol ,+word-bits+)
        (symbol ,+word-bits+)
        (null ,+word-bits+)
        (list ,+word-bits+)

@@ -1,5 +1,19 @@
 (in-package #:typo.fndb)
 
+(define-fndb-record = (number &rest more-numbers)
+  (:specializer
+   (if (null more-numbers)
+       (wrap
+        (prog2-fn
+         (the-number number)
+         t))
+       (apply
+        (function-specializer 'and)
+        (mapcar
+         (lambda (other-number)
+           (wrap (cmpeq number other-number)))
+         more-numbers)))))
+
 (define-simple-instruction (= short-float=) (generalized-boolean) (short-float short-float))
 (define-simple-instruction (= single-float=) (generalized-boolean) (single-float single-float))
 (define-simple-instruction (= double-float=) (generalized-boolean) (double-float double-float))
@@ -8,6 +22,7 @@
 (define-simple-instruction (= complex-single-float=) (generalized-boolean) (complex-single-float complex-single-float))
 (define-simple-instruction (= complex-double-float=) (generalized-boolean) (complex-double-float complex-double-float))
 (define-simple-instruction (= complex-long-float=) (generalized-boolean) (complex-long-float complex-long-float))
+
 (define-instruction (= cmpeq) (generalized-boolean) (a b)
   (ntype-subtypecase
       (ntype-contagion
@@ -58,15 +73,4 @@
      (wrap-default
       (type-specifier-ntype 'generalized-boolean)))))
 
-(define-specializer = (number &rest more-numbers)
-  (if (null more-numbers)
-      (wrap
-       (prog2-fn
-        (the-number number)
-        t))
-      (apply
-       (function-specializer 'and)
-       (mapcar
-        (lambda (other-number)
-          (wrap (cmpeq number other-number)))
-        more-numbers))))
+

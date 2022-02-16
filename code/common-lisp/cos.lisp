@@ -1,38 +1,19 @@
 (in-package #:typo.fndb)
 
-(define-specializer cos (x)
-  (ntype-subtypecase (wrapper-ntype x)
-    ((not number)
-     (abort-specialization))
-    (short-float
-     (wrap
-      (short-float-cos x)))
-    (single-float
-     (wrap
-      (single-float-cos x)))
-    (double-float
-     (wrap
-      (double-float-cos x)))
-    (long-float
-     (wrap
-      (long-float-cos x)))
-    (complex-short-float
-     (wrap
-      (complex-short-float-cos x)))
-    (complex-single-float
-     (wrap
-      (complex-single-float-cos x)))
-    (complex-double-float
-     (wrap
-      (complex-double-float-cos x)))
-    (complex-long-float
-     (wrap
-      (complex-long-float-cos x)))
-    (t
-     (wrap-default (type-specifier-ntype 'number)))))
-
-(define-differentiator cos (x) _
-  (wrap (- (sin x))))
+(define-fndb-record cos (x)
+  (:differentiator _ (wrap (- (sin x))))
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype x)
+     ((not number) (abort-specialization))
+     (short-float (wrap (short-float-cos x)))
+     (single-float (wrap (single-float-cos x)))
+     (double-float (wrap (double-float-cos x)))
+     (long-float (wrap (long-float-cos x)))
+     (complex-short-float (wrap (complex-short-float-cos x)))
+     (complex-single-float (wrap (complex-single-float-cos x)))
+     (complex-double-float (wrap (complex-double-float-cos x)))
+     (complex-long-float (wrap (complex-long-float-cos x)))
+     (t (wrap-default (type-specifier-ntype 'number))))))
 
 (define-simple-instruction (cos short-float-cos) (short-float) (short-float))
 (define-simple-instruction (cos single-float-cos) (single-float) (single-float))

@@ -126,12 +126,11 @@ NIL means the result is a generalization."))
 (defmethod ntype-subtypep
     ((ntype1 ntype)
      (ntype2 ntype))
-  (multiple-value-bind (subtype-p valid-p)
-      (subtypep
-       (ntype-type-specifier ntype1)
-       (ntype-type-specifier ntype2))
-    (assert valid-p)
-    subtype-p))
+  (values
+   (subtypep
+    (ntype-type-specifier ntype1)
+    (ntype-type-specifier ntype2))
+   t))
 
 (define-compiler-macro type-specifier-ntype (&whole form type-specifier)
   (if (constantp type-specifier)

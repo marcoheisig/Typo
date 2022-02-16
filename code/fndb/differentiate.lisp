@@ -22,7 +22,7 @@
               :index index
               :arguments wrappers))
       (t
-       (apply (function-differentiator function) index wrappers)))))
+       (apply (fndb-record-differentiator (find-fndb-record function)) index wrappers)))))
 
 (defun diff (function arguments n)
   (flet ((wrap-constant (object)

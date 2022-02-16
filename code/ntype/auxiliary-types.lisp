@@ -4,10 +4,14 @@
 ;;; definition, but the CL package defines no corresponding type.  We
 ;;; define those types here.
 
+(deftype non-nil-symbol ()
+  '(and symbol (not null)))
+
 (deftype function-name ()
-  '(or
-    (and symbol (not null))
-    (cons (eql setf) (cons symbol nil))))
+  '(or non-nil-symbol (cons (eql setf) (cons non-nil-symbol))))
+
+(deftype variable-name ()
+  'non-nil-symbol)
 
 (deftype function-designator ()
   '(or (and symbol (not null)) function))
