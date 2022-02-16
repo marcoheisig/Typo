@@ -43,6 +43,7 @@
    (wrap-default (type-specifier-ntype 'list))))
 
 (define-fndb-record not (x)
+  (:pure t)
   (:specializer
    (let ((ntype (wrapper-ntype x)))
      (if (eql-ntype-p ntype)
@@ -53,39 +54,48 @@
            (t (wrap-default (type-specifier-ntype 'boolean))))))))
 
 (define-fndb-record eq (a b)
+  (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-fndb-record eql (a b)
+  (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-fndb-record equal (a b)
+  (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-fndb-record equalp (a b)
+  (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-fndb-record identity (object)
+  (:pure t)
   (:specializer
    (wrap object)))
 
 (define-fndb-record complement (function)
+  (:pure t)
   (:specializer
    (check-ntype function function)
    (wrap-default (type-specifier-ntype 'function))))
 
 (define-fndb-record constantly (value)
+  (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'function))))
 
 (define-fndb-record values (&rest objects)
+  (:pure t)
   (:specializer
    (wrap-function 'values objects (mapcar #'wrapper-ntype objects) '() nil)))
 
 (define-fndb-record values-list (list)
+  (:pure t)
   (:specializer
    (check-ntype list list)
    (give-up-specialization)))
@@ -103,6 +113,7 @@
       (t (wrap-default (ntype-union (wrapper-ntype a) (wrapper-ntype b)))))))
 
 (define-fndb-record and-fn (&rest args)
+  (:pure t)
   (:specializer
    (let ((sure t))
      (loop for arg in args do
@@ -115,6 +126,7 @@
          (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
 (define-fndb-record or-fn (&rest args)
+  (:pure t)
   (:specializer
    (let ((sure t))
      (loop for arg in args do

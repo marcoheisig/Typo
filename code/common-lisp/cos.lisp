@@ -1,6 +1,7 @@
 (in-package #:typo.fndb)
 
 (define-fndb-record cos (x)
+  (:pure t)
   (:differentiator _ (wrap (- (sin x))))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)

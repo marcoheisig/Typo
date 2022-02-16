@@ -1,6 +1,7 @@
 (in-package #:typo.fndb)
 
 (define-fndb-record sqrt (x)
+  (:pure t)
   (:differentiator _ (wrap (/ (* 2 (sqrt x)))))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)

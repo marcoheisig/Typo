@@ -1,6 +1,7 @@
 (in-package #:typo.fndb)
 
 (define-fndb-record /= (number &rest more-numbers)
+  (:pure t)
   (:specializer
    (if (null more-numbers)
        (wrap

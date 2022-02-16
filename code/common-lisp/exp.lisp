@@ -28,6 +28,7 @@
 (define-simple-instruction (exp long-float-exp) ((long-float 0L0 *)) (long-float))
 
 (define-fndb-record expt (base power)
+  (:pure t)
   (:differentiator
    index
    (ecase index

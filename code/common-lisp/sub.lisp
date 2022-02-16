@@ -110,5 +110,6 @@
 (define-simple-instruction (- complex-long-float-unary-) (complex-long-float) (complex-long-float))
 
 (define-fndb-record 1- (number)
+  (:pure t)
   (:differentiator _ (declare (ignore number)) (wrap 1))
   (:specializer (wrap (- number 1))))

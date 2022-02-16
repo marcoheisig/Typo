@@ -1,6 +1,7 @@
 (in-package #:typo.fndb)
 
 (define-fndb-record max (real &rest more-reals)
+  (:pure t)
   (:differentiator
    index
    (funcall (function-specializer 'if)
@@ -52,4 +53,5 @@
 (define-simple-instruction (max long-float-max) (long-float) (long-float long-float))
 
 (define-fndb-record argmax (real &rest more-reals)
+  (:pure t)
   (:specializer (wrap-default (type-specifier-ntype 'argument-index))))

@@ -1,6 +1,7 @@
 (in-package #:typo.fndb)
 
 (define-fndb-record min (real &rest more-reals)
+  (:pure t)
   (:differentiator
    index
    (funcall (function-specializer 'if)

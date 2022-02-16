@@ -5,6 +5,7 @@
            (intern (format nil "~:@(~S~S~)" type name) #.*package*)))
     `(progn
        (define-fndb-record ,name (real &rest more-reals)
+         (:pure t)
          (:specializer
           (if (null more-reals)
               (wrap (prog2-fn (the-real real) t))

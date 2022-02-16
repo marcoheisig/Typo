@@ -1,6 +1,7 @@
 (in-package #:typo.fndb)
 
 (define-fndb-record + (&rest numbers)
+  (:pure t)
   (:differentiator index (declare (ignore numbers index)) (wrap 1))
   (:specializer
    (trivia:match numbers
@@ -91,5 +92,6 @@
 (define-simple-instruction (+ complex-long-float+) (complex-long-float) (complex-long-float complex-long-float))
 
 (define-fndb-record 1+ (number)
+  (:pure t)
   (:differentiator index (declare (ignore index number)) (wrap 1))
   (:specializer (wrap (+ number 1))))

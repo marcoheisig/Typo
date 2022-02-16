@@ -18,6 +18,7 @@
 (define-simple-instruction (ln long-float-ln) (long-float) ((or long-float (complex long-float))))
 
 (define-fndb-record log (number &optional (base nil base-supplied-p))
+  (:pure t)
   (:differentiator
    index
    (if (not base-supplied-p)

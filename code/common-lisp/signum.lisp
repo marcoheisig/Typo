@@ -1,6 +1,7 @@
 (in-package #:typo.fndb)
 
 (define-fndb-record signum (number)
+  (:pure t)
   ;; Should I care about the discontinuity at zero?  Nah.
   (:differentiator _ (declare (ignore number)) 0)
   (:specializer

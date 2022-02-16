@@ -1,6 +1,7 @@
 (in-package #:typo.fndb)
 
 (define-fndb-record tan (x)
+  (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      ((not number)

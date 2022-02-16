@@ -13,6 +13,7 @@
    (wrap-default (type-specifier-ntype 'type-specifier))))
 
 (define-fndb-record typep (object type-specifier &optional (environment nil environment-p))
+  (:pure t)
   (:specializer
    (let ((object-ntype (wrapper-ntype object))
          (type-specifier-ntype (wrapper-ntype type-specifier))
