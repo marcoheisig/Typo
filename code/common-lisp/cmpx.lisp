@@ -1,4 +1,4 @@
-(in-package #:typo.fndb)
+(in-package #:typo.common-lisp)
 
 (defmacro cmpx (name)
   (flet ((mkname (type)

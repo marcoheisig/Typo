@@ -51,7 +51,29 @@
      #:ntype-subtypecase
      #:universal-ntype
      #:empty-ntype)
+    ;; The Function Database
     #2=
+    (:export
+     #:function-arity
+     #:lambda-list-arity
+     #:abort-specialization
+     #:give-up-specialization
+     #:check-ntype
+     #:define-fndb-record
+     #:wrap
+     #:wrap-default
+     #:wrapper-ntype
+     #:wrap-constant
+     #:wrap-function
+     #:define-instruction
+     #:define-simple-instruction
+     #:function-specializer
+     #:function-differentiator
+     #:specialize
+     #:differentiate
+     #:infer-ntypes)
+    ;; Primitives
+    #3=
     (:export
      #:f32
      #:f32-if
@@ -282,30 +304,9 @@
      #:s64-decf
      #:s64-aref
      #:s64-row-major-aref)
-    #3=
+    ;; Common Lisp Functions
+    #4=
     (:export
-     #:function-arity
-     #:lambda-list-arity
-
-     ;; Type inference.
-     #:abort-specialization
-     #:give-up-specialization
-     #:check-ntype
-     #:define-specializer
-     #:define-differentiator
-     #:wrap
-     #:wrap-default
-     #:wrapper-ntype
-     #:wrap-constant
-     #:wrap-function
-     #:define-instruction
-     #:define-simple-instruction
-     #:specialize
-     #:differentiate
-     #:infer-ntypes
-
-     ;; Type checks.
-
      #:the-number
      #:the-real
      #:the-rational
@@ -323,9 +324,6 @@
      #:the-function
      #:the-character
      #:the-symbol
-
-     ;; Specialized functions.
-
      ;; abs.lisp
      #:short-float-abs
      #:single-float-abs
@@ -510,4 +508,14 @@
   (defpackage #:typo.fndb
     (:use #:closer-common-lisp #:typo)
     (:import-from #:trivia #:place #:<> #:access)
-    #3#))
+    #2#)
+
+  (defpackage #:typo.primitives
+    (:use #:closer-common-lisp #:typo)
+    (:import-from #:trivia #:place #:<> #:access)
+    #3#)
+
+  (defpackage #:typo.common-lisp
+    (:use #:closer-common-lisp #:typo)
+    (:import-from #:trivia #:place #:<> #:access)
+    #4#))

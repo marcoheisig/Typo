@@ -1,4 +1,4 @@
-(in-package #:typo.fndb)
+(in-package #:typo.common-lisp)
 
 (define-fndb-record sqrt (x)
   (:pure t)

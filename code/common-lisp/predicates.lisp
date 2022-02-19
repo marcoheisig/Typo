@@ -1,4 +1,4 @@
-(in-package #:typo.fndb)
+(in-package #:typo.common-lisp)
 
 (defmacro define-predicate-fndb-record (predicate type-specifier)
   `(define-fndb-record ,predicate (object)

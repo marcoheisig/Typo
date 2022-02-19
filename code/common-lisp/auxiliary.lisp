@@ -1,4 +1,4 @@
-(in-package #:typo.fndb)
+(in-package #:typo.common-lisp)
 
 (defconstant short-float-e (exp 1S0))
 (defconstant single-float-e (exp 1F0))

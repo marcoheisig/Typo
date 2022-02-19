@@ -116,6 +116,11 @@
                                      result-types argument-types)
   (let ((arguments (mapcar #'gensymify argument-types)))
     `(define-instruction (,parent-name ,instruction-name) ,result-types ,arguments
+       ,@(loop for argument in arguments
+               for argument-type in argument-types
+               collect
+               `(ntype-subtypecase (wrapper-ntype ,argument)
+                  ((not ,argument-type) (abort-specialization))))
        (wrap-default
         ,@(loop for type in result-types
                 collect

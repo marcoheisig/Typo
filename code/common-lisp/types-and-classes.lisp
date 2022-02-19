@@ -1,4 +1,4 @@
-(in-package #:typo.fndb)
+(in-package #:typo.common-lisp)
 
 (define-fndb-record subtypep (type-1 type-2 &optional environment)
   (:pure t)

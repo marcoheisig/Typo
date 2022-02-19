@@ -1,38 +1,20 @@
-(in-package #:typo.fndb)
+(in-package #:typo.common-lisp)
 
-(define-specializer sin (x)
-  (ntype-subtypecase (wrapper-ntype x)
-    ((not number)
-     (abort-specialization))
-    (short-float
-     (wrap
-      (short-float-sin x)))
-    (single-float
-     (wrap
-      (single-float-sin x)))
-    (double-float
-     (wrap
-      (double-float-sin x)))
-    (long-float
-     (wrap
-      (long-float-sin x)))
-    (complex-short-float
-     (wrap
-      (complex-short-float-sin x)))
-    (complex-single-float
-     (wrap
-      (complex-single-float-sin x)))
-    (complex-double-float
-     (wrap
-      (complex-double-float-sin x)))
-    (complex-long-float
-     (wrap
-      (complex-long-float-sin x)))
-    (t
-     (wrap-default (type-specifier-ntype 'number)))))
-
-(define-differentiator sin (x) _
-  (wrap (cos x)))
+(define-fndb-record sin (x)
+  (:pure t)
+  (:differentiator _ (wrap (cos 1)))
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype x)
+     ((not number) (abort-specialization))
+     (short-float (wrap (short-float-sin x)))
+     (single-float (wrap (single-float-sin x)))
+     (double-float (wrap (double-float-sin x)))
+     (long-float (wrap (long-float-sin x)))
+     (complex-short-float (wrap (complex-short-float-sin x)))
+     (complex-single-float (wrap (complex-single-float-sin x)))
+     (complex-double-float (wrap (complex-double-float-sin x)))
+     (complex-long-float (wrap (complex-long-float-sin x)))
+     (t (wrap-default (type-specifier-ntype 'number))))))
 
 (define-simple-instruction (sin short-float-sin) (short-float) (short-float))
 (define-simple-instruction (sin single-float-sin) (single-float) (single-float))

@@ -1,37 +1,19 @@
-(in-package #:typo.fndb)
+(in-package #:typo.common-lisp)
 
 (define-fndb-record tan (x)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
-     ((not number)
-      (abort-specialization))
-     (short-float
-      (wrap
-       (short-float-tan x)))
-     (single-float
-      (wrap
-       (single-float-tan x)))
-     (double-float
-      (wrap
-       (double-float-tan x)))
-     (long-float
-      (wrap
-       (long-float-tan x)))
-     (complex-short-float
-      (wrap
-       (complex-short-float-tan x)))
-     (complex-single-float
-      (wrap
-       (complex-single-float-tan x)))
-     (complex-double-float
-      (wrap
-       (complex-double-float-tan x)))
-     (complex-long-float
-      (wrap
-       (complex-long-float-tan x)))
-     (t
-      (wrap-default (type-specifier-ntype 'number))))))
+     ((not number) (abort-specialization))
+     (short-float (wrap (short-float-tan x)))
+     (single-float (wrap (single-float-tan x)))
+     (double-float (wrap (double-float-tan x)))
+     (long-float (wrap (long-float-tan x)))
+     (complex-short-float (wrap (complex-short-float-tan x)))
+     (complex-single-float (wrap (complex-single-float-tan x)))
+     (complex-double-float (wrap (complex-double-float-tan x)))
+     (complex-long-float (wrap (complex-long-float-tan x)))
+     (t (wrap-default (type-specifier-ntype 'number))))))
 
 (define-simple-instruction (tan short-float-tan) (short-float) (short-float))
 (define-simple-instruction (tan single-float-tan) (single-float) (single-float))

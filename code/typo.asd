@@ -48,6 +48,9 @@
      (:file "macros")
      (:file "specialize")
      (:file "differentiate")))
+   (:module "primitives"
+    :components
+    ((:file "default")))
    (:module "common-lisp"
     :components
     ((:file "auxiliary")
