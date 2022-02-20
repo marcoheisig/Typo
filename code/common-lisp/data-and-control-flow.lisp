@@ -2,7 +2,7 @@
 
 (define-fndb-record apply (function arg &rest more-args)
   (:specializer
-   (check-ntype function function-designator)
+   (assert-wrapper-type function function-designator)
    (let ((tail (if (null more-args)
                    arg
                    (car (last more-args)))))
@@ -11,21 +11,21 @@
        (null (apply (function-specializer 'funcall) function arg (butlast more-args)))
        ;; We give up here, because we cannot determine the number of values
        ;; returned by APPLY.
-       (t (give-up-specialization))))))
+       (t (wrap-default* '() '() (type-specifier-ntype 't)))))))
 
 (define-fndb-record fdefinition (name)
   (:specializer
-   (check-ntype name function-name)
+   (assert-wrapper-type name function-name)
    (wrap-default (type-specifier-ntype 't))))
 
 (define-fndb-record fboundp (name)
   (:specializer
-   (check-ntype name function-name)
+   (assert-wrapper-type name function-name)
    (wrap-default (type-specifier-ntype 't))))
 
 (define-fndb-record fmakunbound (name)
   (:specializer
-   (check-ntype name function-name)
+   (assert-wrapper-type name function-name)
    (wrap-default (type-specifier-ntype 'function-name))))
 
 (define-fndb-record funcall (function &rest arguments)
@@ -34,12 +34,12 @@
      (if (eql-ntype-p function-ntype)
          (apply (function-specializer (eql-ntype-object function-ntype)) arguments)
          (progn
-           (check-ntype function function)
-           (give-up-specialization))))))
+           (assert-wrapper-type function function)
+           (wrap-default* '() '() (type-specifier-ntype 't)))))))
 
 (define-fndb-record function-lambda-expression (function)
   (:specializer
-   (check-ntype function function)
+   (assert-wrapper-type function function)
    (wrap-default (type-specifier-ntype 'list))))
 
 (define-fndb-record not (x)
@@ -81,7 +81,7 @@
 (define-fndb-record complement (function)
   (:pure t)
   (:specializer
-   (check-ntype function function)
+   (assert-wrapper-type function function)
    (wrap-default (type-specifier-ntype 'function))))
 
 (define-fndb-record constantly (value)
@@ -97,8 +97,8 @@
 (define-fndb-record values-list (list)
   (:pure t)
   (:specializer
-   (check-ntype list list)
-   (give-up-specialization)))
+   (assert-wrapper-type list list)
+   (wrap-default* '() '() (type-specifier-ntype 't))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

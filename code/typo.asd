@@ -43,8 +43,9 @@
     :components
     ((:file "function-lambda-lists")
      (:file "conditions")
-     (:file "special-functions")
+     (:file "wrap")
      (:file "fndb")
+     (:file "define-fndb-record")
      (:file "macros")
      (:file "specialize")
      (:file "differentiate")))

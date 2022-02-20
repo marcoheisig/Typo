@@ -58,13 +58,14 @@
      #:lambda-list-arity
      #:abort-specialization
      #:give-up-specialization
-     #:check-ntype
      #:define-fndb-record
      #:wrap
      #:wrap-default
+     #:wrap-default*
      #:wrapper-ntype
      #:wrap-constant
      #:wrap-function
+     #:assert-wrapper-type
      #:define-instruction
      #:define-simple-instruction
      #:function-specializer

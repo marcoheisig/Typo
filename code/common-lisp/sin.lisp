@@ -2,7 +2,7 @@
 
 (define-fndb-record sin (x)
   (:pure t)
-  (:differentiator _ (wrap (cos 1)))
+  (:differentiator _ (wrap (cos x)))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      ((not number) (abort-specialization))

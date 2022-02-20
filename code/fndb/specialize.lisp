@@ -40,17 +40,17 @@ supplied FUNCTION.
         (*wrapper-nth-value-ntype* wrapper-nth-value-ntype)
         (*wrapper-ntype* wrapper-ntype)
         (fndb-record (find-fndb-record function nil)))
-    (handler-case (apply (fndb-record-specializer fndb-record) wrappers)
-      ;; A program error is an indication that we had an argument
-      ;; mismatch.
-      (give-up-specialization ()
-        (wrap-function function wrappers '() '() (universal-ntype)))
-      (program-error ()
-        ;; FIXME: Actually make sure we have an invalid number of
-        ;; arguments.
-        (error 'wrong-number-of-arguments
-               :function function
-               :arguments wrappers)))))
+    (if (not fndb-record)
+        (wrap-function function wrappers '() '() (universal-ntype))
+        (handler-case (apply (fndb-record-specializer fndb-record) wrappers)
+          (program-error (e)
+            (if (not (<= (fndb-record-min-arguments fndb-record)
+                         (length wrappers)
+                         (fndb-record-max-arguments fndb-record)))
+                (error 'wrong-number-of-arguments
+                       :function function
+                       :arguments wrappers)
+                (error e)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

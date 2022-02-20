@@ -21,9 +21,10 @@
        (error 'non-numeric-differentiation-argument
               :function function
               :index index
-              :arguments wrappers))
-      (t
-       (apply (fndb-record-differentiator fndb-record) index wrappers)))))
+              :arguments wrappers)))
+    (if (not fndb-record)
+        (error "Don't know how to differentiate ~S" function)
+        (apply (fndb-record-differentiator fndb-record) index wrappers))))
 
 (defun diff (function arguments n)
   (flet ((wrap-constant (object)

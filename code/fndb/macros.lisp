@@ -1,30 +1,11 @@
 (in-package #:typo.fndb)
 
-(defmacro define-fndb-record (function-name lambda-list &body options)
-  (multiple-value-bind (min-arguments max-arguments)
-      (lambda-list-arity lambda-list)
-    `(reinitialize-instance (ensure-fndb-record ',function-name)
-       :function-name ',function-name
-       :min-arguments ',min-arguments
-       :max-arguments ',max-arguments
-       ,@(loop for option in options
-               append
-               (trivia:ematch option
-                 ((list :parent parent)
-                  (list :parent `(find-fndb-record ',parent)))
-                 ((list :pure purep)
-                  (list :purep `(the boolean ,purep)))
-                 ((list* :differentiator index body)
-                  (list :differentiator `(define-differentiator ,function-name ,lambda-list ,index ,@body)))
-                 ((list* :specializer body)
-                  (list :specializer `(define-specializer ,function-name ,lambda-list ,@body))))))))
-
 (defun block-name (function-name)
   (trivia:ematch function-name
     ((list 'setf name) name)
     ((type function-name) function-name)))
 
-(defmacro define-specializer (function-name lambda-list &body body)
+(defmacro define-specializer (function-name lambda-list purep &body body)
   (multiple-value-bind (required optional rest keyword)
       (alexandria:parse-ordinary-lambda-list lambda-list)
     (unless (null keyword)
@@ -45,14 +26,17 @@
                    (list* ,@required ,@(mapcar #'first optional) ,rest)
                    ntypes
                    '()
-                   nil)))
-           (declare (ignorable #'abort-specialization #'wrap-default))
+                   nil))
+                (wrap-default* (required optional rest)
+                  (declare (list required optional) (ntype rest))
+                  (wrap-function
+                   ',function-name
+                   (list* ,@required ,@(mapcar #'first optional) ,rest)
+                   required
+                   optional
+                   rest)))
+           (declare (ignorable #'abort-specialization #'wrap-default #'wrap-default*))
            (block ,(block-name function-name) ,@remaining-forms))))))
-
-(defmacro check-ntype (object ntype)
-  `(ntype-subtypecase (wrapper-ntype ,object)
-     ((not ,ntype) (abort-specialization))
-     (t (values))))
 
 (declaim (notinline %abort-specialization))
 (defun %abort-specialization (function arguments)
@@ -79,21 +63,6 @@
                       (null rest))
              `((declare (ignorable ,index))))
          (block ,(block-name function-name) ,@remaining-forms)))))
-
-(defmacro wrap (form)
-  (expand-wrap form))
-
-(defun expand-wrap (form)
-  (cond ((consp form)
-         `(funcall
-           (function-specializer ',(first form))
-           ,@(mapcar #'expand-wrap (rest form))))
-        ((constantp form)
-         `(wrap-constant ,form))
-        ((symbolp form)
-         form)
-        (t (error "Don't know how to wrap ~S." form))))
-
 (defmacro define-instruction ((parent-name instruction-name)
                               result-types arguments
                               &body body)
@@ -107,10 +76,6 @@
        (:pure t)
        (:parent ,parent-name)
        (:specializer ,@body))))
-
-(defmacro function-specializer (function)
-  `(fndb-record-specializer
-    (ensure-fndb-record ,function)))
 
 (defmacro define-simple-instruction ((parent-name instruction-name)
                                      result-types argument-types)

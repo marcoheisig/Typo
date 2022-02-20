@@ -1,11 +1,5 @@
 (in-package #:typo.fndb)
 
-(define-condition give-up-specialization (condition)
-  ())
-
-(defun give-up-specialization ()
-  (signal 'give-up-specialization))
-
 (define-condition specialization-error (error)
   ((%function :initarg :function :reader specialization-error-function)))
 

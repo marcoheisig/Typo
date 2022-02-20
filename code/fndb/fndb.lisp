@@ -30,6 +30,16 @@
 (defvar *fndb* (make-fndb))
 (declaim (type fndb *fndb*))
 
+(defun make-default-specializer (function-designator)
+  (lambda (&rest args)
+    (wrap-function function-designator args '() '() (universal-ntype))))
+
+(defun make-default-differentiator (function-designator)
+  (lambda (&rest args)
+    (declare (ignore args))
+    (error "Don't know the derivative of ~S."
+           function-designator)))
+
 (defclass fndb-record ()
   ((%function-name
     :initarg :function-name
@@ -62,34 +72,27 @@
     :type function
     :reader fndb-record-differentiator)))
 
-(defvar *default-fndb-record*
-  (make-instance 'fndb-record
-    :function-name 'dummy
-    :min-arguments 0
-    :max-arguments (1- call-arguments-limit)
-    :purep nil
-    :specializer
-    (lambda (&rest arguments)
-      (declare (ignore arguments))
-      (give-up-specialization))
-    :differentiator
-    (lambda (&rest arguments)
-      (declare (ignore arguments))
-      (error "Cannot differentiate this function."))))
-
 (defmethod reinitialize-instance
     ((fndb-record fndb-record)
      &key
        (function-name (alexandria:required-argument :function-name))
        (min-arguments (alexandria:required-argument :min-arguments))
        (max-arguments (alexandria:required-argument :max-arguments))
-       (parent *default-fndb-record*)
-       (purep (fndb-record-purep parent))
-       (specializer (fndb-record-specializer parent))
-       (differentiator (fndb-record-differentiator parent)))
-  (declare (fndb-record parent)
-           (boolean purep)
-           (type (or function null) specializer differentiator))
+       (parent nil)
+       (purep
+        (if parent
+            (fndb-record-purep parent)
+            nil))
+       (specializer
+        (if parent
+            (fndb-record-specializer parent)
+            (make-default-specializer function-name)))
+       (differentiator
+        (if parent
+            (fndb-record-differentiator parent)
+            (make-default-differentiator function-name))))
+  (declare (boolean purep)
+           (type function specializer differentiator))
   ;; Check that the function of that name exists.
   (assert (fboundp function-name))
   ;; Check that the lambda list arity matches the arity of the
@@ -130,11 +133,11 @@
      (let ((record
              (make-instance 'fndb-record
                :function-name function-name
-               :min-arguments (fndb-record-min-arguments *default-fndb-record*)
-               :max-arguments (fndb-record-max-arguments *default-fndb-record*)
-               :purep (fndb-record-purep *default-fndb-record*)
-               :specializer (fndb-record-specializer *default-fndb-record*)
-               :differentiator (fndb-record-differentiator *default-fndb-record*))))
+               :min-arguments 0
+               :max-arguments (1- call-arguments-limit)
+               :purep nil
+               :specializer (make-default-specializer function-name)
+               :differentiator (make-default-differentiator function-name))))
        (unless (functionp function-designator)
          (when (fboundp function-name)
            (setf (gethash (fdefinition function-name) (fndb-function-table *fndb*))
@@ -161,7 +164,7 @@
     (multiple-value-bind (record present-p) (gethash key table)
       (cond (present-p record)
             (errorp (error "There is no fndb record for ~S" function-designator))
-            (t *default-fndb-record*)))))
+            (t nil)))))
 
 (define-compiler-macro find-fndb-record (&whole form function-designator &optional (errorp t))
   (if (and (constantp function-designator)
@@ -169,4 +172,30 @@
       `(load-time-value
         (locally (declare (notinline find-fndb-record))
           (find-fndb-record ,function-designator ,errorp)))
+      form))
+
+(defun function-specializer (function-designator)
+  (let ((fndb-record (find-fndb-record function-designator nil)))
+    (if (not fndb-record)
+        (make-default-specializer function-designator)
+        (fndb-record-specializer fndb-record))))
+
+(define-compiler-macro function-specializer (&whole form function-designator)
+  (if (constantp function-designator)
+      `(load-time-value
+        (locally (declare (notinline function-specializer))
+          (function-specializer ,function-designator)))
+      form))
+
+(defun function-differentiator (function-designator)
+  (let ((fndb-record (find-fndb-record function-designator nil)))
+    (if (not fndb-record)
+        (make-default-differentiator function-designator)
+        (fndb-record-differentiator fndb-record))))
+
+(define-compiler-macro function-differentiator (&whole form function-designator)
+  (if (constantp function-designator)
+      `(load-time-value
+        (locally (declare (notinline function-differentiator))
+          (function-differentiator ,function-designator)))
       form))
