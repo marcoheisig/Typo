@@ -42,7 +42,3 @@
         ((symbolp form)
          form)
         (t (error "Don't know how to wrap ~S." form))))
-
-(defmacro assert-wrapper-type (wrapper type)
-  `(ntype-subtypecase (wrapper-ntype ,wrapper)
-     ((not ,type) (abort-specialization))))

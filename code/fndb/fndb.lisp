@@ -175,27 +175,13 @@
       form))
 
 (defun function-specializer (function-designator)
-  (let ((fndb-record (find-fndb-record function-designator nil)))
-    (if (not fndb-record)
-        (make-default-specializer function-designator)
-        (fndb-record-specializer fndb-record))))
+  (fndb-record-specializer (ensure-fndb-record function-designator)))
 
-(define-compiler-macro function-specializer (&whole form function-designator)
-  (if (constantp function-designator)
-      `(load-time-value
-        (locally (declare (notinline function-specializer))
-          (function-specializer ,function-designator)))
-      form))
+(define-compiler-macro function-specializer (function-designator)
+  `(fndb-record-specializer (ensure-fndb-record ,function-designator)))
 
 (defun function-differentiator (function-designator)
-  (let ((fndb-record (find-fndb-record function-designator nil)))
-    (if (not fndb-record)
-        (make-default-differentiator function-designator)
-        (fndb-record-differentiator fndb-record))))
+  (fndb-record-differentiator (ensure-fndb-record function-designator)))
 
-(define-compiler-macro function-differentiator (&whole form function-designator)
-  (if (constantp function-designator)
-      `(load-time-value
-        (locally (declare (notinline function-differentiator))
-          (function-differentiator ,function-designator)))
-      form))
+(define-compiler-macro function-differentiator (function-designator)
+  `(fndb-record-differentiator (ensure-fndb-record ,function-designator)))

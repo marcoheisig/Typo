@@ -16,25 +16,45 @@
         (alexandria:parse-body body)
       `(lambda ,lambda-list
          ,@declarations
-         (flet ((abort-specialization ()
-                  (%abort-specialization
-                   ',function-name
-                   (list* ,@required ,@(mapcar #'first optional) ,rest)))
-                (wrap-default (&rest ntypes)
-                  (wrap-function
-                   ',function-name
-                   (list* ,@required ,@(mapcar #'first optional) ,rest)
-                   ntypes
-                   '()
-                   nil))
-                (wrap-default* (required optional rest)
-                  (declare (list required optional) (ntype rest))
-                  (wrap-function
-                   ',function-name
-                   (list* ,@required ,@(mapcar #'first optional) ,rest)
-                   required
-                   optional
-                   rest)))
+         (labels
+             ((abort-specialization ()
+                (%abort-specialization
+                 ',function-name
+                 (list* ,@required ,@(mapcar #'first optional) ,rest)))
+              (wrap-default* (required optional rest)
+                (declare (list required optional) (type (or ntype null) rest))
+                ;; Fold calls to pure functions with known arguments.
+                ,(if purep
+                     `(if (and ,@(loop for wrapper in required
+                                       collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
+                               ,@(loop for (wrapper nil nil) in optional
+                                       collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
+                               ,@(when rest
+                                   `((loop for arg in ,rest
+                                           always (eql-ntype-p (wrapper-ntype arg))))))
+                          (wrap-constant
+                           (,(if rest 'apply 'funcall)
+                            (function ,function-name)
+                            ,@(loop for wrapper in required
+                                    collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
+                            ,@(loop for (wrapper nil nil) in optional
+                                    collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
+                            ,@(when rest
+                                `((loop for arg in ,rest collect (eql-ntype-object (wrapper-ntype arg)))))))
+                          (wrap-function
+                           ',function-name
+                            (list* ,@required ,@(mapcar #'first optional) ,rest)
+                            required
+                            optional
+                            rest))
+                     `(wrap-function
+                       ',function-name
+                        (list* ,@required ,@(mapcar #'first optional) ,rest)
+                        required
+                        optional
+                        rest)))
+              (wrap-default (&rest ntypes)
+                (wrap-default* ntypes '() nil)))
            (declare (ignorable #'abort-specialization #'wrap-default #'wrap-default*))
            (block ,(block-name function-name) ,@remaining-forms))))))
 
@@ -44,6 +64,10 @@
          :function function
          :argument-types
          (mapcar (alexandria:compose #'ntype-type-specifier #'wrapper-ntype) arguments)))
+
+(defmacro assert-wrapper-type (wrapper type)
+  `(ntype-subtypecase (wrapper-ntype ,wrapper)
+     ((not ,type) (abort-specialization))))
 
 (defmacro define-differentiator (function-name lambda-list index &body body)
   (multiple-value-bind (required optional rest keyword)

@@ -5,9 +5,9 @@
      &key
        wrap-constant wrap-function wrapper-nth-value-ntype
        (wrapper-ntype (lambda (w) (funcall wrapper-nth-value-ntype 0 w))))
-  "Traverses a decomposition of FUNCTION into successive calls to more
-specialized functions, using the supplied wrapping functions.  Returns the
-value returned by WRAP-FUNCTION.
+  "Returns a wrapper that encapsulates the information of calling FUNCTION
+with arguments that are described by the supplied wrappers.  The exact
+nature of a wrapper depends on the supplied WRAP* functions.
 
 Arguments:
 
