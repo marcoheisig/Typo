@@ -83,7 +83,7 @@
 (defmethod ntype-union
     ((ntype1 array-ntype)
      (ntype2 array-ntype))
-  (multiple-value-bind (element-ntype element-ntype-precise-p)
+  (multiple-value-bind (element-type element-ntype-precise-p)
       (array-element-ntype-union
        (array-ntype-element-ntype ntype1)
        (array-ntype-element-ntype ntype2))
@@ -97,7 +97,7 @@
            (array-ntype-simplep ntype2))
         (multiple-value-bind (result result-precise-p)
             (make-array-ntype
-             :element-type (ntype-type-specifier element-ntype)
+             :element-type element-type
              :dimensions dimensions
              :simplep simplep)
           (values
@@ -109,7 +109,9 @@
 
 (defun array-element-ntype-union (e1 e2)
   (if (eq e1 e2)
-      (values e1 t)
+      (if (ntypep e1)
+          (values (ntype-type-specifier e1) t)
+          (values e1 t))
       (values '* nil)))
 
 (defun array-dimensions-union (d1 d2)
