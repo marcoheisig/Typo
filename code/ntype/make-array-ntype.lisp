@@ -26,6 +26,14 @@
                    (find-primitive-ntype 'array)))))
        precise-p))))
 
+(define-compiler-macro make-array-ntype (&whole form &rest args)
+  (if (and (evenp (length args))
+           (every #'constantp args))
+      `(load-time-value
+        (locally (declare (notinline make-array-ntype))
+          (make-array-ntype ,@args)))
+      form))
+
 (defun canonicalize-array-dimension-specifier (dimensions)
   (typecase dimensions
     ((eql *) dimensions)

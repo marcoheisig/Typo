@@ -37,11 +37,21 @@
 ;;; The only case where a non-EQL ntype can denote a subtype of an EQL is
 ;;; that of the class NULL.
 (defmethod ntype-subtypep
-    ((ntype1 (eql (type-specifier-ntype 'null)))
-     (ntype2 eql-ntype))
-  (null (eql-ntype-object ntype2)))
+    ((ntype1 (eql (find-primitive-ntype 'null)))
+     (ntype2 (eql (make-eql-ntype nil))))
+  t)
 
 ;;; Subtyping with Array Ntypes
+
+(defmethod ntype-subtypep
+    ((ntype1 array-ntype)
+     (ntype2 (eql (find-primitive-ntype 'array))))
+  t)
+
+(defmethod ntype-subtypep
+    ((ntype1 (eql (find-primitive-ntype 'array)))
+     (ntype2 array-ntype))
+  (ntype-subtypep (make-array-ntype) ntype2))
 
 (defmethod ntype-subtypep
     ((ntype1 array-ntype)
@@ -55,20 +65,6 @@
        (array-simplep-subtypep
         (array-ntype-simplep ntype1)
         (array-ntype-simplep ntype2))))
-
-(defmethod ntype-subtypep
-    ((ntype1 array-ntype)
-     (ntype2 (eql (type-specifier-ntype 'array))))
-  (and (array-dimensions-subtypep '* (array-ntype-dimensions ntype2))
-       (array-element-ntype-subtypep '* (array-ntype-element-ntype ntype2))
-       (array-simplep-subtypep nil (array-ntype-simplep ntype2))))
-
-(defmethod ntype-subtypep
-    ((ntype1 (eql (type-specifier-ntype 'array)))
-     (ntype2 array-ntype))
-  (and (array-dimensions-subtypep (array-ntype-dimensions ntype2) '*)
-       (array-element-ntype-subtypep (array-ntype-element-ntype ntype2) '*)
-       (array-simplep-subtypep (array-ntype-simplep ntype2) nil)))
 
 (defun array-dimensions-subtypep (d1 d2)
   (etypecase d2
@@ -85,7 +81,7 @@
           (= (length d1) (length d2))
           (loop for a in d1
                 for b in d2
-                always (or (eq d2 *) (eql d1 d2)))))))
+                always (or (eql a *) (eql a b)))))))
 
 (defun array-element-ntype-subtypep (e1 e2)
   (cond ((eq e1 e2) t)
