@@ -37,6 +37,7 @@
       (non-nil-symbol ,+word-bits+)
       (null ,+word-bits+)
       (symbol ,+word-bits+)
+      (cons ,(* 2 +word-bits+))
       (list ,+word-bits+)
       (character ,(integer-length (1- char-code-limit)))
       (logical-pathname ,+word-bits+)
