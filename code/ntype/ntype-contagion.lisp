@@ -75,21 +75,20 @@
 (defun complex-contagion (ntype1 ntype2)
   (assert (ntype-subtypep ntype1 (type-specifier-ntype 'complex)))
   (assert (ntype-subtypep ntype2 (type-specifier-ntype 'complex)))
-  (macrolet ((body ()
-               `(ntype-subtypecase ntype1
-                  ,@(loop for cp1 in *complex-primitive-ntypes*
-                          collect
-                          `(,(primitive-ntype-type-specifier cp1)
-                            (ntype-subtypecase ntype2
-                              ,@(loop for cp2 in *complex-primitive-ntypes*
-                                      collect
-                                      `(,(primitive-ntype-type-specifier cp2)
-                                        ,(if (> (primitive-ntype-bits cp1)
-                                                (primitive-ntype-bits cp2))
-                                             cp1 cp2)))
-                              (t (type-specifier-ntype 'complex)))))
-                  (t (type-specifier-ntype 'complex)))))
-    (body)))
+  (let ((pt1 (upgraded-complex-part-ntype ntype1))
+        (pt2 (upgraded-complex-part-ntype ntype2)))
+    (ntype-subtypecase pt1
+      (float
+       (ntype-subtypecase pt2
+         (float (make-complex-ntype (float-contagion pt1 pt2)))
+         (rational (make-complex-ntype pt1))
+         (t (make-complex-ntype 't))))
+      (rational
+       (ntype-subtypecase pt2
+         (float (make-complex-ntype pt2))
+         (rational (make-complex-ntype (type-specifier-ntype 'rational)))
+         (t (make-complex-ntype 't))))
+      (t (make-complex-ntype 't)))))
 
 (let ((cache (make-array (list +primitive-ntype-limit+ +primitive-ntype-limit+)
                          :element-type 'ntype

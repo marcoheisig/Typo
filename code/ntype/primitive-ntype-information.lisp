@@ -30,6 +30,7 @@
       ((complex double-float) ,(* 2 +double-float-bits+))
       ((complex short-float) ,(* 2 +short-float-bits+))
       ((complex long-float) ,(* 2 +long-float-bits+))
+      ((complex rational) ,(* 2 +long-float-bits+))
       (complex ,(* 2 +word-bits+))
       (number ,+word-bits+)
       (array ,+word-bits+)

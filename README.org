@@ -4,13 +4,83 @@
 * Notable Features
 
 ** Blazingly fast (approximate) handling of types
-TODO
+
+Typo has its own representation of types, called ntypes.  Conversion of
+type specifiers is fast and mostly non-consing:
+
+#+BEGIN_SRC lisp
+(dolist (type '((function)
+                (cons * function)
+                (eql 42)
+                (array bit (1 2 3 * 4))))
+  (time (loop repeat (expt 10 6) do (type-specifier-ntype type))))
+;;; Evaluation took:
+;;;   0.031 seconds of real time
+;;;   0 bytes consed
+;;;
+;;; Evaluation took:
+;;;   0.059 seconds of real time
+;;;   0 bytes consed
+;;;
+;;; Evaluation took:
+;;;   0.155 seconds of real time
+;;;   0 bytes consed
+;;;
+;;; Evaluation took:
+;;;  0.539 seconds of real time
+;;;  0 bytes consed
+#+END_SRC
+
+Also, reasoning about ntypes is much faster than reasoning about type
+specifiers.  The only downside is that both the conversion from type
+specifiers to ntypes and most operations on ntypes aren't always precise.
+Each function that may or may not be precise will return a second value
+that is true when its result is precise, and false if it isn't.
 
 ** Handles almost all functions in the Common Lisp package
-TODO
+
+#+BEGIN_SRC lisp
+(infer-ntypes '+ (list (type-specifier-ntype '(complex single-float))
+                       (type-specifier-ntype 'integer)
+                       (type-specifier-ntype 'double-float)))
+;; => (#<TYPO.NTYPE::PRIMITIVE-NTYPE (COMPLEX DOUBLE-FLOAT)>)
+;; => NIL
+;; => NIL
+
+(infer-ntypes 'apply (list (type-specifier-ntype '(eql coerce))
+                           (type-specifier-ntype 'integer)
+                           (type-specifier-ntype '(eql single-float))
+                           (type-specifier-ntype 'null)))
+;; => (#<TYPO.NTYPE::PRIMITIVE-NTYPE SINGLE-FLOAT>)
+;; => NIL
+;; => NIL
+#+END_SRC
 
 ** Extensible
-TODO
+
+Typo uses a convenient syntax for specifying function information, by means
+of the =define-fndb-record= macro.  This way, programmers can describe how
+a particular function can be specialized or differentiated, or whether it
+can be subjected to constant folding.  Fore example, here is the function
+information for the function =cl:cos=:
+
+#+BEGIN_SRC lisp
+(define-fndb-record cos (x)
+  (:pure t)
+  (:differentiator _ (wrap (- (sin x))))
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype x)
+     ((not number) (abort-specialization))
+     (short-float (wrap (short-float-cos x)))
+     (single-float (wrap (single-float-cos x)))
+     (double-float (wrap (double-float-cos x)))
+     (long-float (wrap (long-float-cos x)))
+     (complex-short-float (wrap (complex-short-float-cos x)))
+     (complex-single-float (wrap (complex-single-float-cos x)))
+     (complex-double-float (wrap (complex-double-float-cos x)))
+     (complex-long-float (wrap (complex-long-float-cos x)))
+     (t (wrap-default (type-specifier-ntype 'number))))))
+#+END_SRC
 
 * Bonus Features
 
@@ -29,8 +99,13 @@ where a is an integer, b is a double-float, and c is a single-float with
 (two-arg-f64+ (two-arg-f64+ (f64-from-integer a) b) (f64-from-f32 c))
 #+END_SRC
 
+The inferface for this machinery is the function =typo:specialize=.
+
 ** Automatic differentiation
-TODO
+
+Typo can also compute expressions for computing the derivative of a
+supplied function with respect to a particular argument.  The inferface for
+this machinery is the function =typo:differentiate=.
 
 * FAQ
 ** What's the difference betwen NTYPE from this implementation and https://github.com/s-expressionists/ctype?
