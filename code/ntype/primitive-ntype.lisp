@@ -23,6 +23,10 @@
   (declare (ntype-index index))
   (aref *primitive-ntypes* index))
 
+(defmethod ntype-primitive-ntype
+    ((ntype ntype))
+  (values (primitive-ntype-from-index (ntype-index ntype)) nil))
+
 (defmethod make-load-form ((primitive-ntype primitive-ntype) &optional env)
   (declare (ignore env))
   `(primitive-ntype-from-index

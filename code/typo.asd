@@ -24,7 +24,6 @@
      (:file "primitive-ntype-information")
      (:file "ntype")
      (:file "primitive-ntype")
-     (:file "ntype-primitive-ntype")
      (:file "make-eql-ntype")
      (:file "make-array-ntype")
      (:file "type-specifier-ntype")

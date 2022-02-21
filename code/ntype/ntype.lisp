@@ -9,6 +9,15 @@
    "Returns the number of bits that is required to encode any object of
 the supplied NTYPE."))
 
+(defgeneric ntype-primitive-ntype (ntype)
+  (:documentation
+   "Returns the primitive ntype of the supplied NTYPE, i.e., an ntype that
+denotes superset of the supplied NTYPE and is one of the elements of the
+*PRIMITIVE-NTYPES* vector.
+
+A second value of T means the result is precise, while a second value of
+NIL means the result is a generalization."))
+
 (defgeneric ntype-subtypep (ntype1 ntype2)
   (:documentation
    "Returns whether NTYPE1 denotes a subtype of NTYPE2.  In contrast to
@@ -165,6 +174,14 @@ NIL means the result is a generalization."))
 
 (defmethod ntype-bits ((primitive-ntype primitive-ntype))
   (primitive-ntype-bits primitive-ntype))
+
+(defmethod ntype-bits ((ntype ntype))
+  (primitive-ntype-bits
+   (ntype-primitive-ntype ntype)))
+
+(defmethod ntype-primitive-ntype
+    ((ntype primitive-ntype))
+  (values ntype t))
 
 ;;; EQL Ntypes
 

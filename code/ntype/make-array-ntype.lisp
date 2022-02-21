@@ -7,11 +7,6 @@
    :test #'equal
    :weakness :value))
 
-;;; Populate the array ntype table with the one array that has an
-;;; equivalent primitive type.
-(setf (gethash (list '* '* nil) *array-ntype-table*)
-      (find-primitive-ntype 'array))
-
 (defmethod make-array-ntype (&key (element-type '*) (dimensions '*) (simplep nil))
   (check-type simplep boolean)
   (multiple-value-bind (element-ntype precise-p)
@@ -60,8 +55,11 @@
 
 (defmethod make-load-form ((array-ntype array-ntype) &optional env)
   (declare (ignore env))
-  `(load-time-value
-    (make-array-ntype
-     :element-type ',(array-ntype-element-ntype array-ntype)
-     :dimensions ',(array-ntype-dimensions array-ntype)
-     :simplep ',(array-ntype-simplep array-ntype))))
+  `(make-array-ntype
+    :element-type ',(array-ntype-element-ntype array-ntype)
+    :dimensions ',(array-ntype-dimensions array-ntype)
+    :simplep ',(array-ntype-simplep array-ntype)))
+
+(defmethod ntype-primitive-ntype
+    ((ntype (eql (make-array-ntype))))
+  (find-primitive-ntype 'array))

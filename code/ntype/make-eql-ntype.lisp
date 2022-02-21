@@ -42,6 +42,9 @@
 
 (defmethod make-load-form ((eql-ntype eql-ntype) &optional env)
   (declare (ignore env))
-  `(load-time-value
-    (make-eql-ntype
-     ,(eql-ntype-object eql-ntype))))
+  `(make-eql-ntype
+    ,(eql-ntype-object eql-ntype)))
+
+(defmethod ntype-primitive-ntype
+    ((ntype (eql (make-eql-ntype nil))))
+  (find-primitive-ntype 'null))
