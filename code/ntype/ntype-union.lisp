@@ -38,6 +38,8 @@
      (aref v1-cache (ntype-index p1) (ntype-index p2))
      (plusp (aref v2-cache (ntype-index p1) (ntype-index p2))))))
 
+;;; EQL Ntype Union
+
 (defmethod ntype-union
     ((ntype1 eql-ntype)
      (ntype2 eql-ntype))
@@ -47,14 +49,36 @@
       (call-next-method)))
 
 (defmethod ntype-union
+    ((ntype1 (eql (find-primitive-ntype 'null)))
+     (ntype2 (eql (make-eql-ntype nil))))
+  (values ntype2 t))
+
+(defmethod ntype-union
+    ((ntype1 (eql (make-eql-ntype nil)))
+     (ntype2 (eql (find-primitive-ntype 'null))))
+  (values ntype1 t))
+
+;;; Array Ntype Union
+
+(defmethod ntype-union
     ((ntype1 array-ntype)
      (ntype2 (eql (find-primitive-ntype 'array))))
-  (ntype-union ntype1 (make-array-ntype)))
+  (values (make-array-ntype) nil))
 
 (defmethod ntype-union
     ((ntype1 (eql (find-primitive-ntype 'array)))
      (ntype2 array-ntype))
-  (ntype-union (make-array-ntype) ntype2))
+  (values (make-array-ntype) nil))
+
+(defmethod ntype-union
+    ((ntype1 (eql (make-array-ntype)))
+     (ntype2 (eql (find-primitive-ntype 'array))))
+  (values ntype1 t))
+
+(defmethod ntype-union
+    ((ntype1 (eql (find-primitive-ntype 'array)))
+     (ntype2 (eql (make-array-ntype))))
+  (values ntype2 t))
 
 (defmethod ntype-union
     ((ntype1 array-ntype)
