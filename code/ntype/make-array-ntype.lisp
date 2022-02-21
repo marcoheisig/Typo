@@ -53,7 +53,6 @@
   (if (eql element-type '*)
       (values '* t)
       (multiple-value-bind (aet aet-precise-p)
-          (declaim (notinline type-specifier-ntype))
           (type-specifier-ntype element-type)
         (multiple-value-bind (uaet uaet-precise-p)
             (upgraded-array-element-ntype aet)

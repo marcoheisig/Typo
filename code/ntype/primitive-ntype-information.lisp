@@ -55,5 +55,12 @@
   (loop for (B . nil) in rest do
     (assert (not (subtypep B A)))))
 
+;;; There must only be a single primitive array ntype, ARRAY.
+
+(loop for (type . nil) in *primitive-ntype-information* do
+  (assert (or (eq type 'array)
+              (eq type 'nil)
+              (not (subtypep type 'array)))))
+
 (deftype ntype-index ()
   `(integer 0 ,(length *primitive-ntype-information*)))

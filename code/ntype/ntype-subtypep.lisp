@@ -34,14 +34,65 @@
   (typep (eql-ntype-object ntype1)
          (ntype-type-specifier ntype2)))
 
+;;; The only case where a non-EQL ntype can denote a subtype of an EQL is
+;;; that of the class NULL.
 (defmethod ntype-subtypep
-    ((ntype1 ntype)
+    ((ntype1 (eql (type-specifier-ntype 'null)))
      (ntype2 eql-ntype))
-  ;; The only case where a non-EQL ntype can denote a subtype of an EQL is
-  ;; that of the class NULL.
-  (and (eql ntype1 (type-specifier-ntype 'null))
-       (null (eql-ntype-object ntype2))))
+  (null (eql-ntype-object ntype2)))
 
 ;;; Subtyping with Array Ntypes
 
-;;; TODO
+(defmethod ntype-subtypep
+    ((ntype1 array-ntype)
+     (ntype2 array-ntype))
+  (and (array-dimensions-subtypep
+        (array-ntype-dimensions ntype1)
+        (array-ntype-dimensions ntype2))
+       (array-element-ntype-subtypep
+        (array-ntype-element-ntype ntype1)
+        (array-ntype-element-ntype ntype2))
+       (array-simplep-subtypep
+        (array-ntype-simplep ntype1)
+        (array-ntype-simplep ntype2))))
+
+(defmethod ntype-subtypep
+    ((ntype1 array-ntype)
+     (ntype2 (eql (type-specifier-ntype 'array))))
+  (and (array-dimensions-subtypep '* (array-ntype-dimensions ntype2))
+       (array-element-ntype-subtypep '* (array-ntype-element-ntype ntype2))
+       (array-simplep-subtypep nil (array-ntype-simplep ntype2))))
+
+(defmethod ntype-subtypep
+    ((ntype1 (eql (type-specifier-ntype 'array)))
+     (ntype2 array-ntype))
+  (and (array-dimensions-subtypep (array-ntype-dimensions ntype2) '*)
+       (array-element-ntype-subtypep (array-ntype-element-ntype ntype2) '*)
+       (array-simplep-subtypep (array-ntype-simplep ntype2) nil)))
+
+(defun array-dimensions-subtypep (d1 d2)
+  (etypecase d2
+    ((eql *) t)
+    (integer
+     (etypecase d1
+       ((eql *) nil)
+       (integer (= d2 d1))
+       (list (= d2 (length d1)))))
+    (list
+     ;; We rely on the fact that make-array-ntype normalizes lists of all
+     ;; asterisks into integers.
+     (and (listp d1)
+          (= (length d1) (length d2))
+          (loop for a in d1
+                for b in d2
+                always (or (eq d2 *) (eql d1 d2)))))))
+
+(defun array-element-ntype-subtypep (e1 e2)
+  (cond ((eq e1 e2) t)
+        ((eq e2 '*) t)
+        ((eq e1 '*) nil)
+        ((and (ntypep e1) (ntypep e2)) (ntype= e1 e2))
+        (t nil)))
+
+(defun array-simplep-subtypep (b1 b2)
+  (if b2 b1 t))
