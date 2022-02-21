@@ -24,6 +24,8 @@
      (:file "primitive-ntype-information")
      (:file "ntype")
      (:file "primitive-ntype")
+     (:file "upgraded-array-element-ntype")
+     (:file "upgraded-complex-part-ntype")
      (:file "make-eql-ntype")
      (:file "make-array-ntype")
      (:file "type-specifier-ntype")
@@ -35,9 +37,7 @@
      (:file "ntype-subtypecase")
      (:file "ntype-contagion")
      (:file "array-element-ntype")
-     (:file "complex-part-ntype")
-     (:file "upgraded-array-element-ntype")
-     (:file "upgraded-complex-part-ntype")))
+     (:file "complex-part-ntype")))
    (:module "fndb"
     :components
     ((:file "function-lambda-lists")

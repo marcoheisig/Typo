@@ -40,13 +40,13 @@
     ((integer 0 #.array-rank-limit) dimensions)
     (list
      (loop with *-only = t
-           for dimension in dimensions
-           for length from 0 do
+           for length from 0
+           for dimension in dimensions do
              (unless (eql dimension '*)
                (setf *-only nil)
-               (if (typep dimension '(integer 0 #.array-rank-limit))
-                   (error "Invalid array dimension specifier: ~S"
-                          dimension)))
+               (unless (typep dimension '(integer 0 #.array-rank-limit))
+                 (error "Invalid array dimension specifier: ~S"
+                        dimension)))
            finally (return (if *-only length dimensions))))
     (otherwise
      (error "Invalid array dimensions specifier: ~S"
@@ -64,7 +64,7 @@
 (defmethod make-load-form ((array-ntype array-ntype) &optional env)
   (declare (ignore env))
   `(make-array-ntype
-    :element-type ',(array-ntype-element-ntype array-ntype)
+    :element-type ',(array-ntype-element-type array-ntype)
     :dimensions ',(array-ntype-dimensions array-ntype)
     :simplep ',(array-ntype-simplep array-ntype)))
 

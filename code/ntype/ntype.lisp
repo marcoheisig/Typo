@@ -216,10 +216,15 @@ NIL means the result is a generalization."))
    :type boolean
    :read-only t))
 
+(defun array-ntype-element-type (array-ntype)
+  (declare (array-ntype array-ntype))
+  (let ((element-ntype (array-ntype-element-ntype array-ntype)))
+    (if (eql element-ntype '*)
+        '*
+        (ntype-type-specifier element-ntype))))
+
 (defmethod ntype-type-specifier ((array-ntype array-ntype))
-  (let ((element-type
-          (ntype-type-specifier
-           (array-ntype-element-ntype array-ntype))))
+  (let ((element-type (array-ntype-element-type array-ntype)))
     (if (array-ntype-simplep array-ntype)
         (trivia:ematch (array-ntype-dimensions array-ntype)
           ('*

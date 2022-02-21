@@ -17,6 +17,53 @@
 (setf (gethash 'null *atomic-type-specifier-table*)
       (list (make-eql-ntype nil) t))
 
+(setf (gethash 'array *atomic-type-specifier-table*)
+      (multiple-value-list
+       (make-array-ntype)))
+
+(setf (gethash 'simple-array *atomic-type-specifier-table*)
+      (multiple-value-list
+       (make-array-ntype
+        :simplep t)))
+
+(setf (gethash 'vector *atomic-type-specifier-table*)
+      (multiple-value-list
+       (make-array-ntype
+        :dimensions 1)))
+
+(setf (gethash 'simple-vector *atomic-type-specifier-table*)
+      (multiple-value-list
+       (make-array-ntype
+        :element-type 't
+        :dimensions 1
+        :simplep t)))
+
+(setf (gethash 'bit-vector *atomic-type-specifier-table*)
+      (multiple-value-list
+       (make-array-ntype
+        :element-type 'bit
+        :dimensions 1)))
+
+(setf (gethash 'simple-bit-vector *atomic-type-specifier-table*)
+      (multiple-value-list
+       (make-array-ntype
+        :element-type 'bit
+        :dimensions 1
+        :simplep t)))
+
+(setf (gethash 'string *atomic-type-specifier-table*)
+      (multiple-value-list
+       (make-array-ntype
+        :element-type 'character
+        :dimensions 1)))
+
+(setf (gethash 'simple-string *atomic-type-specifier-table*)
+      (multiple-value-list
+       (make-array-ntype
+        :element-type 'character
+        :dimensions 1
+        :simplep t)))
+
 (defmethod type-specifier-ntype :around ((atomic-type-specifier symbol))
   (values-list
    (alexandria:ensure-gethash
@@ -324,46 +371,85 @@
 ;;; Array Type Specifiers
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'array)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> element-type '*) (<> dimensions '*))
+         (and (list element-type) (<> dimensions '*))
+         (and (list element-type dimensions)))
+     (make-array-ntype
+      :element-type element-type
+      :dimensions dimensions))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'simple-array)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> element-type '*) (<> dimensions '*))
+         (and (list element-type) (<> dimensions '*))
+         (and (list element-type dimensions)))
+     (make-array-ntype
+      :element-type element-type
+      :dimensions dimensions
+      :simplep t))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'vector)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> element-type '*) (<> size '*))
+         (and (list element-type) (<> size '*))
+         (and (list element-type (and size (or '* (type (and fixnum unsigned-byte)))))))
+     (make-array-ntype
+      :element-type element-type
+      :dimensions (list size)))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'bit-vector)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> size '*))
+         (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
+     (make-array-ntype
+      :element-type 'bit
+      :dimensions (list size)))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'simple-bit-vector)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> size '*))
+         (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
+     (make-array-ntype
+      :element-type 'bit
+      :dimensions (list size)
+      :simplep t))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'simple-vector)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> size '*))
+         (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
+     (make-array-ntype
+      :element-type 't
+      :dimensions (list size)
+      :simplep t))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'string)) rest whole)
-  ;; TODO
   (trivia:match rest
-    (_ (call-next-method))))
-
-(defmethod compound-type-specifier-ntype ((_ (eql 'base-string)) rest whole)
-  ;; TODO
-  (trivia:match rest
+    ((or (and (list) (<> size '*))
+         (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
+     (make-array-ntype
+      :element-type 'character
+      :dimensions (list size)))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'simple-string)) rest whole)
+  (trivia:match rest
+    ((or (and (list) (<> size '*))
+         (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
+     (make-array-ntype
+      :element-type 'character
+      :dimensions (list size)
+      :simplep t))
+    (_ (call-next-method))))
+
+(defmethod compound-type-specifier-ntype ((_ (eql 'base-string)) rest whole)
   ;; TODO
   (trivia:match rest
     (_ (call-next-method))))
@@ -376,19 +462,31 @@
 ;;; Miscellaneous Compound Type Specifiers
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'cons)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> car '*) (<> cdr '*))
+         (and (list car) (<> cdr '*))
+         (list car cdr))
+     (multiple-value-bind (car-ntype a)
+         (if (eql car '*)
+             (values (universal-ntype) t)
+             (type-specifier-ntype car))
+       (multiple-value-bind (cdr-ntype b)
+           (if (eql cdr '*)
+               (values (universal-ntype) t)
+               (type-specifier-ntype cdr))
+         (multiple-value-bind (ntype c)
+             (find-primitive-ntype 'cons)
+           (if (and (ntype= car-ntype (universal-ntype))
+                    (ntype= cdr-ntype (universal-ntype)))
+               (values ntype (and a b c))
+               (values ntype nil))))))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'values)) rest whole)
-  ;; TODO
-  (trivia:match rest
-    (_ (call-next-method))))
+  (error "Cannot handle VALUES types specifiers."))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'function)) rest whole)
-  ;; TODO
-  (trivia:match rest
-    (_ (call-next-method))))
+  (find-primitive-ntype 'function))
 
 ;;; Populate the Caches
 
