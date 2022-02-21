@@ -46,4 +46,62 @@
       (values ntype1 t)
       (call-next-method)))
 
-;;; TODO handle array ntypes.
+(defmethod ntype-union
+    ((ntype1 array-ntype)
+     (ntype2 (eql (find-primitive-ntype 'array))))
+  (ntype-union ntype1 (make-array-ntype)))
+
+(defmethod ntype-union
+    ((ntype1 (eql (find-primitive-ntype 'array)))
+     (ntype2 array-ntype))
+  (ntype-union (make-array-ntype) ntype2))
+
+(defmethod ntype-union
+    ((ntype1 array-ntype)
+     (ntype2 array-ntype))
+  (multiple-value-bind (element-ntype element-ntype-precise-p)
+      (array-element-ntype-union
+       (array-ntype-element-ntype ntype1)
+       (array-ntype-element-ntype ntype2))
+    (multiple-value-bind (dimensions dimensions-precise-p)
+        (array-dimensions-union
+         (array-ntype-dimensions ntype1)
+         (array-ntype-dimensions ntype2))
+      (multiple-value-bind (simplep simplep-precise-p)
+          (array-simplep-union
+           (array-ntype-simplep ntype1)
+           (array-ntype-simplep ntype2))
+        (multiple-value-bind (result result-precise-p)
+            (make-array-ntype
+             :element-type (ntype-type-specifier element-ntype)
+             :dimensions dimensions
+             :simplep simplep)
+          (values
+           result
+           (and element-ntype-precise-p
+                dimensions-precise-p
+                simplep-precise-p
+                result-precise-p)))))))
+
+(defun array-element-ntype-union (e1 e2)
+  (if (eq e1 e2)
+      (values e1 t)
+      (values '* nil)))
+
+(defun array-dimensions-union (d1 d2)
+  (cond ((equal d1 d2)
+         (values d1 t))
+        ((and (listp d1)
+              (listp d2))
+         (values
+          (loop for a in d1
+                for b in d2
+                collect
+                (if (eql a b) a '*))
+          nil))
+        (t (values '* nil))))
+
+(defun array-simplep-union (b1 b2)
+  (if (eq b1 b2)
+      (values b1 t)
+      (values nil nil)))
