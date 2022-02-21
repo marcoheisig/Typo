@@ -82,13 +82,13 @@
        (ntype-subtypecase pt2
          (float (make-complex-ntype (float-contagion pt1 pt2)))
          (rational (make-complex-ntype pt1))
-         (t (make-complex-ntype 't))))
+         (t (type-specifier-ntype 'complex))))
       (rational
        (ntype-subtypecase pt2
          (float (make-complex-ntype pt2))
          (rational (make-complex-ntype (type-specifier-ntype 'rational)))
-         (t (make-complex-ntype 't))))
-      (t (make-complex-ntype 't)))))
+         (t (type-specifier-ntype 'complex))))
+      (t (type-specifier-ntype 'complex)))))
 
 (let ((cache (make-array (list +primitive-ntype-limit+ +primitive-ntype-limit+)
                          :element-type 'ntype
