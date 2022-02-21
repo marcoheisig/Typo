@@ -38,6 +38,8 @@
      (aref v1-cache (ntype-index p1) (ntype-index p2))
      (plusp (aref v2-cache (ntype-index p1) (ntype-index p2))))))
 
+;;; EQL Ntype Intersection
+
 (defmethod ntype-intersection
     ((ntype1 eql-ntype)
      (ntype2 eql-ntype))
@@ -46,4 +48,64 @@
       (values ntype1 t)
       (values (empty-ntype) t)))
 
-;;; TODO handle array ntypes.
+(defmethod ntype-intersection
+    ((ntype1 (eql (find-primitive-ntype 'null)))
+     (ntype2 (eql (make-eql-ntype nil))))
+  (values ntype2 t))
+
+(defmethod ntype-intersection
+    ((ntype1 (eql (make-eql-ntype nil)))
+     (ntype2 (eql (find-primitive-ntype 'null))))
+  (values ntype1 t))
+
+;;; Array Ntype Intersection
+
+(defmethod ntype-intersection
+    ((ntype1 array-ntype)
+     (ntype2 (eql (find-primitive-ntype 'array))))
+  (values ntype1 t))
+
+(defmethod ntype-intersection
+    ((ntype1 (eql (find-primitive-ntype 'array)))
+     (ntype2 array-ntype))
+  (values ntype2 t))
+
+(defmethod ntype-intersection
+    ((ntype1 array-ntype)
+     (ntype2 array-ntype))
+  (flet ((fail ()
+           (return-from ntype-intersection
+             (values (empty-ntype) t))))
+    (let* ((e1 (array-ntype-element-ntype ntype1))
+           (e2 (array-ntype-element-ntype ntype2))
+           (element-type
+             (cond ((eq e1 e2) e1)
+                   ((eq e1 '*) e2)
+                   ((eq e2 '*) e1)
+                   (t (fail))))
+           (d1 (array-ntype-dimensions ntype1))
+           (d2 (array-ntype-dimensions ntype2))
+           (dimensions
+             (etypecase d1
+               ((eql *) d2)
+               (integer
+                (etypecase d2
+                  ((eql *) d1)
+                  (integer (if (= d1 d2) d1 (fail)))
+                  (list (if (= d1 (length d2)) d2 (fail)))))
+               (list
+                (etypecase d2
+                  ((eql *) d1)
+                  (integer (if (= (length d1) d2) d1 (fail)))
+                  (list
+                   (if (/= (length d1) (length d2))
+                       (fail)
+                       (loop for a in d1
+                             for b in d2
+                             collect (if (eq a '*) b a))))))))
+           (simplep (or (array-ntype-simplep ntype1)
+                        (array-ntype-simplep ntype2))))
+      (make-array-ntype
+       :element-type element-type
+       :dimensions dimensions
+       :simplep simplep))))
