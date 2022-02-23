@@ -27,12 +27,12 @@
           (result-ntype (ntype-contagion ntype-of-a ntype-of-b)))
      (cond
        ((and (eql-ntype-p ntype-of-a)
-             (zerop (eql-ntype-object ntype-of-a)))
+             (eql 0 (eql-ntype-object ntype-of-a)))
         (funcall (function-specializer 'coerce)
                  b
                  (wrap-constant (ntype-type-specifier result-ntype))))
        ((and (eql-ntype-p ntype-of-b)
-             (zerop (eql-ntype-object ntype-of-b)))
+             (eql 0 (eql-ntype-object ntype-of-b)))
         (funcall (function-specializer 'coerce)
                  a
                  (wrap-constant (ntype-type-specifier result-ntype))))

@@ -58,6 +58,20 @@
      (ntype2 (eql (find-primitive-ntype 'null))))
   (values ntype1 t))
 
+(defmethod ntype-intersection
+    ((ntype1 eql-ntype)
+     (ntype2 ntype))
+  (if (ntype-subtypep ntype1 ntype2)
+      (values ntype1 t)
+      (values (empty-ntype) t)))
+
+(defmethod ntype-intersection
+    ((ntype1 ntype)
+     (ntype2 eql-ntype))
+  (if (ntype-subtypep ntype2 ntype1)
+      (values ntype2 t)
+      (values (empty-ntype) t)))
+
 ;;; Array Ntype Intersection
 
 (defmethod ntype-intersection
