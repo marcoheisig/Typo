@@ -96,7 +96,7 @@
        (defun ,instruction-name ,arguments
          (the (values ,@result-types &optional)
               (,parent-name ,@arguments))))
-     (define-fndb-record ,instruction-name ,arguments
+     (define-fnrecord ,instruction-name ,arguments
        (:pure t)
        (:parent ,parent-name)
        (:specializer ,@body))))

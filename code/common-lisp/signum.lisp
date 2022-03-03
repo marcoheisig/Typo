@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record signum (number)
+(define-fnrecord signum (number)
   (:pure t)
   ;; Should I care about the discontinuity at zero?  Nah.
   (:differentiator _ (declare (ignore number)) 0)

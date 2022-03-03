@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record max (real &rest more-reals)
+(define-fnrecord max (real &rest more-reals)
   (:pure t)
   (:differentiator
    index
@@ -52,6 +52,6 @@
 (define-simple-instruction (max double-float-max) (double-float) (double-float double-float))
 (define-simple-instruction (max long-float-max) (long-float) (long-float long-float))
 
-(define-fndb-record argmax (real &rest more-reals)
+(define-fnrecord argmax (real &rest more-reals)
   (:pure t)
   (:specializer (wrap-default (type-specifier-ntype 'argument-index))))

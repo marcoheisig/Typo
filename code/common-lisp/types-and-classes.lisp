@@ -1,18 +1,18 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record subtypep (type-1 type-2 &optional environment)
+(define-fnrecord subtypep (type-1 type-2 &optional environment)
   (:pure t)
   (:specializer
    (wrap-default
     (type-specifier-ntype 'generalized-boolean)
     (type-specifier-ntype 'generalized-boolean))))
 
-(define-fndb-record type-of (object)
+(define-fnrecord type-of (object)
   (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'type-specifier))))
 
-(define-fndb-record typep (object type-specifier &optional (environment nil environment-p))
+(define-fnrecord typep (object type-specifier &optional (environment nil environment-p))
   (:pure t)
   (:specializer
    (let ((object-ntype (wrapper-ntype object))

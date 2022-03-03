@@ -9,7 +9,7 @@
          (defun ,name (object)
            (check-type object ,type)
            object))
-       (define-fndb-record ,name (object)
+       (define-fnrecord ,name (object)
          ;; Of course type checks are only pure in their respective
          ;; domains.  But this is fine for us, since we do not consider
          ;; signaled conditions when it comes to types, only returned

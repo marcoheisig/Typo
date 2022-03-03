@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record min (real &rest more-reals)
+(define-fnrecord min (real &rest more-reals)
   (:pure t)
   (:differentiator
    index

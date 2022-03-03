@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record apply (function arg &rest more-args)
+(define-fnrecord apply (function arg &rest more-args)
   (:specializer
    (assert-wrapper-type function function-designator)
    (let ((tail (if (null more-args)
@@ -13,22 +13,22 @@
        ;; returned by APPLY.
        (t (wrap-default* '() '() (type-specifier-ntype 't)))))))
 
-(define-fndb-record fdefinition (name)
+(define-fnrecord fdefinition (name)
   (:specializer
    (assert-wrapper-type name function-name)
    (wrap-default (type-specifier-ntype 't))))
 
-(define-fndb-record fboundp (name)
+(define-fnrecord fboundp (name)
   (:specializer
    (assert-wrapper-type name function-name)
    (wrap-default (type-specifier-ntype 't))))
 
-(define-fndb-record fmakunbound (name)
+(define-fnrecord fmakunbound (name)
   (:specializer
    (assert-wrapper-type name function-name)
    (wrap-default (type-specifier-ntype 'function-name))))
 
-(define-fndb-record funcall (function &rest arguments)
+(define-fnrecord funcall (function &rest arguments)
   (:specializer
    (let ((function-ntype (wrapper-ntype function)))
      (if (eql-ntype-p function-ntype)
@@ -37,12 +37,12 @@
            (assert-wrapper-type function function)
            (wrap-default* '() '() (type-specifier-ntype 't)))))))
 
-(define-fndb-record function-lambda-expression (function)
+(define-fnrecord function-lambda-expression (function)
   (:specializer
    (assert-wrapper-type function function)
    (wrap-default (type-specifier-ntype 'list))))
 
-(define-fndb-record not (x)
+(define-fnrecord not (x)
   (:pure t)
   (:specializer
    (let ((ntype (wrapper-ntype x)))
@@ -53,48 +53,48 @@
            ((not null) (wrap nil))
            (t (wrap-default (type-specifier-ntype 'boolean))))))))
 
-(define-fndb-record eq (a b)
+(define-fnrecord eq (a b)
   (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
-(define-fndb-record eql (a b)
+(define-fnrecord eql (a b)
   (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
-(define-fndb-record equal (a b)
+(define-fnrecord equal (a b)
   (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
-(define-fndb-record equalp (a b)
+(define-fnrecord equalp (a b)
   (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
-(define-fndb-record identity (object)
+(define-fnrecord identity (object)
   (:pure t)
   (:specializer
    (wrap object)))
 
-(define-fndb-record complement (function)
+(define-fnrecord complement (function)
   (:pure t)
   (:specializer
    (assert-wrapper-type function function)
    (wrap-default (type-specifier-ntype 'function))))
 
-(define-fndb-record constantly (value)
+(define-fnrecord constantly (value)
   (:pure t)
   (:specializer
    (wrap-default (type-specifier-ntype 'function))))
 
-(define-fndb-record values (&rest objects)
+(define-fnrecord values (&rest objects)
   (:pure t)
   (:specializer
    (wrap-function 'values objects (mapcar #'wrapper-ntype objects) '() nil)))
 
-(define-fndb-record values-list (list)
+(define-fnrecord values-list (list)
   (:pure t)
   (:specializer
    (assert-wrapper-type list list)
@@ -104,7 +104,7 @@
 ;;;
 ;;; Control Flow Directives
 
- (define-fndb-record choose (boolean a b)
+ (define-fnrecord choose (boolean a b)
    (:pure t)
    (:specializer
     (ntype-subtypecase (wrapper-ntype boolean)
@@ -112,7 +112,7 @@
       ((not null) (wrap a))
       (t (wrap-default (ntype-union (wrapper-ntype a) (wrapper-ntype b)))))))
 
-(define-fndb-record and-fn (&rest args)
+(define-fnrecord and-fn (&rest args)
   (:pure t)
   (:specializer
    (let ((sure t))
@@ -125,7 +125,7 @@
          (wrap t)
          (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
-(define-fndb-record or-fn (&rest args)
+(define-fnrecord or-fn (&rest args)
   (:pure t)
   (:specializer
    (let ((sure t))
@@ -141,7 +141,7 @@
          (wrap nil)
          (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
- (define-fndb-record prog2-fn (a b)
+ (define-fnrecord prog2-fn (a b)
    (:pure t)
    (:specializer
     (wrap-function 'prog2-fn (list a b) (list (wrapper-ntype b)) '() nil)))

@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record exp (x)
+(define-fnrecord exp (x)
   (:pure t)
   (:differentiator _ (wrap (exp x)))
   (:specializer
@@ -27,7 +27,7 @@
 (define-simple-instruction (exp double-float-exp) ((double-float 0D0 *)) (double-float))
 (define-simple-instruction (exp long-float-exp) ((long-float 0L0 *)) (long-float))
 
-(define-fndb-record expt (base power)
+(define-fnrecord expt (base power)
   (:pure t)
   (:differentiator
    index

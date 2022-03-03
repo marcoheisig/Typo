@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record abs (x)
+(define-fnrecord abs (x)
   (:pure t)
   (:differentiator _ (wrap (if (< 0 x) 1 -1)))
   (:specializer

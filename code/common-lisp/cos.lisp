@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record cos (x)
+(define-fnrecord cos (x)
   (:pure t)
   (:differentiator _ (wrap (- (sin x))))
   (:specializer

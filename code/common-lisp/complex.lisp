@@ -4,7 +4,7 @@
 ;;;
 ;;; COMPLEX
 
-(define-fndb-record complex (realpart &optional (imagpart nil imagpart-supplied-p))
+(define-fnrecord complex (realpart &optional (imagpart nil imagpart-supplied-p))
   (:pure t)
   (:specializer
    (let* ((realpart-ntype (wrapper-ntype realpart))
@@ -50,7 +50,7 @@
 ;;;
 ;;; REALPART
 
-(define-fndb-record realpart (number)
+(define-fnrecord realpart (number)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype number)
@@ -70,7 +70,7 @@
 ;;;
 ;;; IMAGPART
 
-(define-fndb-record imagpart (number)
+(define-fnrecord imagpart (number)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype number)
@@ -90,7 +90,7 @@
 ;;;
 ;;; CONJUGATE
 
-(define-fndb-record conjugate (number)
+(define-fnrecord conjugate (number)
   (:pure t)
   (:specializer
    (let ((ntype (wrapper-ntype number)))
@@ -108,7 +108,7 @@
 ;;;
 ;;; PHASE
 
-(define-fndb-record phase (number)
+(define-fnrecord phase (number)
   (:pure t)
   (:specializer
    (let ((ntype (wrapper-ntype number)))
@@ -129,7 +129,7 @@
 ;;;
 ;;; CIS
 
-(define-fndb-record cis (x)
+(define-fnrecord cis (x)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)

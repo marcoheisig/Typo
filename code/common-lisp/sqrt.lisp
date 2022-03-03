@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record sqrt (x)
+(define-fnrecord sqrt (x)
   (:pure t)
   (:differentiator _ (wrap (/ (* 2 (sqrt x)))))
   (:specializer

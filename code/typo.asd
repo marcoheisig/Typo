@@ -44,7 +44,7 @@
      (:file "conditions")
      (:file "wrap")
      (:file "fndb")
-     (:file "define-fndb-record")
+     (:file "define-fnrecord")
      (:file "macros")
      (:file "specialize")
      (:file "differentiate")))

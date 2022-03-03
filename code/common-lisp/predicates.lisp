@@ -1,7 +1,7 @@
 (in-package #:typo.common-lisp)
 
-(defmacro define-predicate-fndb-record (predicate type-specifier)
-  `(define-fndb-record ,predicate (object)
+(defmacro define-predicate-fnrecord (predicate type-specifier)
+  `(define-fnrecord ,predicate (object)
      (:pure t)
      (:specializer
       (let ((ntype (wrapper-ntype object)))
@@ -10,29 +10,29 @@
           (,type-specifier (wrap-default (type-specifier-ntype '(not null))))
           (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))))
 
-(define-predicate-fndb-record arrayp array)
-(define-predicate-fndb-record bit-vector-p bit-vector)
-(define-predicate-fndb-record characterp character)
-(define-predicate-fndb-record compiled-function-p compiled-function)
-(define-predicate-fndb-record complexp complex)
-(define-predicate-fndb-record consp cons)
-(define-predicate-fndb-record floatp float)
-(define-predicate-fndb-record functionp function)
-(define-predicate-fndb-record hash-table-p hash-table)
-(define-predicate-fndb-record integerp integer)
-(define-predicate-fndb-record keywordp keyword)
-(define-predicate-fndb-record listp list)
-(define-predicate-fndb-record numberp number)
-(define-predicate-fndb-record packagep package)
-(define-predicate-fndb-record random-state-p random-state)
-(define-predicate-fndb-record rationalp rational)
-(define-predicate-fndb-record realp real)
-(define-predicate-fndb-record streamp stream)
+(define-predicate-fnrecord arrayp array)
+(define-predicate-fnrecord bit-vector-p bit-vector)
+(define-predicate-fnrecord characterp character)
+(define-predicate-fnrecord compiled-function-p compiled-function)
+(define-predicate-fnrecord complexp complex)
+(define-predicate-fnrecord consp cons)
+(define-predicate-fnrecord floatp float)
+(define-predicate-fnrecord functionp function)
+(define-predicate-fnrecord hash-table-p hash-table)
+(define-predicate-fnrecord integerp integer)
+(define-predicate-fnrecord keywordp keyword)
+(define-predicate-fnrecord listp list)
+(define-predicate-fnrecord numberp number)
+(define-predicate-fnrecord packagep package)
+(define-predicate-fnrecord random-state-p random-state)
+(define-predicate-fnrecord rationalp rational)
+(define-predicate-fnrecord realp real)
+(define-predicate-fnrecord streamp stream)
 
-;;; The remaining rules cannot be handled by DEFINE-PREDICATE-FNDB-RECORD,
+;;; The remaining rules cannot be handled by DEFINE-PREDICATE-FNRECORD,
 ;;; because the domain of these functions is limited to certain numbers.
 
-(define-fndb-record minusp (real)
+(define-fnrecord minusp (real)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype real)
@@ -41,7 +41,7 @@
      ((real 0 *) (wrap nil))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
-(define-fndb-record plusp (real)
+(define-fnrecord plusp (real)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype real)
@@ -50,7 +50,7 @@
      ((real * 0) (wrap nil))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
-(define-fndb-record zerop (number)
+(define-fnrecord zerop (number)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype number)
@@ -59,14 +59,14 @@
      ((not zero) (wrap nil))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
-(define-fndb-record evenp (integer)
+(define-fnrecord evenp (integer)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype integer)
      ((not real) (abort-specialization))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
-(define-fndb-record oddp (integer)
+(define-fnrecord oddp (integer)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype integer)

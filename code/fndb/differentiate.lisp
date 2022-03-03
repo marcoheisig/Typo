@@ -10,7 +10,7 @@
         (*wrap-function* wrap-function)
         (*wrapper-nth-value-ntype* wrapper-ntype)
         (*wrapper-ntype* wrapper-ntype)
-        (fndb-record (find-fndb-record function nil)))
+        (fnrecord (find-fnrecord function nil)))
     (unless (< -1 index (length wrappers))
       (error 'invalid-differentiation-index
              :function function
@@ -22,9 +22,9 @@
               :function function
               :index index
               :arguments wrappers)))
-    (if (not fndb-record)
+    (if (not fnrecord)
         (error "Don't know how to differentiate ~S" function)
-        (apply (fndb-record-differentiator fndb-record) index wrappers))))
+        (apply (fnrecord-differentiator fnrecord) index wrappers))))
 
 (defun diff (function arguments n)
   (flet ((wrap-constant (object)

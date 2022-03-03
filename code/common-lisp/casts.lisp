@@ -4,7 +4,7 @@
 ;;;
 ;;; Floating-Point Casts
 
-(define-fndb-record coerce-to-short-float (x)
+(define-fnrecord coerce-to-short-float (x)
   (:pure t)
   (:differentiator _ (declare (ignore x)) (wrap 1S0))
   (:specializer
@@ -19,7 +19,7 @@
 (define-simple-instruction (coerce-to-short-float short-float-from-double-float) (short-float) (double-float))
 (define-simple-instruction (coerce-to-short-float short-float-from-long-float) (short-float) (long-float))
 
-(define-fndb-record coerce-to-single-float (x)
+(define-fnrecord coerce-to-single-float (x)
   (:pure t)
   (:differentiator _ (declare (ignore x)) (wrap 1F0))
   (:specializer
@@ -34,7 +34,7 @@
 (define-simple-instruction (coerce-to-single-float single-float-from-double-float) (single-float) (double-float))
 (define-simple-instruction (coerce-to-single-float single-float-from-long-float) (single-float) (long-float))
 
-(define-fndb-record coerce-to-double-float (x)
+(define-fnrecord coerce-to-double-float (x)
   (:pure t)
   (:differentiator _ (declare (ignore x)) (wrap 1D0))
   (:specializer
@@ -49,7 +49,7 @@
 (define-simple-instruction (coerce-to-double-float double-float-from-single-float) (double-float) (single-float))
 (define-simple-instruction (coerce-to-double-float double-float-from-long-float) (double-float) (long-float))
 
-(define-fndb-record coerce-to-long-float (x)
+(define-fnrecord coerce-to-long-float (x)
   (:pure t)
   (:differentiator _ (declare (ignore x)) (wrap 1L0))
   (:specializer
@@ -68,7 +68,7 @@
 ;;;
 ;;; Complex Floating-Point Casts
 
-(define-fndb-record coerce-to-complex-short-float (x)
+(define-fnrecord coerce-to-complex-short-float (x)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -87,7 +87,7 @@
 (define-simple-instruction (coerce-to-complex-short-float complex-short-float-from-complex-double-float) (complex-short-float) (complex-double-float))
 (define-simple-instruction (coerce-to-complex-short-float complex-short-float-from-complex-long-float) (complex-short-float) (complex-long-float))
 
-(define-fndb-record coerce-to-complex-single-float (x)
+(define-fnrecord coerce-to-complex-single-float (x)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -106,7 +106,7 @@
 (define-simple-instruction (coerce-to-complex-single-float complex-single-float-from-complex-double-float) (complex-single-float) (complex-double-float))
 (define-simple-instruction (coerce-to-complex-single-float complex-single-float-from-complex-long-float) (complex-single-float) (complex-long-float))
 
-(define-fndb-record coerce-to-complex-double-float (x)
+(define-fnrecord coerce-to-complex-double-float (x)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -125,7 +125,7 @@
 (define-simple-instruction (coerce-to-complex-double-float complex-double-float-from-complex-single-float) (complex-double-float) (complex-single-float))
 (define-simple-instruction (coerce-to-complex-double-float complex-double-float-from-complex-long-float) (complex-double-float) (complex-long-float))
 
-(define-fndb-record coerce-to-complex-long-float (x)
+(define-fnrecord coerce-to-complex-long-float (x)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -148,7 +148,7 @@
 ;;;
 ;;; FLOAT
 
-(define-fndb-record float (number &optional (prototype nil prototype-supplied-p))
+(define-fnrecord float (number &optional (prototype nil prototype-supplied-p))
   (:pure t)
   (:specializer
    (if prototype-supplied-p
@@ -169,7 +169,7 @@
 ;;;
 ;;; COERCE
 
-(define-fndb-record coerce (object type-specifier)
+(define-fnrecord coerce (object type-specifier)
   (:pure t)
   (:specializer
    (let ((object-ntype (wrapper-ntype object))

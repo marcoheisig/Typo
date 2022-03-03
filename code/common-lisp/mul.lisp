@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record * (&rest numbers)
+(define-fnrecord * (&rest numbers)
   (:pure t)
   (:differentiator
    index
@@ -22,7 +22,7 @@
              (specializer (function-specializer '*)))
         (funcall specializer (apply specializer lo) (apply specializer hi)))))))
 
-(define-fndb-record two-arg-* (a b)
+(define-fnrecord two-arg-* (a b)
   (:pure t)
   (:parent *)
   (:specializer

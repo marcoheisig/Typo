@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record - (number &rest more-numbers)
+(define-fnrecord - (number &rest more-numbers)
   (:pure t)
   (:differentiator
    index
@@ -109,7 +109,7 @@
 (define-simple-instruction (- complex-double-float-unary-) (complex-double-float) (complex-double-float))
 (define-simple-instruction (- complex-long-float-unary-) (complex-long-float) (complex-long-float))
 
-(define-fndb-record 1- (number)
+(define-fnrecord 1- (number)
   (:pure t)
   (:differentiator _ (declare (ignore number)) (wrap 1))
   (:specializer (wrap (- number 1))))

@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record tan (x)
+(define-fnrecord tan (x)
   (:pure t)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)

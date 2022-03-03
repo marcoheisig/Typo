@@ -58,7 +58,7 @@
      #:lambda-list-arity
      #:abort-specialization
      #:give-up-specialization
-     #:define-fndb-record
+     #:define-fnrecord
      #:wrap
      #:wrap-default
      #:wrap-default*

@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record /= (number &rest more-numbers)
+(define-fnrecord /= (number &rest more-numbers)
   (:pure t)
   (:specializer
    (if (null more-numbers)

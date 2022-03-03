@@ -1,6 +1,6 @@
 (in-package #:typo.common-lisp)
 
-(define-fndb-record ln (x)
+(define-fnrecord ln (x)
   (:pure t)
   (:differentiator _ (wrap (/ x)))
   (:specializer
@@ -17,7 +17,7 @@
 (define-simple-instruction (ln double-float-ln) (double-float) ((or double-float (complex double-float))))
 (define-simple-instruction (ln long-float-ln) (long-float) ((or long-float (complex long-float))))
 
-(define-fndb-record log (number &optional (base nil base-supplied-p))
+(define-fnrecord log (number &optional (base nil base-supplied-p))
   (:pure t)
   (:differentiator
    index

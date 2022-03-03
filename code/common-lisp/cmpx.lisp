@@ -4,7 +4,7 @@
   (flet ((mkname (type)
            (intern (format nil "~:@(~S~S~)" type name) #.*package*)))
     `(progn
-       (define-fndb-record ,name (real &rest more-reals)
+       (define-fnrecord ,name (real &rest more-reals)
          (:pure t)
          (:specializer
           (if (null more-reals)
