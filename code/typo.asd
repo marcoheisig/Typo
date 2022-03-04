@@ -43,6 +43,7 @@
     ((:file "function-lambda-lists")
      (:file "conditions")
      (:file "wrap")
+     (:file "fnrecord")
      (:file "fndb")
      (:file "define-fnrecord")
      (:file "macros")

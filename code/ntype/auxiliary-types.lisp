@@ -14,7 +14,10 @@
   'non-nil-symbol)
 
 (deftype function-designator ()
-  '(or (and symbol (not null)) function))
+  '(or non-nil-symbol function))
+
+(deftype extended-function-designator ()
+  '(or function-name function))
 
 (deftype character-designator ()
   '(or (vector character 1) character))

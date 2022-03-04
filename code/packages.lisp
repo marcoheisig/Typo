@@ -11,6 +11,7 @@
      #:function-name
      #:variable-name
      #:function-designator
+     #:extended-function-designator
      #:character-designator
      #:string-designator
      #:package-designator
@@ -59,6 +60,15 @@
      #:abort-specialization
      #:give-up-specialization
      #:define-fnrecord
+     #:fnrecord
+     #:fnrecordp
+     #:fnrecord-name
+     #:fnrecord-function
+     #:fnrecord-min-arguments
+     #:fnrecord-max-arguments
+     #:fnrecord-purep
+     #:fnrecord-specializer
+     #:fnrecord-differentiator
      #:wrap
      #:wrap-default
      #:wrap-default*
