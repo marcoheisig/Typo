@@ -5,7 +5,7 @@
     ((list 'setf name) name)
     ((type function-name) function-name)))
 
-(defmacro define-specializer (function-name lambda-list purep &body body)
+(defmacro define-specializer (function-name lambda-list &body body)
   (multiple-value-bind (required optional rest keyword)
       (alexandria:parse-ordinary-lambda-list lambda-list)
     (unless (null keyword)
@@ -14,49 +14,45 @@
       function-name)
     (multiple-value-bind (remaining-forms declarations)
         (alexandria:parse-body body)
-      `(lambda ,lambda-list
-         ,@declarations
-         (labels
-             ((abort-specialization ()
-                (%abort-specialization
-                 ',function-name
-                 (list* ,@required ,@(mapcar #'first optional) ,rest)))
-              (wrap-default* (required optional rest)
-                (declare (list required optional) (type (or ntype null) rest))
-                ;; Fold calls to pure functions with known arguments.
-                ,(if purep
-                     `(if (and ,@(loop for wrapper in required
-                                       collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
-                               ,@(loop for (wrapper nil nil) in optional
-                                       collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
-                               ,@(when rest
-                                   `((loop for arg in ,rest
-                                           always (eql-ntype-p (wrapper-ntype arg))))))
-                          (wrap-constant
-                           (,(if rest 'apply 'funcall)
-                            (function ,function-name)
-                            ,@(loop for wrapper in required
-                                    collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
-                            ,@(loop for (wrapper nil nil) in optional
-                                    collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
-                            ,@(when rest
-                                `((loop for arg in ,rest collect (eql-ntype-object (wrapper-ntype arg)))))))
-                          (wrap-function
-                           ',function-name
-                            (list* ,@required ,@(mapcar #'first optional) ,rest)
-                            required
-                            optional
-                            rest))
-                     `(wrap-function
-                       ',function-name
-                        (list* ,@required ,@(mapcar #'first optional) ,rest)
-                        required
-                        optional
-                        rest)))
-              (wrap-default (&rest ntypes)
-                (wrap-default* ntypes '() nil)))
-           (declare (ignorable #'abort-specialization #'wrap-default #'wrap-default*))
-           (block ,(block-name function-name) ,@remaining-forms))))))
+      (alexandria:with-gensyms (fnrecord)
+        `(let ((,fnrecord (ensure-fnrecord ',function-name)))
+           (lambda ,lambda-list
+             ,@declarations
+             (labels
+                 ((abort-specialization ()
+                    (%abort-specialization
+                     (fnrecord-name ,fnrecord)
+                     (list* ,@required ,@(mapcar #'first optional) ,rest)))
+                  (wrap-default* (required optional rest)
+                    (declare (list required optional) (type (or ntype null) rest))
+                    (if (and (fnrecord-purep ,fnrecord)
+                             ,@(loop for wrapper in required
+                                     collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
+                             ,@(loop for (wrapper nil nil) in optional
+                                     collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
+                             ,@(when rest
+                                 `((loop for arg in ,rest
+                                         always (eql-ntype-p (wrapper-ntype arg))))))
+                        ;; Fold calls to pure functions with known arguments.
+                        (wrap-constant
+                         (,(if rest 'apply 'funcall)
+                          (function ,function-name)
+                          ,@(loop for wrapper in required
+                                  collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
+                          ,@(loop for (wrapper nil nil) in optional
+                                  collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
+                          ,@(when rest
+                              `((loop for arg in ,rest collect (eql-ntype-object (wrapper-ntype arg)))))))
+                        (wrap-function
+                         (fnrecord-name ,fnrecord)
+                         (list* ,@required ,@(mapcar #'first optional) ,rest)
+                         required
+                         optional
+                         rest)))
+                  (wrap-default (&rest ntypes)
+                    (wrap-default* ntypes '() nil)))
+               (declare (ignorable #'abort-specialization #'wrap-default #'wrap-default*))
+               (block ,(block-name function-name) ,@remaining-forms))))))))
 
 (declaim (notinline %abort-specialization))
 (defun %abort-specialization (function arguments)
@@ -87,6 +83,7 @@
                       (null rest))
              `((declare (ignorable ,index))))
          (block ,(block-name function-name) ,@remaining-forms)))))
+
 (defmacro define-instruction ((parent-name instruction-name)
                               result-types arguments
                               &body body)

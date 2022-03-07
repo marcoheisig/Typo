@@ -19,10 +19,10 @@ object that can be processed by WRAPPER-NTYPE and WRAPPER-NTH-VALUE-NTYPE.
 WRAP-CONSTANT - A function that takes an object and returns a wrapper
 around this object.
 
-WRAP-FUNCTION - A function that is invoked with a first argument that is a
-function designator, a second argument that is a list of wrapped objects, a
-third argument that is a list of ntypes of arguments that will definitely
-be returned, a fourth argument that is a list of ntypes of its optional
+WRAP-FUNCTION - A function that is invoked with a first argument that is an
+fnrecord, a second argument that is a list of wrapped objects, a third
+argument that is a list of ntypes of arguments that will definitely be
+returned, a fourth argument that is a list of ntypes of its optional
 values, and an ntype of all rest values or NIL if there are no rest values.
 
 WRAPPER-NTYPE - A function that takes a wrapper and returns the ntype of
