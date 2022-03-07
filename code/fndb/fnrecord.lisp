@@ -56,6 +56,9 @@
     :type function
     :reader fnrecord-differentiator)))
 
+(defclass forward-referenced-fnrecord ()
+  ())
+
 (defmethod print-object ((fnrecord fnrecord) stream)
   (print-unreadable-object (fnrecord stream :type t)
     (format stream "~S ~S"

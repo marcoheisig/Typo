@@ -30,10 +30,13 @@
     (multiple-value-bind (fnrecord present-p)
         (gethash key table)
       (if present-p
-          (apply #'reinitialize-instance
-                 fnrecord
-                 :name function-name
-                 kwargs)
+          (if (typep fnrecord 'forward-referenced-fnrecord)
+              (apply #'change-class fnrecord 'fnrecord
+                     :name function-name
+                     kwargs)
+              (apply #'reinitialize-instance fnrecord
+                     :name function-name
+                     kwargs))
           (let ((function (fdefinition function-name))
                 (fnrecord (apply #'make-instance 'fnrecord
                                  :name function-name
@@ -42,29 +45,35 @@
             (setf (gethash function (fndb-function-table *fndb*)) fnrecord)
             fnrecord)))))
 
+(defun fndb-key-and-table (extended-function-designator)
+  (trivia:ematch extended-function-designator
+    ((list 'setf (and name (type non-nil-symbol)))
+     (values name (fndb-setf-function-name-table *fndb*)))
+    ((and name (type non-nil-symbol))
+     (values name (fndb-function-name-table *fndb*)))
+    ((and function (type function))
+     (values function (fndb-function-table *fndb*)))
+    (_ (error "Invalid extended function designator ~S" extended-function-designator))))
+
 (defun find-fnrecord (extended-function-designator &optional (errorp t))
   (multiple-value-bind (key table)
-      (trivia:ematch extended-function-designator
-        ((list 'setf (and name (type non-nil-symbol)))
-         (values name (fndb-setf-function-name-table *fndb*)))
-        ((and name (type non-nil-symbol))
-         (values name (fndb-function-name-table *fndb*)))
-        ((and function (type function))
-         (values function (fndb-function-table *fndb*)))
-        (_ (error "Invalid extended function designator ~S" extended-function-designator)))
+      (fndb-key-and-table extended-function-designator)
     (multiple-value-bind (record present-p)
         (gethash key table)
       (cond (present-p record)
             (errorp (error "There is no fnrecord for ~S" extended-function-designator))
             (t nil)))))
 
-(define-compiler-macro find-fnrecord (&whole form function-designator &optional (errorp t))
-  (if (and (constantp function-designator)
-           (constantp errorp))
-      `(load-time-value
-        (locally (declare (notinline find-fnrecord))
-          (find-fnrecord ,function-designator ,errorp)))
-      form))
+(defun (setf find-fnrecord) (value extended-function-designator &optional (errorp t))
+  (declare (ignore errorp))
+  (multiple-value-bind (key table)
+      (fndb-key-and-table extended-function-designator)
+    (setf (gethash key table) value)))
+
+(defun forward-reference-fnrecord (function-name)
+  (or (find-fnrecord function-name nil)
+      (setf (find-fnrecord function-name)
+            (make-instance 'forward-referenced-fnrecord))))
 
 (defun function-specializer (function-designator)
   (let ((fnrecord (find-fnrecord function-designator nil)))
@@ -76,7 +85,7 @@
   (if (constantp function-designator)
       `(fnrecord-specializer
         (load-time-value
-         (ensure-fnrecord ,function-designator)))
+         (forward-reference-fnrecord ,function-designator)))
       form))
 
 (defun function-differentiator (function-designator)
@@ -89,5 +98,5 @@
   (if (constantp function-designator)
       `(fnrecord-differentiator
         (load-time-value
-         (ensure-fnrecord ,function-designator)))
+         (forward-reference-fnrecord ,function-designator)))
       form))
