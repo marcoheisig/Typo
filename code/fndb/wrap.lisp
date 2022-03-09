@@ -21,7 +21,7 @@
     (constant))
 
 (define-special-function (wrap-function *wrap-function*)
-    (function-designator wrappers required-ntypes optional-ntypes rest-ntype))
+    (fnrecord wrappers required-ntypes optional-ntypes rest-ntype))
 
 (define-special-function (wrapper-nth-value-ntype *wrapper-nth-value-ntype*)
   (n wrapper))

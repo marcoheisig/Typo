@@ -69,6 +69,8 @@
      #:fnrecord-purep
      #:fnrecord-specializer
      #:fnrecord-differentiator
+     #:find-fnrecord
+     #:ensure-fnrecord
      #:wrap
      #:wrap-default
      #:wrap-default*

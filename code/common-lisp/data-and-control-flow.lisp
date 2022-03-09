@@ -92,7 +92,7 @@
 (define-fnrecord values (&rest objects)
   (:pure t)
   (:specializer
-   (wrap-function 'values objects (mapcar #'wrapper-ntype objects) '() nil)))
+   (wrap-function (ensure-fnrecord 'values) objects (mapcar #'wrapper-ntype objects) '() nil)))
 
 (define-fnrecord values-list (list)
   (:pure t)
@@ -144,4 +144,6 @@
  (define-fnrecord prog2-fn (a b)
    (:pure t)
    (:specializer
-    (wrap-function 'prog2-fn (list a b) (list (wrapper-ntype b)) '() nil)))
+    (wrap-function
+     (ensure-fnrecord 'prog2-fn)
+     (list a b) (list (wrapper-ntype b)) '() nil)))

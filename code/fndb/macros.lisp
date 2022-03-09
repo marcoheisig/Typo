@@ -44,7 +44,7 @@
                           ,@(when rest
                               `((loop for arg in ,rest collect (eql-ntype-object (wrapper-ntype arg)))))))
                         (wrap-function
-                         (fnrecord-name ,fnrecord)
+                         ,fnrecord
                          (list* ,@required ,@(mapcar #'first optional) ,rest)
                          required
                          optional

@@ -3,7 +3,9 @@
 (defun specialize
     (function wrappers
      &key
-       wrap-constant wrap-function wrapper-nth-value-ntype
+       wrap-constant
+       wrap-function
+       wrapper-nth-value-ntype
        (wrapper-ntype (lambda (w) (funcall wrapper-nth-value-ntype 0 w))))
   "Returns a wrapper that encapsulates the information of calling FUNCTION
 with arguments that are described by the supplied wrappers.  The exact
@@ -39,18 +41,16 @@ supplied FUNCTION.
         (*wrap-function* wrap-function)
         (*wrapper-nth-value-ntype* wrapper-nth-value-ntype)
         (*wrapper-ntype* wrapper-ntype)
-        (fnrecord (find-fnrecord function nil)))
-    (if (not fnrecord)
-        (wrap-function function wrappers '() '() (universal-ntype))
-        (handler-case (apply (fnrecord-specializer fnrecord) wrappers)
-          (program-error (e)
-            (if (not (<= (fnrecord-min-arguments fnrecord)
-                         (length wrappers)
-                         (fnrecord-max-arguments fnrecord)))
-                (error 'wrong-number-of-arguments
-                       :function function
-                       :arguments wrappers)
-                (error e)))))))
+        (fnrecord (ensure-fnrecord function)))
+    (handler-case (apply (fnrecord-specializer fnrecord) wrappers)
+      (program-error (e)
+        (if (not (<= (fnrecord-min-arguments fnrecord)
+                     (length wrappers)
+                     (fnrecord-max-arguments fnrecord)))
+            (error 'wrong-number-of-arguments
+                   :function function
+                   :arguments wrappers)
+            (error e))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -72,8 +72,8 @@ supplied FUNCTION.
                               rest))))))))
          (wrap-constant (c)
            (list (list (ntype-of c)) '() nil))
-         (wrap-function (fn wrappers required optional rest)
-           (declare (ignore fn wrappers))
+         (wrap-function (fnrecord wrappers required optional rest)
+           (declare (ignore fnrecord wrappers))
            (list required optional rest)))
     (destructuring-bind (required optional rest)
         (specialize

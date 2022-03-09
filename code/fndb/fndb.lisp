@@ -105,7 +105,8 @@
 (defmethod shared-initialize
     ((instance full-fnrecord) slot-names
      &rest initargs
-     &key name
+     &key
+       (name (fnrecord-name instance))
        (function (fdefinition name))
        (lambda-list (function-lambda-list function))
        (min-arguments (nth-value 0 (lambda-list-arity lambda-list)))
@@ -177,6 +178,13 @@
               :name function-name
               :function (fdefinition function-name)))))
 
+(define-compiler-macro ensure-fnrecord (&whole form function-designator)
+  (if (constantp function-designator)
+      `(load-time-value
+        (locally (declare (notinline ensure-fnrecord))
+          (ensure-fnrecord ,function-designator)))
+      form))
+
 (defun update-fnrecord
     (function-name &rest kwargs &key &allow-other-keys)
   (check-type function-name function-name)
@@ -217,10 +225,7 @@
     (_ (error "Invalid extended function designator ~S" extended-function-designator))))
 
 (defun function-specializer (function-designator)
-  (let ((fnrecord (find-fnrecord function-designator nil)))
-    (if (not fnrecord)
-        (make-default-specializer function-designator)
-        (fnrecord-specializer fnrecord))))
+  (fnrecord-specializer (ensure-fnrecord function-designator)))
 
 (define-compiler-macro function-specializer (&whole form function-designator)
   (if (constantp function-designator)
