@@ -165,24 +165,44 @@
             (errorp (error "There is no fnrecord for ~S" extended-function-designator))
             (t nil)))))
 
-(defun (setf find-fnrecord) (value extended-function-designator &optional (errorp t))
+(defun (setf find-fnrecord) (fnrecord extended-function-designator &optional (errorp t))
   (declare (ignore errorp))
-  (multiple-value-bind (key table)
-      (fndb-key-and-table extended-function-designator)
-    (setf (gethash key table) value)))
+  (with-accessors ((function fnrecord-function)
+                   (name fnrecord-name)) fnrecord
+    (if (functionp extended-function-designator)
+        (assert (eq extended-function-designator function))
+        (assert (equal extended-function-designator name)))
+    (when name
+      (multiple-value-bind (key table) (fndb-key-and-table name)
+        (setf (gethash key table)
+              fnrecord)))
+    (setf (gethash function (fndb-function-table *fndb*))
+          fnrecord)))
 
-(defun ensure-fnrecord (function-name)
-  (or (find-fnrecord function-name nil)
-      (setf (find-fnrecord function-name)
-            (make-instance 'minimal-fnrecord
-              :name function-name
-              :function (fdefinition function-name)))))
+(defun ensure-fnrecord (fnrecord-designator)
+  (if (fnrecordp fnrecord-designator)
+      fnrecord-designator
+      (or (find-fnrecord fnrecord-designator nil)
+          (setf (find-fnrecord fnrecord-designator)
+                (if (functionp fnrecord-designator)
+                    (make-instance 'minimal-fnrecord
+                      :name nil
+                      :function fnrecord-designator)
+                    (make-instance 'minimal-fnrecord
+                      :name fnrecord-designator
+                      :function
+                      (if (fboundp fnrecord-designator)
+                          (fdefinition fnrecord-designator)
+                          (lambda (&rest args)
+                            (declare (ignore args))
+                            (error "Call to unbound function ~S."
+                                   fnrecord-designator)))))))))
 
-(define-compiler-macro ensure-fnrecord (&whole form function-designator)
-  (if (constantp function-designator)
+(define-compiler-macro ensure-fnrecord (&whole form fnrecord-designator)
+  (if (constantp fnrecord-designator)
       `(load-time-value
         (locally (declare (notinline ensure-fnrecord))
-          (ensure-fnrecord ,function-designator)))
+          (ensure-fnrecord ,fnrecord-designator)))
       form))
 
 (defun update-fnrecord
