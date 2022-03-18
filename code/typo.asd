@@ -1,7 +1,7 @@
 (defsystem "typo"
   :description "A portable type inference library for Common Lisp"
   :author "Marco Heisig <marco.heisig@fau.de>"
-  :license "AGPLv3"
+  :license "MIT"
 
   :depends-on
   ("alexandria"
@@ -10,8 +10,6 @@
    "trivia"
    "trivial-arguments"
    "trivial-garbage")
-
-  :in-order-to ((test-op (test-op "petalisp.test-suite")))
 
   :serial t
   :components
@@ -48,9 +46,6 @@
      (:file "macros")
      (:file "specialize")
      (:file "differentiate")))
-   (:module "primitives"
-    :components
-    ((:file "default")))
    (:module "common-lisp"
     :components
     ((:file "auxiliary")
