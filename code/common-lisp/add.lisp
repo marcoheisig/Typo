@@ -38,6 +38,7 @@
                  (wrap-constant (ntype-type-specifier result-ntype))))
        (t
         (ntype-subtypecase result-ntype
+          (nil (abort-specialization))
           ((not number) (abort-specialization))
           (integer (wrap-default (type-specifier-ntype 'integer)))
           (short-float

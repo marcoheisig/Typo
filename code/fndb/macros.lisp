@@ -92,9 +92,8 @@
        (declaim (inline ,instruction-name))
        (defun ,instruction-name ,arguments
          (the (values ,@result-types &optional)
-              (,parent-name ,@arguments))))
+              (funcall (function ,parent-name) ,@arguments))))
      (define-fnrecord ,instruction-name ,arguments
-       (:pure t)
        (:parent ,parent-name)
        (:specializer ,@body))))
 

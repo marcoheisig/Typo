@@ -3,6 +3,7 @@
 (defmacro define-fnrecord (function-name lambda-list &body options)
   `(update-fnrecord
     ',function-name
+    :lambda-list ',lambda-list
     ,@(loop for processed = '()
             for option in options
             append

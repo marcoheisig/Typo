@@ -406,7 +406,7 @@
     ((or (and (list) (<> size '*))
          (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
      (make-array-ntype
-      :element-type 'bit
+      :element-type (find-primitive-ntype 'bit)
       :dimensions (list size)))
     (_ (call-next-method))))
 
@@ -415,7 +415,7 @@
     ((or (and (list) (<> size '*))
          (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
      (make-array-ntype
-      :element-type 'bit
+      :element-type (find-primitive-ntype 'bit)
       :dimensions (list size)
       :simplep t))
     (_ (call-next-method))))
@@ -425,7 +425,7 @@
     ((or (and (list) (<> size '*))
          (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
      (make-array-ntype
-      :element-type 't
+      :element-type (find-primitive-ntype 't)
       :dimensions (list size)
       :simplep t))
     (_ (call-next-method))))
@@ -435,7 +435,7 @@
     ((or (and (list) (<> size '*))
          (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
      (make-array-ntype
-      :element-type 'character
+      :element-type (find-primitive-ntype 'character)
       :dimensions (list size)))
     (_ (call-next-method))))
 
@@ -444,7 +444,7 @@
     ((or (and (list) (<> size '*))
          (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
      (make-array-ntype
-      :element-type 'character
+      :element-type (find-primitive-ntype 'character)
       :dimensions (list size)
       :simplep t))
     (_ (call-next-method))))

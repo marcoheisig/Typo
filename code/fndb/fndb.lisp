@@ -186,7 +186,9 @@
           (setf (find-fnrecord fnrecord-designator)
                 (if (functionp fnrecord-designator)
                     (make-instance 'minimal-fnrecord
-                      :name nil
+                      :name
+                      #-sbcl nil
+                      #+sbcl (sb-kernel:%fun-name fnrecord-designator)
                       :function fnrecord-designator)
                     (make-instance 'minimal-fnrecord
                       :name fnrecord-designator

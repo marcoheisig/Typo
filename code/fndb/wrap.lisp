@@ -34,11 +34,18 @@
 
 (defun expand-wrap (form)
   (cond ((consp form)
-         (if (eql (first form) 'unwrap)
-             (second form)
-             `(funcall
-               (function-specializer ',(first form))
-               ,@(mapcar #'expand-wrap (rest form)))))
+         (case (first form)
+           ((unwrap)
+            (assert (= 2 (length form)))
+            (second form))
+           ((setf)
+            (assert (= 3 (length form)))
+            (destructuring-bind (fn . args) (second form)
+              `(funcall (function-specializer '(setf ,fn)) ,(third form) ,@args)))
+           (otherwise
+            `(funcall
+              (function-specializer ',(first form))
+              ,@(mapcar #'expand-wrap (rest form))))))
         ((constantp form)
          `(wrap-constant ,form))
         ((symbolp form)

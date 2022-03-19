@@ -56,6 +56,7 @@
      (:file "types-and-classes")
      (:file "abs")
      (:file "add")
+     (:file "array")
      (:file "cmpeq")
      (:file "cmpneq")
      (:file "cmpx")
