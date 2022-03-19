@@ -71,6 +71,7 @@
      #:find-fnrecord
      #:ensure-fnrecord
      #:wrap
+     #:unwrap
      #:wrap-default
      #:wrap-default*
      #:wrapper-ntype
