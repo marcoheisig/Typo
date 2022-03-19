@@ -80,7 +80,17 @@
   (values ntype1 t))
 
 (defmethod ntype-intersection
+    ((ntype1 array-ntype)
+     (ntype2 (eql (find-primitive-ntype 't))))
+  (values ntype1 t))
+
+(defmethod ntype-intersection
     ((ntype1 (eql (find-primitive-ntype 'array)))
+     (ntype2 array-ntype))
+  (values ntype2 t))
+
+(defmethod ntype-intersection
+    ((ntype1 (eql (find-primitive-ntype 't)))
      (ntype2 array-ntype))
   (values ntype2 t))
 
