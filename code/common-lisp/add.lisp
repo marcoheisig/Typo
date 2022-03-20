@@ -40,7 +40,11 @@
         (ntype-subtypecase result-ntype
           (nil (abort-specialization))
           ((not number) (abort-specialization))
-          (integer (wrap-default (type-specifier-ntype 'integer)))
+          (integer
+           (wrap
+            (integer+
+             (the-integer a)
+             (the-integer b))))
           (short-float
            (wrap
             (short-float+
@@ -83,6 +87,7 @@
              (coerce-to-complex-long-float b))))
           (t (wrap-default (type-specifier-ntype 'number)))))))))
 
+(define-simple-instruction (+ integer+) (integer) (integer integer))
 (define-simple-instruction (+ short-float+) (short-float) (short-float short-float))
 (define-simple-instruction (+ single-float+) (single-float) (single-float single-float))
 (define-simple-instruction (+ double-float+) (double-float) (double-float double-float))

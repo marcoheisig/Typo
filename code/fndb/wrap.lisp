@@ -42,6 +42,9 @@
             (assert (= 3 (length form)))
             (destructuring-bind (fn . args) (second form)
               `(funcall (function-specializer '(setf ,fn)) ,(third form) ,@args)))
+           ((quote)
+            (assert (= 2 (length form)))
+            `(wrap-constant ',(second form)))
            (otherwise
             `(funcall
               (function-specializer ',(first form))

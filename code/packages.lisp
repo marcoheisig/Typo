@@ -123,6 +123,11 @@
      #:complex-single-float+
      #:complex-double-float+
      #:complex-long-float+
+     ;; array.lisp
+     #:short-float-row-major-aref
+     #:single-float-row-major-aref
+     #:double-float-row-major-aref
+     #:long-float-row-major-aref
      ;; auxiliary.lisp
      #:and-fn
      #:or-fn

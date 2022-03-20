@@ -51,6 +51,11 @@
              (wrapper-ntype a)
              (wrapper-ntype b))
           ((not number) (abort-specialization))
+          (integer
+           (wrap
+            (integer*
+             (the-integer a)
+             (the-integer b))))
           (short-float
            (wrap
             (short-float*
@@ -94,6 +99,7 @@
           (t
            (wrap-default (type-specifier-ntype 'number)))))))))
 
+(define-simple-instruction (* integer*) (integer) (integer integer))
 (define-simple-instruction (* short-float*) (short-float) (short-float short-float))
 (define-simple-instruction (* single-float*) (single-float) (single-float single-float))
 (define-simple-instruction (* double-float*) (double-float) (double-float double-float))
