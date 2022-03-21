@@ -115,6 +115,7 @@
      #:complex-double-float-abs
      #:complex-long-float-abs
      ;; add.lisp
+     #:integer+
      #:short-float+
      #:single-float+
      #:double-float+
@@ -242,6 +243,7 @@
      #:double-float-min
      #:long-float-min
      ;; mul.lisp
+     #:integer*
      #:short-float*
      #:single-float*
      #:double-float*
