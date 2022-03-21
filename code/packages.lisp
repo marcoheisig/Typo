@@ -262,6 +262,7 @@
      #:complex-double-float-sin
      #:complex-long-float-sin
      ;; sub.lisp
+     #:integer-
      #:short-float-
      #:single-float-
      #:double-float-
@@ -270,6 +271,7 @@
      #:complex-single-float-
      #:complex-double-float-
      #:complex-long-float-
+     #:integer-unary-
      #:short-float-unary-
      #:single-float-unary-
      #:double-float-unary-

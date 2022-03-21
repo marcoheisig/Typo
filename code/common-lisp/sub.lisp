@@ -14,6 +14,7 @@
           (let ((x number))
             (ntype-subtypecase (wrapper-ntype x)
               ((not number) (abort-specialization))
+              (integer (wrap (integer-unary- x)))
               (short-float (wrap (short-float-unary- x)))
               (single-float (wrap (single-float-unary- x)))
               (double-float (wrap (double-float-unary- x)))
@@ -40,6 +41,11 @@
                              (ntype-type-specifier result-ntype)))
                    (ntype-subtypecase result-ntype
                      ((not number) (abort-specialization))
+                     (integer
+                      (wrap
+                       (integer-
+                        (the-integer a)
+                        (the-integer b))))
                      (short-float
                       (wrap
                        (short-float-
@@ -91,6 +97,7 @@
            more-numbers
            :initial-value number)))))
 
+(define-simple-instruction (- integer-) (integer) (integer integer))
 (define-simple-instruction (- short-float-) (short-float) (short-float short-float))
 (define-simple-instruction (- single-float-) (single-float) (single-float single-float))
 (define-simple-instruction (- double-float-) (double-float) (double-float double-float))
@@ -100,6 +107,7 @@
 (define-simple-instruction (- complex-double-float-) (complex-double-float) (complex-double-float complex-double-float))
 (define-simple-instruction (- complex-long-float-) (complex-long-float) (complex-long-float complex-long-float))
 
+(define-simple-instruction (- integer-unary-) (integer) (integer integer))
 (define-simple-instruction (- short-float-unary-) (short-float) (short-float))
 (define-simple-instruction (- single-float-unary-) (single-float) (single-float))
 (define-simple-instruction (- double-float-unary-) (double-float) (double-float))
