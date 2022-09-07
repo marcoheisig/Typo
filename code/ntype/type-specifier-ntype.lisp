@@ -82,33 +82,21 @@
    ;; Retain the ntype as long as the class exists.
    :weakness :key))
 
-(defmethod type-specifier-ntype :around ((class-type-specifier class))
+(defmethod type-specifier-ntype :around ((class class))
   (values-list
    (alexandria:ensure-gethash
-    class-type-specifier
+    class
     *class-type-specifier-table*
     (multiple-value-list
      (call-next-method)))))
 
-(defparameter *built-in-class-ntype-table*
-  (let ((table (make-hash-table)))
-    (dolist (class *built-in-classes* table)
-      (setf (gethash class table)
-            (let ((ntype (cond ((subtypep class 'array)
-                                (make-array-ntype
-                                 :simplep (subtypep class 'simple-array)
-                                 :dimensions (if (subtypep class 'vector) '(*) '*)
-                                 :element-type (array-element-type (class-prototype class))))
-                               (t
-                                (find-primitive-ntype class)))))
-              (list ntype (subtypep (ntype-type-specifier ntype) class)))))))
-
-(defmethod type-specifier-ntype ((class-type-specifier class))
-  (multiple-value-bind (value presentp)
-      (gethash class-type-specifier *built-in-class-ntype-table*)
-    (if presentp
-        (values-list value)
-        (find-primitive-ntype class-type-specifier))))
+(defmethod type-specifier-ntype ((class class))
+  (if (subtypep class 'array)
+      (make-array-ntype
+       :simplep (subtypep class 'simple-array)
+       :dimensions (if (subtypep class 'vector) '(*) '*)
+       :element-type (array-element-type (class-prototype class)))
+      (find-primitive-ntype class)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -516,4 +504,4 @@
 ;;; Populate the Caches
 
 (mapc #'type-specifier-ntype *standardized-atomic-type-specifiers*)
-(mapc #'type-specifier-ntype (remove nil (map 'list #'primitive-ntype-class *primitive-ntypes*)))
+(mapc #'type-specifier-ntype *built-in-classes*)

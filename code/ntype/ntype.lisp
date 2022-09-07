@@ -119,7 +119,7 @@ NIL means the result is a generalization."))
             (:predicate ntypep)
             (:copier nil)
             (:constructor nil))
-  ;; An index into the +primitive-ntypes+ vector, denoting the most
+  ;; An index into the *PRIMITIVE-NTYPES* vector, denoting the most
   ;; specialized primitive type of this ntype.
   (index (alexandria:required-argument :index)
    :type ntype-index :read-only t))
