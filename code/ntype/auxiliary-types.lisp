@@ -140,3 +140,14 @@
 (deftype standardized-type-specifier ()
   '(or standardized-atomic-type-specifier standardized-compound-type-specifier))
 
+(defparameter *built-in-classes*
+  (let ((visited (make-hash-table))
+        (result '()))
+    (labels ((visit (class)
+               (unless (gethash class visited)
+                 (setf (gethash class visited) t)
+                 (when (typep class 'built-in-class)
+                   (push class result))
+                 (mapc #'visit (class-direct-subclasses class)))))
+      (visit (find-class t)))
+    result))

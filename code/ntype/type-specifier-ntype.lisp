@@ -90,9 +90,25 @@
     (multiple-value-list
      (call-next-method)))))
 
+(defparameter *built-in-class-ntype-table*
+  (let ((table (make-hash-table)))
+    (dolist (class *built-in-classes* table)
+      (setf (gethash class table)
+            (let ((ntype (cond ((subtypep class 'array)
+                                (make-array-ntype
+                                 :simplep (subtypep class 'simple-array)
+                                 :dimensions (if (subtypep class 'vector) '(*) '*)
+                                 :element-type (array-element-type (class-prototype class))))
+                               (t
+                                (find-primitive-ntype class)))))
+              (list ntype (subtypep (ntype-type-specifier ntype) class)))))))
+
 (defmethod type-specifier-ntype ((class-type-specifier class))
-  ;; TODO handle specialized array classes.
-  (find-primitive-ntype class-type-specifier))
+  (multiple-value-bind (value presentp)
+      (gethash class-type-specifier *built-in-class-ntype-table*)
+    (if presentp
+        (values-list value)
+        (find-primitive-ntype class-type-specifier))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -450,13 +466,22 @@
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'base-string)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> size '*))
+         (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
+     (make-array-ntype
+      :element-type 'base-string
+      :dimensions size))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'simple-base-string)) rest whole)
-  ;; TODO
   (trivia:match rest
+    ((or (and (list) (<> size '*))
+         (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
+     (make-array-ntype
+      :element-type 'base-string
+      :dimensions size
+      :simplep t))
     (_ (call-next-method))))
 
 ;;; Miscellaneous Compound Type Specifiers
