@@ -1,4 +1,4 @@
-(in-package #:typo.common-lisp)
+(in-package #:typo.vm)
 
 (defmacro define-predicate-fnrecord (predicate type-specifier)
   `(define-fnrecord ,predicate (object)

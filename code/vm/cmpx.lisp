@@ -1,8 +1,8 @@
-(in-package #:typo.common-lisp)
+(in-package #:typo.vm)
 
 (defmacro cmpx (name)
   (flet ((mkname (type)
-           (intern (format nil "~:@(~S~S~)" type name) #.*package*)))
+           (intern (format nil "~:@(two-arg-~S~S~)" type name) #.*package*)))
     `(progn
        (define-fnrecord ,name (real &rest more-reals)
          (:pure t)

@@ -1,4 +1,4 @@
-(in-package #:typo.common-lisp)
+(in-package #:typo.vm)
 
 (define-fnrecord abs (x)
   (:pure t)
@@ -24,7 +24,7 @@
      (complex-long-float
       (wrap (complex-long-float-abs x)))
      (integer
-      (wrap-default (type-specifier-ntype '(integer 0 *))))
+      (wrap (integer-abs x)))
      (real
       (wrap-default (type-specifier-ntype '(real 0 *))))
      (rational
@@ -32,6 +32,7 @@
      (t
       (wrap-default (type-specifier-ntype '(real 0 *)))))))
 
+(define-simple-instruction (abs integer-abs) ((integer 0 *)) (integer))
 (define-simple-instruction (abs short-float-abs) ((short-float 0S0 *)) (short-float))
 (define-simple-instruction (abs single-float-abs) ((single-float 0F0 *)) (single-float))
 (define-simple-instruction (abs double-float-abs) ((double-float 0D0 *)) (double-float))

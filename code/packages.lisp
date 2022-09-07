@@ -85,7 +85,7 @@
      #:specialize
      #:differentiate
      #:infer-ntypes)
-    ;; Common Lisp Functions
+    ;; Typo VM Operations
     #3=
     (:export
      #:the-number
@@ -115,15 +115,15 @@
      #:complex-double-float-abs
      #:complex-long-float-abs
      ;; add.lisp
-     #:integer+
-     #:short-float+
-     #:single-float+
-     #:double-float+
-     #:long-float+
-     #:complex-short-float+
-     #:complex-single-float+
-     #:complex-double-float+
-     #:complex-long-float+
+     #:two-arg-integer+
+     #:two-arg-short-float+
+     #:two-arg-single-float+
+     #:two-arg-double-float+
+     #:two-arg-long-float+
+     #:two-arg-complex-short-float+
+     #:two-arg-complex-single-float+
+     #:two-arg-complex-double-float+
+     #:two-arg-complex-long-float+
      ;; array.lisp
      #:short-float-row-major-aref
      #:single-float-row-major-aref
@@ -163,40 +163,43 @@
      #:complex-long-float-from-complex-single-float
      #:complex-long-float-from-complex-double-float
      ;; cmpeq.lisp
-     #:short-float=
-     #:single-float=
-     #:double-float=
-     #:long-float=
-     #:complex-short-float=
-     #:complex-single-float=
-     #:complex-double-float=
-     #:complex-long-float=
+     #:two-arg=
+     #:two-arg-short-float=
+     #:two-arg-single-float=
+     #:two-arg-double-float=
+     #:two-arg-long-float=
+     #:two-arg-complex-short-float=
+     #:two-arg-complex-single-float=
+     #:two-arg-complex-double-float=
+     #:two-arg-complex-long-float=
      ;; cmpneq.lisp
-     #:short-float/=
-     #:single-float/=
-     #:double-float/=
-     #:long-float/=
-     #:complex-short-float/=
-     #:complex-single-float/=
-     #:complex-double-float/=
-     #:complex-long-float/=
+     #:two-arg/=
+     #:two-arg-short-float/=
+     #:two-arg-single-float/=
+     #:two-arg-double-float/=
+     #:two-arg-long-float/=
+     #:two-arg-complex-short-float/=
+     #:two-arg-complex-single-float/=
+     #:two-arg-complex-double-float/=
+     #:two-arg-complex-long-float/=
      ;; cmpx.lisp
-     #:short-float<
-     #:single-float<
-     #:double-float<
-     #:long-float<
-     #:short-float>
-     #:single-float>
-     #:double-float>
-     #:long-float>
-     #:short-float<=
-     #:single-float<=
-     #:double-float<=
-     #:long-float<=
-     #:short-float>=
-     #:single-float>=
-     #:double-float>=
-     #:long-float>=
+     #:two-arg-short-float<
+     #:two-arg-short-float<
+     #:two-arg-single-float<
+     #:two-arg-double-float<
+     #:two-arg-long-float<
+     #:two-arg-short-float>
+     #:two-arg-single-float>
+     #:two-arg-double-float>
+     #:two-arg-long-float>
+     #:two-arg-short-float<=
+     #:two-arg-single-float<=
+     #:two-arg-double-float<=
+     #:two-arg-long-float<=
+     #:two-arg-short-float>=
+     #:two-arg-single-float>=
+     #:two-arg-double-float>=
+     #:two-arg-long-float>=
      ;; complex.lisp
      #:short-float-complex
      #:single-float-complex
@@ -224,34 +227,34 @@
      #:complex-double-float-cos
      #:complex-long-float-cos
      ;; div.lisp
-     #:short-float/
-     #:single-float/
-     #:double-float/
-     #:long-float/
-     #:complex-short-float/
-     #:complex-single-float/
-     #:complex-double-float/
-     #:complex-long-float/
+     #:two-arg-short-float/
+     #:two-arg-single-float/
+     #:two-arg-double-float/
+     #:two-arg-long-float/
+     #:two-arg-complex-short-float/
+     #:two-arg-complex-single-float/
+     #:two-arg-complex-double-float/
+     #:two-arg-complex-long-float/
      ;; max.lisp
-     #:short-float-max
-     #:single-float-max
-     #:double-float-max
-     #:long-float-max
+     #:two-arg-short-float-max
+     #:two-arg-single-float-max
+     #:two-arg-double-float-max
+     #:two-arg-long-float-max
      ;; min.lisp
-     #:short-float-min
-     #:single-float-min
-     #:double-float-min
-     #:long-float-min
+     #:two-arg-short-float-min
+     #:two-arg-single-float-min
+     #:two-arg-double-float-min
+     #:two-arg-long-float-min
      ;; mul.lisp
-     #:integer*
-     #:short-float*
-     #:single-float*
-     #:double-float*
-     #:long-float*
-     #:complex-short-float*
-     #:complex-single-float*
-     #:complex-double-float*
-     #:complex-long-float*
+     #:two-arg-integer*
+     #:two-arg-short-float*
+     #:two-arg-single-float*
+     #:two-arg-double-float*
+     #:two-arg-long-float*
+     #:two-arg-complex-short-float*
+     #:two-arg-complex-single-float*
+     #:two-arg-complex-double-float*
+     #:two-arg-complex-long-float*
      ;; sin.lisp
      #:short-float-sin
      #:single-float-sin
@@ -262,24 +265,24 @@
      #:complex-double-float-sin
      #:complex-long-float-sin
      ;; sub.lisp
-     #:integer-
-     #:short-float-
-     #:single-float-
-     #:double-float-
-     #:long-float-
-     #:complex-short-float-
-     #:complex-single-float-
-     #:complex-double-float-
-     #:complex-long-float-
-     #:integer-unary-
-     #:short-float-unary-
-     #:single-float-unary-
-     #:double-float-unary-
-     #:long-float-unary-
-     #:complex-short-float-unary-
-     #:complex-single-float-unary-
-     #:complex-double-float-unary-
-     #:complex-long-float-unary-
+     #:two-arg-integer-
+     #:two-arg-short-float-
+     #:two-arg-single-float-
+     #:two-arg-double-float-
+     #:two-arg-long-float-
+     #:two-arg-complex-short-float-
+     #:two-arg-complex-single-float-
+     #:two-arg-complex-double-float-
+     #:two-arg-complex-long-float-
+     #:one-arg-integer-
+     #:one-arg-short-float-
+     #:one-arg-single-float-
+     #:one-arg-double-float-
+     #:one-arg-long-float-
+     #:one-arg-complex-short-float-
+     #:one-arg-complex-single-float-
+     #:one-arg-complex-double-float-
+     #:one-arg-complex-long-float-
      ;; tan.lisp
      #:short-float-tan
      #:single-float-tan
@@ -300,7 +303,7 @@
     (:import-from #:trivia #:place #:<> #:access)
     #2#)
 
-  (defpackage #:typo.common-lisp
+  (defpackage #:typo.vm
     (:use #:closer-common-lisp #:typo)
     (:import-from #:trivia #:place #:<> #:access)
     #3#))

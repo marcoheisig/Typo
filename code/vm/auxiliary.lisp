@@ -1,4 +1,4 @@
-(in-package #:typo.common-lisp)
+(in-package #:typo.vm)
 
 (defconstant short-float-e (exp 1S0))
 (defconstant single-float-e (exp 1F0))
@@ -41,20 +41,20 @@
 (defun coerce-to-complex-long-float (number)
   (coerce number 'complex-long-float))
 
-(declaim (inline two-arg-+))
-(defun two-arg-+ (a b)
+(declaim (inline two-arg+))
+(defun two-arg+ (a b)
   (+ a b))
 
-(declaim (inline two-arg--))
-(defun two-arg-- (a b)
+(declaim (inline two-arg-))
+(defun two-arg- (a b)
   (- a b))
 
-(declaim (inline two-arg-*))
-(defun two-arg-* (a b)
+(declaim (inline two-arg*))
+(defun two-arg* (a b)
   (* a b))
 
-(declaim (inline two-arg-/))
-(defun two-arg-/ (a b)
+(declaim (inline two-arg/))
+(defun two-arg/ (a b)
   (/ a b))
 
 (declaim (inline ln))

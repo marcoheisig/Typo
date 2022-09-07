@@ -1,4 +1,4 @@
-(in-package #:typo.common-lisp)
+(in-package #:typo.vm)
 
 (define-fnrecord exp (x)
   (:pure t)

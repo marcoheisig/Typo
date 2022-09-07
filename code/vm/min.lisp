@@ -1,13 +1,13 @@
-(in-package #:typo.common-lisp)
+(in-package #:typo.vm)
 
-(define-fnrecord max (real &rest more-reals)
+(define-fnrecord min (real &rest more-reals)
   (:pure t)
   (:differentiator
    index
    (funcall (function-specializer 'if)
             (funcall (function-specializer '=)
                      (wrap-constant index)
-                     (apply (function-specializer 'argmax) real more-reals))
+                     (apply (function-specializer 'argmin) real more-reals))
             (wrap-constant 1)
             (wrap-constant 0)))
   (:specializer
@@ -23,35 +23,28 @@
                  (short-float
                   (ntype-subtypecase ntype-of-b
                     ((not real) (abort-specialization))
-                    (short-float (wrap (short-float-max a b)))
+                    (short-float (wrap (two-arg-short-float-min a b)))
                     (t (wrap-default (ntype-union ntype-of-a ntype-of-b)))))
                  (single-float
                   (ntype-subtypecase ntype-of-b
                     ((not real) (abort-specialization))
-                    (single-float (wrap (single-float-max a b)))
+                    (single-float (wrap (two-arg-single-float-min a b)))
                     (t (wrap-default (ntype-union ntype-of-a ntype-of-b)))))
                  (double-float
                   (ntype-subtypecase ntype-of-b
                     ((not real) (abort-specialization))
-                    (double-float (wrap (double-float-max a b)))
+                    (double-float (wrap (two-arg-double-float-min a b)))
                     (t (wrap-default (ntype-union ntype-of-a ntype-of-b)))))
                  (long-float
                   (ntype-subtypecase ntype-of-b
                     ((not real) (abort-specialization))
-                    (long-float (wrap (long-float-max a b)))
+                    (long-float (wrap (two-arg-long-float-min a b)))
                     (t (wrap-default (ntype-union ntype-of-a ntype-of-b)))))
-                 (t
-                  (ntype-subtypecase ntype-of-b
-                    ((not real) (abort-specialization))
-                    (t (wrap-default (ntype-union ntype-of-a ntype-of-b))))))))
+                 (t (wrap-default (type-specifier-ntype 'real))))))
            more-reals
            :initial-value real)))))
 
-(define-simple-instruction (max short-float-max) (short-float) (short-float short-float))
-(define-simple-instruction (max single-float-max) (single-float) (single-float single-float))
-(define-simple-instruction (max double-float-max) (double-float) (double-float double-float))
-(define-simple-instruction (max long-float-max) (long-float) (long-float long-float))
-
-(define-fnrecord argmax (real &rest more-reals)
-  (:pure t)
-  (:specializer (wrap-default (type-specifier-ntype 'argument-index))))
+(define-simple-instruction (min two-arg-short-float-min) (short-float) (short-float short-float))
+(define-simple-instruction (min two-arg-single-float-min) (single-float) (single-float single-float))
+(define-simple-instruction (min two-arg-double-float-min) (double-float) (double-float double-float))
+(define-simple-instruction (min two-arg-long-float-min) (long-float) (long-float long-float))

@@ -1,4 +1,4 @@
-(in-package #:typo.common-lisp)
+(in-package #:typo.vm)
 
 (define-fnrecord subtypep (type-1 type-2 &optional environment)
   (:pure t)

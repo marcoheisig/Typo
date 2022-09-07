@@ -1,4 +1,4 @@
-(in-package #:typo.common-lisp)
+(in-package #:typo.vm)
 
 (defmacro define-type-check (type)
   (check-type type symbol)

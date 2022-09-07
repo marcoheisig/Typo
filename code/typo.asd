@@ -46,7 +46,7 @@
      (:file "macros")
      (:file "specialize")
      (:file "differentiate")))
-   (:module "common-lisp"
+   (:module "vm"
     :components
     ((:file "auxiliary")
      (:file "predicates")
