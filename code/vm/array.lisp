@@ -1,13 +1,13 @@
 (in-package #:typo.vm)
 
 (define-fnrecord array-dimensions (array)
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (assert-wrapper-type array array)
    (wrap-default (type-specifier-ntype 'list))))
 
 (define-fnrecord array-dimension (array axis-number)
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (assert-wrapper-type array array)
    (assert-wrapper-type axis-number unsigned-byte)
@@ -15,7 +15,7 @@
     (type-specifier-ntype 'unsigned-byte))))
 
 (define-fnrecord row-major-aref (array index)
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (assert-wrapper-type index unsigned-byte)
    (ntype-subtypecase (wrapper-ntype array)
@@ -38,7 +38,6 @@
 (define-simple-instruction (row-major-aref long-float-row-major-aref) (long-float) ((array long-float) unsigned-byte))
 
 (define-fnrecord (setf row-major-aref) (value array index)
-  (:pure nil)
   (:specializer
    (assert-wrapper-type index unsigned-byte)
    (ntype-subtypecase (wrapper-ntype array)
@@ -65,7 +64,7 @@
 (define-simple-instruction ((setf row-major-aref) (setf long-float-row-major-aref)) (long-float) (long-float (array long-float) unsigned-byte))
 
 (define-fnrecord aref (array &rest indices)
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (let* ((array-ntype (wrapper-ntype array))
           (rank (length indices))
@@ -98,7 +97,6 @@
         (wrap-default (universal-ntype)))))))
 
 (define-fnrecord (setf aref) (value array &rest indices)
-  (:pure nil)
   (:specializer
    (let* ((array-ntype (wrapper-ntype array))
           (rank (length indices))

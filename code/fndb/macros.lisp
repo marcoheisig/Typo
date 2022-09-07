@@ -25,7 +25,7 @@
                      (list* ,@required ,@(mapcar #'first optional) ,rest)))
                   (wrap-default* (required optional rest)
                     (declare (list required optional) (type (or ntype null) rest))
-                    (if (and (fnrecord-purep ,fnrecord)
+                    (if (and (member :foldable (fnrecord-properties ,fnrecord))
                              ,@(loop for wrapper in required
                                      collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
                              ,@(loop for (wrapper nil nil) in optional
@@ -33,7 +33,7 @@
                              ,@(when rest
                                  `((loop for arg in ,rest
                                          always (eql-ntype-p (wrapper-ntype arg))))))
-                        ;; Fold calls to pure functions with known arguments.
+                        ;; Fold calls to foldable functions with known arguments.
                         (wrap-constant
                          (,(if rest 'apply 'funcall)
                           (function ,function-name)

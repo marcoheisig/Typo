@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord tan (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      ((not number) (abort-specialization))

@@ -66,7 +66,7 @@ information for the function =cl:cos=:
 
 #+BEGIN_SRC lisp
 (define-fndb-record cos (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (wrap (- (sin x))))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)

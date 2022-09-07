@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord ln (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (wrap (/ x)))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -18,7 +18,7 @@
 (define-simple-instruction (ln long-float-ln) (long-float) ((or long-float (complex long-float))))
 
 (define-fnrecord log (number &optional (base nil base-supplied-p))
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator
    index
    (if (not base-supplied-p)

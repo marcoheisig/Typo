@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord max (real &rest more-reals)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator
    index
    (funcall (function-specializer 'if)
@@ -53,5 +53,5 @@
 (define-simple-instruction (max two-arg-long-float-max) (long-float) (long-float long-float))
 
 (define-fnrecord argmax (real &rest more-reals)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer (wrap-default (type-specifier-ntype 'argument-index))))

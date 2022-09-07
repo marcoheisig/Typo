@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord abs (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (wrap (if (< 0 x) 1 -1)))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)

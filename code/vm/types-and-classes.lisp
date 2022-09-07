@@ -1,19 +1,19 @@
 (in-package #:typo.vm)
 
 (define-fnrecord subtypep (type-1 type-2 &optional environment)
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (wrap-default
     (type-specifier-ntype 'generalized-boolean)
     (type-specifier-ntype 'generalized-boolean))))
 
 (define-fnrecord type-of (object)
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (wrap-default (type-specifier-ntype 'type-specifier))))
 
 (define-fnrecord typep (object type-specifier &optional (environment nil environment-p))
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (let ((object-ntype (wrapper-ntype object))
          (type-specifier-ntype (wrapper-ntype type-specifier))

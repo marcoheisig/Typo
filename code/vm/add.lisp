@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord + (&rest numbers)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator index (declare (ignore numbers index)) (wrap 1))
   (:specializer
    (trivia:match numbers
@@ -19,7 +19,7 @@
         (funcall specializer (apply specializer lo) (apply specializer hi)))))))
 
 (define-fnrecord two-arg+ (a b)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator index (declare (ignore a b index)) (wrap 1))
   (:specializer
    (let* ((ntype-of-a (wrapper-ntype a))
@@ -98,6 +98,6 @@
 (define-simple-instruction (+ two-arg-complex-long-float+) (complex-long-float) (complex-long-float complex-long-float))
 
 (define-fnrecord 1+ (number)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator index (declare (ignore index number)) (wrap 1))
   (:specializer (wrap (+ number 1))))

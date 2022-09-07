@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord cos (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (wrap (- (sin x))))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)

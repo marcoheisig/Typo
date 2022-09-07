@@ -5,7 +5,7 @@
 ;;; Floating-Point Casts
 
 (define-fnrecord coerce-to-short-float (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (declare (ignore x)) (wrap 1S0))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -20,7 +20,7 @@
 (define-simple-instruction (coerce-to-short-float short-float-from-long-float) (short-float) (long-float))
 
 (define-fnrecord coerce-to-single-float (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (declare (ignore x)) (wrap 1F0))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -35,7 +35,7 @@
 (define-simple-instruction (coerce-to-single-float single-float-from-long-float) (single-float) (long-float))
 
 (define-fnrecord coerce-to-double-float (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (declare (ignore x)) (wrap 1D0))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -50,7 +50,7 @@
 (define-simple-instruction (coerce-to-double-float double-float-from-long-float) (double-float) (long-float))
 
 (define-fnrecord coerce-to-long-float (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (declare (ignore x)) (wrap 1L0))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -69,7 +69,7 @@
 ;;; Complex Floating-Point Casts
 
 (define-fnrecord coerce-to-complex-short-float (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      (short-float (wrap (complex-short-float-from-short-float x)))
@@ -88,7 +88,7 @@
 (define-simple-instruction (coerce-to-complex-short-float complex-short-float-from-complex-long-float) (complex-short-float) (complex-long-float))
 
 (define-fnrecord coerce-to-complex-single-float (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      (short-float (wrap (complex-single-float-from-single-float (single-float-from-short-float x))))
@@ -107,7 +107,7 @@
 (define-simple-instruction (coerce-to-complex-single-float complex-single-float-from-complex-long-float) (complex-single-float) (complex-long-float))
 
 (define-fnrecord coerce-to-complex-double-float (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      (short-float (wrap (complex-double-float-from-double-float (double-float-from-short-float x))))
@@ -126,7 +126,7 @@
 (define-simple-instruction (coerce-to-complex-double-float complex-double-float-from-complex-long-float) (complex-double-float) (complex-long-float))
 
 (define-fnrecord coerce-to-complex-long-float (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      (short-float (wrap (complex-long-float-from-long-float (long-float-from-short-float x))))
@@ -149,7 +149,7 @@
 ;;; FLOAT
 
 (define-fnrecord float (number &optional (prototype nil prototype-supplied-p))
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (if prototype-supplied-p
        (ntype-subtypecase (wrapper-ntype prototype)
@@ -170,7 +170,7 @@
 ;;; COERCE
 
 (define-fnrecord coerce (object type-specifier)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (let ((object-ntype (wrapper-ntype object))
          (type-specifier-ntype (wrapper-ntype type-specifier)))

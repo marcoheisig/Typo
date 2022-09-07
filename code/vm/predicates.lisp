@@ -2,7 +2,7 @@
 
 (defmacro define-predicate-fnrecord (predicate type-specifier)
   `(define-fnrecord ,predicate (object)
-     (:pure t)
+     (:properties :foldable :movable)
      (:specializer
       (let ((ntype (wrapper-ntype object)))
         (ntype-subtypecase ntype
@@ -33,7 +33,7 @@
 ;;; because the domain of these functions is limited to certain numbers.
 
 (define-fnrecord minusp (real)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype real)
      ((not real) (abort-specialization))
@@ -42,7 +42,7 @@
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
 (define-fnrecord plusp (real)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype real)
      ((not real) (abort-specialization))
@@ -51,7 +51,7 @@
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
 (define-fnrecord zerop (number)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype number)
      ((not real) (abort-specialization))
@@ -60,14 +60,14 @@
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
 (define-fnrecord evenp (integer)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype integer)
      ((not real) (abort-specialization))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
 (define-fnrecord oddp (integer)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype integer)
      ((not real) (abort-specialization))

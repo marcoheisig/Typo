@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord min (real &rest more-reals)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator
    index
    (funcall (function-specializer 'if)

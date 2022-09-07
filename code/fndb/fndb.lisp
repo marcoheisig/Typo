@@ -10,7 +10,7 @@
 
 (defgeneric fnrecord-max-arguments (fnrecord))
 
-(defgeneric fnrecord-purep (fnrecord))
+(defgeneric fnrecord-properties (fnrecord))
 
 (defgeneric fnrecord-specializer (fnrecord))
 
@@ -56,7 +56,7 @@
 (defmethod fnrecord-differentiator ((minimal-fnrecord minimal-fnrecord))
   (make-default-differentiator minimal-fnrecord))
 
-(defmethod fnrecord-purep ((minimal-fnrecord minimal-fnrecord))
+(defmethod fnrecord-properties ((minimal-fnrecord minimal-fnrecord))
   nil)
 
 (defclass full-fnrecord (fnrecord)
@@ -75,11 +75,11 @@
     :initform (alexandria:required-argument :max-arguments)
     :type unsigned-byte
     :reader fnrecord-max-arguments)
-   (%purep
-    :initarg :purep
-    :initform (alexandria:required-argument :purep)
+   (%properties
+    :initarg :properties
+    :initform (alexandria:required-argument :properties)
     :type boolean
-    :reader fnrecord-purep)
+    :reader fnrecord-properties)
    (%specializer
     :initarg :specializer
     :initform (alexandria:required-argument :specializer)
@@ -113,10 +113,7 @@
        (max-arguments (nth-value 1 (lambda-list-arity lambda-list)))
        (parent nil parent-supplied-p)
        (parent-fnrecord (if (not parent-supplied-p) nil (find-fnrecord parent)))
-       (purep
-        (if parent-fnrecord
-            (fnrecord-purep parent-fnrecord)
-            nil))
+       (properties '())
        (specializer
         (if parent-fnrecord
             (fnrecord-specializer parent-fnrecord)
@@ -135,7 +132,7 @@
          :lambda-list lambda-list
          :min-arguments min-arguments
          :max-arguments max-arguments
-         :purep purep
+         :properties (union properties (when parent-fnrecord (fnrecord-properties parent-fnrecord)))
          :specializer specializer
          :differentiator differentiator
          initargs))

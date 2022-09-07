@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord sqrt (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (wrap (/ (* 2 (sqrt x)))))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)

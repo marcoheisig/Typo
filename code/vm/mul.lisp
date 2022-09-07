@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord * (&rest numbers)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator
    index
    (apply (function-specializer '*)
@@ -23,7 +23,7 @@
         (funcall specializer (apply specializer lo) (apply specializer hi)))))))
 
 (define-fnrecord two-arg* (a b)
-  (:pure t)
+  (:properties :foldable :movable)
   (:parent *)
   (:specializer
    (let* ((ntype-of-a (wrapper-ntype a))

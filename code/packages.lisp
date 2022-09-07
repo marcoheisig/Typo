@@ -65,7 +65,7 @@
      #:fnrecord-function
      #:fnrecord-min-arguments
      #:fnrecord-max-arguments
-     #:fnrecord-purep
+     #:fnrecord-properties
      #:fnrecord-specializer
      #:fnrecord-differentiator
      #:find-fnrecord

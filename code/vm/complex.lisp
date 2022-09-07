@@ -5,7 +5,7 @@
 ;;; COMPLEX
 
 (define-fnrecord complex (realpart &optional (imagpart nil imagpart-supplied-p))
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (let* ((realpart-ntype (wrapper-ntype realpart))
           (imagpart-ntype
@@ -51,7 +51,7 @@
 ;;; REALPART
 
 (define-fnrecord realpart (number)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype number)
      (complex-short-float (wrap (complex-short-float-realpart number)))
@@ -71,7 +71,7 @@
 ;;; IMAGPART
 
 (define-fnrecord imagpart (number)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype number)
      (complex-short-float (wrap (complex-short-float-imagpart number)))
@@ -91,7 +91,7 @@
 ;;; CONJUGATE
 
 (define-fnrecord conjugate (number)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (let ((ntype (wrapper-ntype number)))
      (if (and (eql-ntype-p ntype)
@@ -109,7 +109,7 @@
 ;;; PHASE
 
 (define-fnrecord phase (number)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (let ((ntype (wrapper-ntype number)))
      (if (and (eql-ntype-p ntype)
@@ -130,7 +130,7 @@
 ;;; CIS
 
 (define-fnrecord cis (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      ((not real) (abort-specialization))

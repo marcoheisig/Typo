@@ -5,7 +5,7 @@
            (intern (format nil "~:@(two-arg-~S~S~)" type name) #.*package*)))
     `(progn
        (define-fnrecord ,name (real &rest more-reals)
-         (:pure t)
+         (:properties :foldable :movable)
          (:specializer
           (if (null more-reals)
               (wrap (prog2-fn (the-real real) t))

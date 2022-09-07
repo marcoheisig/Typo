@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord signum (number)
-  (:pure t)
+  (:properties :foldable :movable)
   ;; Should I care about the discontinuity at zero?  Nah.
   (:differentiator _ (declare (ignore number)) 0)
   (:specializer

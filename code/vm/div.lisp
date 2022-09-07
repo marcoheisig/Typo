@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord / (number &rest more-numbers)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator
    index
    (cond ((null more-numbers)

@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord exp (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (wrap (exp x)))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
@@ -28,7 +28,7 @@
 (define-simple-instruction (exp long-float-exp) ((long-float 0L0 *)) (long-float))
 
 (define-fnrecord expt (base power)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator
    index
    (ecase index

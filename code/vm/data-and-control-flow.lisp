@@ -43,7 +43,7 @@
    (wrap-default (type-specifier-ntype 'list))))
 
 (define-fnrecord not (x)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (let ((ntype (wrapper-ntype x)))
      (if (eql-ntype-p ntype)
@@ -54,48 +54,48 @@
            (t (wrap-default (type-specifier-ntype 'boolean))))))))
 
 (define-fnrecord eq (a b)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-fnrecord eql (a b)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-fnrecord equal (a b)
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-fnrecord equalp (a b)
-  (:pure t)
+  (:properties :foldable)
   (:specializer
    (wrap-default (type-specifier-ntype 'generalized-boolean))))
 
 (define-fnrecord identity (object)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (wrap object)))
 
 (define-fnrecord complement (function)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (assert-wrapper-type function function)
    (wrap-default (type-specifier-ntype 'function))))
 
 (define-fnrecord constantly (value)
-  (:pure t)
+  (:properties :movable)
   (:specializer
    (wrap-default (type-specifier-ntype 'function))))
 
 (define-fnrecord values (&rest objects)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (wrap-function (ensure-fnrecord 'values) objects (mapcar #'wrapper-ntype objects) '() nil)))
 
 (define-fnrecord values-list (list)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (assert-wrapper-type list list)
    (wrap-default* '() '() (type-specifier-ntype 't))))
@@ -105,7 +105,7 @@
 ;;; Control Flow Directives
 
  (define-fnrecord choose (boolean a b)
-   (:pure t)
+   (:properties :foldable :movable)
    (:specializer
     (ntype-subtypecase (wrapper-ntype boolean)
       (null (wrap b))
@@ -113,7 +113,7 @@
       (t (wrap-default (ntype-union (wrapper-ntype a) (wrapper-ntype b)))))))
 
 (define-fnrecord and-fn (&rest args)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (let ((sure t))
      (loop for arg in args do
@@ -126,7 +126,7 @@
          (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
 (define-fnrecord or-fn (&rest args)
-  (:pure t)
+  (:properties :foldable :movable)
   (:specializer
    (let ((sure t))
      (loop for arg in args do
@@ -142,7 +142,7 @@
          (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
  (define-fnrecord prog2-fn (a b)
-   (:pure t)
+   (:properties :foldable :movable)
    (:specializer
     (wrap-function
      (ensure-fnrecord 'prog2-fn)

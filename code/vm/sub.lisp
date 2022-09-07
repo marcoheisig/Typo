@@ -1,7 +1,7 @@
 (in-package #:typo.vm)
 
 (define-fnrecord - (number &rest more-numbers)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator
    index
    (declare (ignore number))
@@ -117,6 +117,6 @@
 (define-simple-instruction (- one-arg-complex-long-float-) (complex-long-float) (complex-long-float))
 
 (define-fnrecord 1- (number)
-  (:pure t)
+  (:properties :foldable :movable)
   (:differentiator _ (declare (ignore number)) (wrap 1))
   (:specializer (wrap (- number 1))))
