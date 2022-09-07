@@ -88,23 +88,6 @@
     ;; Typo VM Operations
     #3=
     (:export
-     #:the-number
-     #:the-real
-     #:the-rational
-     #:the-integer
-     #:the-float
-     #:the-short-float
-     #:the-single-float
-     #:the-double-float
-     #:the-long-float
-     #:the-complex
-     #:the-complex-short-float
-     #:the-complex-single-float
-     #:the-complex-double-float
-     #:the-complex-long-float
-     #:the-function
-     #:the-character
-     #:the-symbol
      ;; abs.lisp
      #:short-float-abs
      #:single-float-abs
@@ -134,6 +117,14 @@
      #:or-fn
      #:prog2-fn
      ;; casts.lisp
+     #:coerce-to-short-float
+     #:coerce-to-single-float
+     #:coerce-to-double-float
+     #:coerce-to-long-float
+     #:coerce-to-complex-short-float
+     #:coerce-to-complex-single-float
+     #:coerce-to-complex-double-float
+     #:coerce-to-complex-long-float
      #:short-float-from-single-float
      #:short-float-from-double-float
      #:short-float-from-long-float
@@ -264,6 +255,11 @@
      #:complex-single-float-sin
      #:complex-double-float-sin
      #:complex-long-float-sin
+     ;; sqrt.lisp
+     #:short-float-sqrt
+     #:single-float-sqrt
+     #:double-float-sqrt
+     #:long-float-sqrt
      ;; sub.lisp
      #:two-arg-integer-
      #:two-arg-short-float-
@@ -291,7 +287,26 @@
      #:complex-short-float-tan
      #:complex-single-float-tan
      #:complex-double-float-tan
-     #:complex-long-float-tan))
+     #:complex-long-float-tan
+     ;; type-checks.lisp
+     #:the-number
+     #:the-real
+     #:the-rational
+     #:the-integer
+     #:the-float
+     #:the-short-float
+     #:the-single-float
+     #:the-double-float
+     #:the-long-float
+     #:the-complex
+     #:the-complex-short-float
+     #:the-complex-single-float
+     #:the-complex-double-float
+     #:the-complex-long-float
+     #:the-function
+     #:the-character
+     #:the-symbol
+     ))
 
   (defpackage #:typo.ntype
     (:use #:closer-common-lisp #:typo)
