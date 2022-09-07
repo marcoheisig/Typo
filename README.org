@@ -96,12 +96,44 @@ For example, it can replace
 where a is an integer, b is a double-float, and c is a single-float with
 
 #+BEGIN_SRC lisp
-(two-arg-f64+ (two-arg-f64+ (f64-from-integer a) b) (f64-from-f32 c))
+(typo:two-arg-double-float+
+ (typo:coerce-to-double-float a)
+ (typo:two-arg-double-float+
+  b
+  (typo:double-float-from-short-float
+   c)))
 #+END_SRC
 
-The inferface for this machinery is the function =typo:specialize=.
+The inferface for this machinery is the function =typo:specialize=.  The
+call to generate the example would be
 
-** Automatic differentiation
+#+BEGIN_SRC lisp
+(typo:specialize
+ #'cl:+
+ (list
+  (list 'a (list (typo:type-specifier-ntype 'integer)) nil nil)
+  (list 'b (list (typo:type-specifier-ntype 'double-float)) nil nil)
+  (list 'c (list (typo:type-specifier-ntype 'single-float)) nil nil))
+ :wrap-constant (lambda (x) (list x (list (typo:ntype-of x)) nil nil))
+ :wrap-function (lambda (fnrecord wrappers required optional rest)
+                  (list `(,(typo:fnrecord-name fnrecord) ,@(mapcar #'first wrappers))
+                        required optional rest))
+ :wrapper-nth-value-ntype
+ (lambda (index wrapper)
+   (destructuring-bind (form required optional rest) wrapper
+     (declare (ignore form))
+     (let ((n-required (length required)))
+       (if (< index n-required)
+           (nth index required)
+           (let ((n-optional (length optional)))
+             (if (< index (+ n-required n-optional))
+                 (nth (- index n-required) optional)
+                 (if (null rest)
+                     (typo:type-specifier-ntype 'null)
+                     rest))))))))
+#+END_SRC
+
+** Automatic Differentiation
 
 Typo can also compute expressions for computing the derivative of a
 supplied function with respect to a particular argument.  The inferface for
