@@ -16,7 +16,10 @@
         (alexandria:parse-body body)
       (alexandria:with-gensyms (fnrecord)
         `(let ((,fnrecord (ensure-fnrecord ',function-name)))
-           (lambda ,lambda-list
+           (lambda (,@required
+                    ,@(loop for (name initform suppliedp) in optional
+                            collect `(,name (wrap-constant ,initform) ,suppliedp))
+                    ,@(when rest `(&rest ,rest)))
              ,@declarations
              (labels
                  ((abort-specialization ()
@@ -25,34 +28,35 @@
                      (list* ,@required ,@(mapcar #'first optional) ,rest)))
                   (wrap-default* (required optional rest)
                     (declare (list required optional) (type (or ntype null) rest))
-                    (if (and (member :foldable (fnrecord-properties ,fnrecord))
-                             ,@(loop for wrapper in required
-                                     collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
-                             ,@(loop for (wrapper nil nil) in optional
-                                     collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
-                             ,@(when rest
-                                 `((loop for arg in ,rest
-                                         always (eql-ntype-p (wrapper-ntype arg))))))
-                        ;; Fold calls to foldable functions with known arguments.
-                        (wrap-constant
-                         (,(if rest 'apply 'funcall)
-                          (function ,function-name)
-                          ,@(loop for wrapper in required
-                                  collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
-                          ,@(loop for (wrapper nil nil) in optional
-                                  collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
-                          ,@(when rest
-                              `((loop for arg in ,rest collect (eql-ntype-object (wrapper-ntype arg)))))))
-                        (wrap-function
-                         ,fnrecord
-                         (list* ,@required ,@(mapcar #'first optional) ,rest)
-                         required
-                         optional
-                         rest)))
+                    (wrap-function
+                     ,fnrecord
+                     (list* ,@required ,@(mapcar #'first optional) ,rest)
+                     required
+                     optional
+                     rest))
                   (wrap-default (&rest ntypes)
                     (wrap-default* ntypes '() nil)))
                (declare (ignorable #'abort-specialization #'wrap-default #'wrap-default*))
-               (block ,(block-name function-name) ,@remaining-forms))))))))
+               (block ,(block-name function-name)
+                 (if (and (member :foldable (fnrecord-properties ,fnrecord))
+                          ,@(loop for wrapper in required
+                                  collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
+                          ,@(loop for (wrapper nil nil) in optional
+                                  collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
+                          ,@(when rest
+                              `((loop for arg in ,rest
+                                      always (eql-ntype-p (wrapper-ntype arg))))))
+                     ;; Fold calls to foldable functions with known arguments.
+                     (wrap-constant
+                      (,(if rest 'apply 'funcall)
+                       (function ,function-name)
+                       ,@(loop for wrapper in required
+                               collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
+                       ,@(loop for (wrapper nil nil) in optional
+                               collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
+                       ,@(when rest
+                           `((loop for arg in ,rest collect (eql-ntype-object (wrapper-ntype arg))))))))
+                 ,@remaining-forms))))))))
 
 (declaim (notinline %abort-specialization))
 (defun %abort-specialization (function arguments)
