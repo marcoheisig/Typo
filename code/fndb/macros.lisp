@@ -12,55 +12,57 @@
       "Specializer lambda lists must not contain keywords.~@
        The specializer for ~S violates this constraint."
       function-name)
+    (setf optional (loop for (name initform suppliedp) in optional
+                         collect `(,name (wrap-constant ,initform) ,(or suppliedp (gensym)))))
     (multiple-value-bind (remaining-forms declarations)
         (alexandria:parse-body body)
       (alexandria:with-gensyms (fnrecord)
         `(let ((,fnrecord (ensure-fnrecord ',function-name)))
            (lambda (,@required
-                    ,@(when optional
-                        `(&optional ,@
-                          (loop for (name initform suppliedp) in optional
-                                when suppliedp
-                                  collect `(,name (wrap-constant ,initform) ,suppliedp)
-                                else
-                                  collect `(,name (wrap-constant ,initform)))))
+                    ,@(when optional `(&optional ,@optional))
                     ,@(when rest `(&rest ,rest)))
              ,@declarations
              (labels
-                 ((abort-specialization ()
+                 ((list-of-arguments ()
+                    ,(cond ((and (not optional) (not rest))
+                            `(list ,@required))
+                           ((and (not optional))
+                            `(list* ,@required ,rest))
+                           (t
+                            (let ((result (gensym "RESULT")))
+                              `(let ((,result ,rest))
+                                 ,@(loop for (arg nil suppliedp) in (reverse optional)
+                                         collect
+                                         `(when ,suppliedp (push ,arg ,result)))
+                                 ,@(loop for arg in (reverse required)
+                                         collect `(push ,arg ,result))
+                                 ,result)))))
+                  (abort-specialization ()
                     (%abort-specialization
                      (fnrecord-name ,fnrecord)
                      (list* ,@required ,@(mapcar #'first optional) ,rest)))
                   (wrap-default* (required optional rest)
                     (declare (list required optional) (type (or ntype null) rest))
-                    (wrap-function
-                     ,fnrecord
-                     (list* ,@required ,@(mapcar #'first optional) ,rest)
-                     required
-                     optional
-                     rest))
+                    (wrap-function ,fnrecord (list-of-arguments) required optional rest))
                   (wrap-default (&rest ntypes)
                     (wrap-default* ntypes '() nil)))
                (declare (ignorable #'abort-specialization #'wrap-default #'wrap-default*))
                (block ,(block-name function-name)
-                 (if (and (member :foldable (fnrecord-properties ,fnrecord))
-                          ,@(loop for wrapper in required
-                                  collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
-                          ,@(loop for (wrapper nil nil) in optional
-                                  collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
-                          ,@(when rest
-                              `((loop for arg in ,rest
-                                      always (eql-ntype-p (wrapper-ntype arg))))))
-                     ;; Fold calls to foldable functions with known arguments.
+                 ;; Fold calls to foldable functions with known arguments.
+                 (when (and (member :foldable (fnrecord-properties ,fnrecord))
+                            ,@(loop for wrapper in required
+                                    collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
+                            ,@(loop for (wrapper nil nil) in optional
+                                    collect `(eql-ntype-p (wrapper-ntype ,wrapper)))
+                            ,@(when rest
+                                `((loop for arg in ,rest
+                                        always (eql-ntype-p (wrapper-ntype arg))))))
+                   (return-from ,(block-name function-name)
                      (wrap-constant
-                      (,(if rest 'apply 'funcall)
+                      (apply
                        (function ,function-name)
-                       ,@(loop for wrapper in required
-                               collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
-                       ,@(loop for (wrapper nil nil) in optional
-                               collect `(eql-ntype-object (wrapper-ntype ,wrapper)))
-                       ,@(when rest
-                           `((loop for arg in ,rest collect (eql-ntype-object (wrapper-ntype arg))))))))
+                       (loop for wrapper in (list-of-arguments)
+                             collect (eql-ntype-object (wrapper-ntype wrapper)))))))
                  ,@remaining-forms))))))))
 
 (declaim (notinline %abort-specialization))

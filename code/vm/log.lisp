@@ -12,10 +12,10 @@
      (long-float (wrap (long-float-ln x)))
      (t (wrap-default (type-specifier-ntype 'number))))))
 
-(define-simple-instruction (ln short-float-ln) (short-float) ((or short-float (complex short-float))))
-(define-simple-instruction (ln single-float-ln) (single-float) ((or single-float (complex single-float))))
-(define-simple-instruction (ln double-float-ln) (double-float) ((or double-float (complex double-float))))
-(define-simple-instruction (ln long-float-ln) (long-float) ((or long-float (complex long-float))))
+(define-simple-instruction (ln short-float-ln) ((or short-float (complex short-float))) (short-float))
+(define-simple-instruction (ln single-float-ln) ((or single-float (complex single-float))) (single-float))
+(define-simple-instruction (ln double-float-ln) ((or double-float (complex double-float))) (double-float))
+(define-simple-instruction (ln long-float-ln) ((or long-float (complex long-float))) (long-float))
 
 (define-fnrecord log (number &optional (base nil base-supplied-p))
   (:properties :foldable :movable)

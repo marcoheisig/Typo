@@ -21,8 +21,8 @@
      (t
       (wrap-default (type-specifier-ntype 'number))))))
 
-(define-simple-instruction (sqrt short-float-sqrt) (short-float) ((or short-float (complex short-float))))
-(define-simple-instruction (sqrt single-float-sqrt) (single-float) ((or single-float (complex single-float))))
-(define-simple-instruction (sqrt double-float-sqrt) (double-float) ((or double-float (complex double-float))))
-(define-simple-instruction (sqrt long-float-sqrt) (long-float) ((or long-float (complex long-float))))
+(define-simple-instruction (sqrt short-float-sqrt) ((or short-float (complex short-float))) (short-float))
+(define-simple-instruction (sqrt single-float-sqrt) ((or single-float (complex single-float))) (single-float))
+(define-simple-instruction (sqrt double-float-sqrt) ((or double-float (complex double-float))) (double-float))
+(define-simple-instruction (sqrt long-float-sqrt) ((or long-float (complex long-float))) (long-float))
 

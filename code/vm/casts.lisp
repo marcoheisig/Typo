@@ -202,10 +202,11 @@
                     (complex
                      (ntype-subtypecase object-ntype
                        ((not number) (abort-specialization))
+                       (rational (wrap object))
                        (short-float (wrap (coerce-to-complex-short-float object)))
                        (single-float (wrap (coerce-to-complex-single-float object)))
                        (double-float (wrap (coerce-to-complex-double-float object)))
                        (long-float (wrap (coerce-to-complex-long-float object)))
-                       (t (wrap-default 'complex))))
+                       (t (wrap-default (type-specifier-ntype 'complex)))))
                     (t
                      (wrap-default result-ntype))))))))))

@@ -369,7 +369,9 @@
     (declare (ntype part-ntype))
     (values
      (aref v1-cache (ntype-index part-ntype))
-     (if (plusp (aref v2-cache (ntype-index part-ntype))) t nil))))
+     (if (and (primitive-ntype-p part-ntype)
+              (plusp (aref v2-cache (ntype-index part-ntype))))
+         t nil))))
 
 
 ;;; Array Type Specifiers

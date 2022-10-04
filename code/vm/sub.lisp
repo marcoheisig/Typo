@@ -33,7 +33,8 @@
                     (ntype-of-b (wrapper-ntype b))
                     (result-ntype (ntype-contagion ntype-of-a ntype-of-b)))
                (if (and (eql-ntype-p ntype-of-b)
-                        (= (eql-ntype-object ntype-of-b) 0))
+                        (numberp (eql-ntype-object ntype-of-b))
+                        (zerop (eql-ntype-object ntype-of-b)))
                    (funcall (function-specializer 'coerce)
                             a
                             (wrap-constant
@@ -106,7 +107,7 @@
 (define-simple-instruction (- two-arg-complex-double-float-) (complex-double-float) (complex-double-float complex-double-float))
 (define-simple-instruction (- two-arg-complex-long-float-) (complex-long-float) (complex-long-float complex-long-float))
 
-(define-simple-instruction (- one-arg-integer-) (integer) (integer integer))
+(define-simple-instruction (- one-arg-integer-) (integer) (integer))
 (define-simple-instruction (- one-arg-short-float-) (short-float) (short-float))
 (define-simple-instruction (- one-arg-single-float-) (single-float) (single-float))
 (define-simple-instruction (- one-arg-double-float-) (double-float) (double-float))

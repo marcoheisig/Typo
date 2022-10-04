@@ -33,6 +33,7 @@
      #:+double-float-bits+
      #:+long-float-bits+
      #:ntype
+     #:ntypep
      #:ntype-type-specifier
      #:ntype-bits
      #:ntype-subtypep

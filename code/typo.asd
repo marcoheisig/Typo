@@ -11,6 +11,8 @@
    "trivial-arguments"
    "trivial-garbage")
 
+  :in-order-to ((test-op (test-op "typo.test-suite")))
+
   :serial t
   :components
   ((:file "packages")

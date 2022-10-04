@@ -75,20 +75,19 @@
 (defun complex-contagion (ntype1 ntype2)
   (assert (ntype-subtypep ntype1 (type-specifier-ntype 'complex)))
   (assert (ntype-subtypep ntype2 (type-specifier-ntype 'complex)))
-  (let ((pt1 (upgraded-complex-part-ntype ntype1))
-        (pt2 (upgraded-complex-part-ntype ntype2)))
-    (ntype-subtypecase pt1
-      (float
-       (ntype-subtypecase pt2
-         (float (make-complex-ntype (float-contagion pt1 pt2)))
-         (rational (make-complex-ntype pt1))
-         (t (type-specifier-ntype 'complex))))
-      (rational
-       (ntype-subtypecase pt2
-         (float (make-complex-ntype pt2))
-         (rational (make-complex-ntype (type-specifier-ntype 'rational)))
-         (t (type-specifier-ntype 'complex))))
-      (t (type-specifier-ntype 'complex)))))
+  (flet ((part-ntype (ntype)
+           (trivia:match (ntype-type-specifier ntype)
+             ((or 'complex (list 'complex))
+              (values (universal-ntype) t))
+             ((list 'complex type-specifier)
+              (type-specifier-ntype type-specifier)))))
+    (values
+     (type-specifier-ntype
+      `(complex
+        ,(ntype-type-specifier
+          (ntype-contagion/slow
+           (part-ntype ntype1)
+           (part-ntype ntype2))))))))
 
 (let ((cache (make-array (list +primitive-ntype-limit+ +primitive-ntype-limit+)
                          :element-type 'ntype
