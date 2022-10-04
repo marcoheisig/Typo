@@ -179,7 +179,9 @@
          (multiple-value-bind (result-ntype precise-p)
              (type-specifier-ntype (eql-ntype-object type-specifier-ntype))
            (cond ((not precise-p)
-                  (wrap-default result-ntype))
+                  (ntype-subtypecase result-ntype
+                    (real (wrap-default result-ntype))
+                    (t (wrap-default (universal-ntype)))))
                  ((ntype-subtypep object-ntype result-ntype)
                   (wrap object))
                  (t
@@ -207,6 +209,7 @@
                        (single-float (wrap (coerce-to-complex-single-float object)))
                        (double-float (wrap (coerce-to-complex-double-float object)))
                        (long-float (wrap (coerce-to-complex-long-float object)))
-                       (t (wrap-default (type-specifier-ntype 'complex)))))
+                       ((not rational) (wrap-default (type-specifier-ntype 'complex)))
+                       (t (wrap-default (type-specifier-ntype 'number)))))
                     (t
                      (wrap-default result-ntype))))))))))

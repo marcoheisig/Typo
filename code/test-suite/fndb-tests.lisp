@@ -67,9 +67,18 @@ subexpressions match those predicted by Typo."
 
 (define-test apply-test
   (eval-and-test '(apply '+ 7 8 '(9 10 11)))
-  (eval-and-test `(fdefinition '+)))
+  (eval-and-test '(apply 'coerce 7 '(double-float))))
+
+(define-test cast-test
+  (loop for number-type in '(short-float single-float double-float long-float integer rational) do
+    (loop for integer in *test-integers* do
+      (eval-and-test `(coerce ,integer ',number-type))
+      (eval-and-test `(coerce ,integer '(complex ,number-type))))))
 
 (define-test numeric-tests
+  (loop for number in *test-numbers* do
+    (eval-and-test `(abs ,number))
+    (eval-and-test `(signum ,number)))
   (loop for fn in '(= /= + - * /) do
     (loop for number-1 in *test-numbers* do
       (eval-and-test `(,fn ,number-1))
