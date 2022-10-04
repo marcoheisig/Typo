@@ -17,8 +17,13 @@
       (alexandria:with-gensyms (fnrecord)
         `(let ((,fnrecord (ensure-fnrecord ',function-name)))
            (lambda (,@required
-                    ,@(loop for (name initform suppliedp) in optional
-                            collect `(,name (wrap-constant ,initform) ,suppliedp))
+                    ,@(when optional
+                        `(&optional ,@
+                          (loop for (name initform suppliedp) in optional
+                                when suppliedp
+                                  collect `(,name (wrap-constant ,initform) ,suppliedp)
+                                else
+                                  collect `(,name (wrap-constant ,initform)))))
                     ,@(when rest `(&rest ,rest)))
              ,@declarations
              (labels
