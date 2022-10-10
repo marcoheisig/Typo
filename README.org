@@ -149,8 +149,8 @@ specific hooks to be useful.
 NTYPE is only does approximate reasoning about types, but is really fast
 and doesn't cons. It relies on the host's versions of typep and subtypep to
 do the heavy lifting. But it is faster (which matters for Petalisp), and
-fully portable. The main goal of NTYPE is not to narrow down the type of
-each value in a program enough to choose a specialized representation.
+fully portable. The main goal of NTYPE is to narrow down the type of each
+value in a program enough to choose a specialized representation.
 
 So the main difference between NTYPE and CTYPE is that the former is mostly
 about fast type inference and not so much about answering type queries.
