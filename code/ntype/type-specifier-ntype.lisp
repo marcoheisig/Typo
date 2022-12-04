@@ -498,7 +498,7 @@
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'values)) rest whole)
-  (error "Cannot handle VALUES types specifiers."))
+  (error "Values type specifiers can only be parsed by VALUES-TYPE-SPECIFIER-NTYPE."))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'function)) rest whole)
   (find-primitive-ntype 'function))

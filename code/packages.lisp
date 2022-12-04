@@ -52,7 +52,17 @@
      #:upgraded-complex-part-ntype
      #:ntype-subtypecase
      #:universal-ntype
-     #:empty-ntype)
+     #:empty-ntype
+     #:values-ntype
+     #:values-ntype-p
+     #:values-ntype-nth-value-ntype
+     #:values-ntype-minimum-number-of-values
+     #:values-ntype-number-of-optional-values
+     #:values-ntype-number-of-non-rest-values
+     #:values-ntype-rest-ntype
+     #:values-type-specifier-values-ntype
+     #:make-values-ntype
+     #:make-single-value-values-ntype)
     ;; The Function Database
     #2=
     (:export

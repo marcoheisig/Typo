@@ -36,6 +36,7 @@
      (:file "ntype-intersection")
      (:file "ntype-subtypecase")
      (:file "ntype-contagion")
+     (:file "values-ntype")
      (:file "array-element-ntype")
      (:file "complex-part-ntype")))
    (:module "fndb"
