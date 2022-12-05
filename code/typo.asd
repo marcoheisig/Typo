@@ -42,6 +42,7 @@
    (:module "fndb"
     :components
     ((:file "function-lambda-lists")
+     (:file "function-name")
      (:file "conditions")
      (:file "wrap")
      (:file "fndb")

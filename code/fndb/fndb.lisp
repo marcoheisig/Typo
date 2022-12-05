@@ -6,6 +6,8 @@
 
 (defgeneric fnrecord-function (fnrecord))
 
+(defgeneric fnrecord-function-designator (fnrecord))
+
 (defgeneric fnrecord-min-arguments (fnrecord))
 
 (defgeneric fnrecord-max-arguments (fnrecord))
@@ -37,6 +39,10 @@
 (defmethod fnrecordp ((object t)) nil)
 
 (defmethod fnrecordp ((fnrecord fnrecord)) t)
+
+(defmethod fnrecord-function-designator (fnrecord)
+  (or (fnrecord-name fnrecord)
+      (fnrecord-function fnrecord)))
 
 (defclass minimal-fnrecord (fnrecord)
   ())
@@ -153,6 +159,17 @@
 (defvar *fndb* (make-fndb))
 (declaim (type fndb *fndb*))
 
+(defmethod shared-initialize :after
+    ((fnrecord fnrecord) slot-names &rest initargs)
+  (declare (ignore slot-names initargs))
+  (with-accessors ((function fnrecord-function)
+                   (name fnrecord-name)) fnrecord
+    (setf (gethash function (fndb-function-table *fndb*))
+          fnrecord)
+    (unless (not name)
+      (multiple-value-bind (key table) (fndb-key-and-table name)
+        (setf (gethash key table) fnrecord)))))
+
 (defun find-fnrecord (extended-function-designator &optional (errorp t))
   (multiple-value-bind (key table)
       (fndb-key-and-table extended-function-designator)
@@ -162,40 +179,23 @@
             (errorp (error "There is no fnrecord for ~S" extended-function-designator))
             (t nil)))))
 
-(defun (setf find-fnrecord) (fnrecord extended-function-designator &optional (errorp t))
-  (declare (ignore errorp))
-  (with-accessors ((function fnrecord-function)
-                   (name fnrecord-name)) fnrecord
-    (if (functionp extended-function-designator)
-        (assert (eq extended-function-designator function))
-        (assert (equal extended-function-designator name)))
-    (when name
-      (multiple-value-bind (key table) (fndb-key-and-table name)
-        (setf (gethash key table)
-              fnrecord)))
-    (setf (gethash function (fndb-function-table *fndb*))
-          fnrecord)))
-
 (defun ensure-fnrecord (fnrecord-designator)
   (if (fnrecordp fnrecord-designator)
       fnrecord-designator
       (or (find-fnrecord fnrecord-designator nil)
-          (setf (find-fnrecord fnrecord-designator)
-                (if (functionp fnrecord-designator)
-                    (make-instance 'minimal-fnrecord
-                      :name
-                      #-sbcl nil
-                      #+sbcl (sb-kernel:%fun-name fnrecord-designator)
-                      :function fnrecord-designator)
-                    (make-instance 'minimal-fnrecord
-                      :name fnrecord-designator
-                      :function
-                      (if (fboundp fnrecord-designator)
-                          (fdefinition fnrecord-designator)
-                          (lambda (&rest args)
-                            (declare (ignore args))
-                            (error "Call to unbound function ~S."
-                                   fnrecord-designator)))))))))
+          (if (functionp fnrecord-designator)
+              (make-instance 'minimal-fnrecord
+                :name (function-name fnrecord-designator)
+                :function fnrecord-designator)
+              (make-instance 'minimal-fnrecord
+                :name fnrecord-designator
+                :function
+                (if (fboundp fnrecord-designator)
+                    (fdefinition fnrecord-designator)
+                    (lambda (&rest args)
+                      (declare (ignore args))
+                      (error "Call to unbound function ~S."
+                             fnrecord-designator))))))))
 
 (define-compiler-macro ensure-fnrecord (&whole form fnrecord-designator)
   (if (constantp fnrecord-designator)
@@ -225,13 +225,9 @@
               (apply #'change-class fnrecord 'full-fnrecord
                      :name function-name
                      kwargs))
-          (let ((function (fdefinition function-name))
-                (fnrecord (apply #'make-instance 'full-fnrecord
-                                 :name function-name
-                                 kwargs)))
-            (setf (gethash key table) fnrecord)
-            (setf (gethash function (fndb-function-table *fndb*)) fnrecord)
-            fnrecord)))))
+          (apply #'make-instance 'full-fnrecord
+                 :name function-name
+                 kwargs)))))
 
 (defun fndb-key-and-table (extended-function-designator)
   (trivia:ematch extended-function-designator

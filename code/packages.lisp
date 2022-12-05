@@ -41,8 +41,14 @@
      #:ntype-union
      #:ntype-intersection
      #:ntype-contagion
+     #:ntype-index
      #:ntype=
      #:ntype-of
+     #:ntype-primitive-ntype
+     #:+primitive-ntype-limit+
+     #:primitive-ntype
+     #:primitive-ntype-p
+     #:primitive-ntype-from-index
      #:eql-ntype-p
      #:eql-ntype-object
      #:type-specifier-ntype
@@ -74,6 +80,7 @@
      #:fnrecordp
      #:fnrecord-name
      #:fnrecord-function
+     #:fnrecord-function-designator
      #:fnrecord-min-arguments
      #:fnrecord-max-arguments
      #:fnrecord-properties
