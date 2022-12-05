@@ -244,6 +244,16 @@
      #:two-arg-complex-single-float/
      #:two-arg-complex-double-float/
      #:two-arg-complex-long-float/
+     ;; exp.lisp
+     #:short-float-exp
+     #:single-float-exp
+     #:double-float-exp
+     #:long-float-exp
+     ;; log.lisp
+     #:short-float-ln
+     #:single-float-ln
+     #:double-float-ln
+     #:long-float-ln
      ;; max.lisp
      #:two-arg-short-float-max
      #:two-arg-single-float-max
