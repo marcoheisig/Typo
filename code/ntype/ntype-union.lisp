@@ -125,6 +125,12 @@
                 collect
                 (if (eql a b) a '*))
           nil))
+        ((and (integerp d1) (listp d2)
+              (= d1 (length d2)))
+         (values d1 (every (lambda (x) (eql x '*)) d2)))
+        ((and (listp d1) (integerp d2)
+              (= (length d1) d2))
+         (values d2 (every (lambda (x) (eql x '*)) d1)))
         (t (values '* nil))))
 
 (defun array-simplep-union (b1 b2)
