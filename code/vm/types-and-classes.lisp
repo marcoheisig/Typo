@@ -26,7 +26,7 @@
          (multiple-value-bind (ntype precise-p)
              (type-specifier-ntype (eql-ntype-object type-specifier-ntype))
            (cond ((and precise-p (ntype-subtypep object-ntype ntype))
-                  (wrap-default (type-specifier-ntype '(not null))))
+                  (wrap-default (true-ntype)))
                  ((ntype-subtypepc2 object-ntype ntype)
                   (wrap-constant nil))
                  (t (wrap-default (type-specifier-ntype 'generalized-boolean)))))))))

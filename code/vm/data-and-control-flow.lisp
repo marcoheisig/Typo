@@ -134,7 +134,7 @@
          ((not null)
           (if sure
               (return-from or-fn arg)
-              (wrap-default (type-specifier-ntype '(not null)))))
+              (wrap-default (true-ntype))))
          (null)
          (t (setf sure nil))))
      (if sure

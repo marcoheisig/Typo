@@ -59,6 +59,8 @@
      #:ntype-subtypecase
      #:universal-ntype
      #:empty-ntype
+     #:true-ntype
+     #:false-ntype
      #:values-ntype
      #:values-ntype-p
      #:values-ntype-nth-value-ntype

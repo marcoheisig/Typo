@@ -57,6 +57,20 @@
 (defun universal-ntype ()
   (primitive-ntype-from-index (1- +primitive-ntype-limit+)))
 
+(declaim (inline true-ntype))
+(defun true-ntype ()
+  (primitive-ntype-from-index
+   #.(position '(not null) *primitive-ntype-information*
+               :key #'first
+               :test #'equal)))
+
+(declaim (inline false-ntype))
+(defun false-ntype ()
+  (primitive-ntype-from-index
+   #.(position 'null *primitive-ntype-information*
+               :key #'first
+               :test #'equal)))
+
 (defvar *upgraded-array-element-primitive-ntypes*
   (remove-if-not
    (lambda (primitive-ntype)

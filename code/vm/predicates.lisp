@@ -7,7 +7,7 @@
       (let ((ntype (wrapper-ntype object)))
         (ntype-subtypecase ntype
           ((not ,type-specifier) (wrap nil))
-          (,type-specifier (wrap-default (type-specifier-ntype '(not null))))
+          (,type-specifier (wrap-default (true-ntype)))
           (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))))
 
 (define-predicate-fnrecord arrayp array)
@@ -37,7 +37,7 @@
   (:specializer
    (ntype-subtypecase (wrapper-ntype real)
      ((not real) (abort-specialization))
-     ((real * (0)) (wrap-default (type-specifier-ntype '(not null))))
+     ((real * (0)) (wrap-default (true-ntype)))
      ((real 0 *) (wrap nil))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
@@ -46,7 +46,7 @@
   (:specializer
    (ntype-subtypecase (wrapper-ntype real)
      ((not real) (abort-specialization))
-     ((real (0) *) (wrap-default (type-specifier-ntype '(not null))))
+     ((real (0) *) (wrap-default (true-ntype)))
      ((real * 0) (wrap nil))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
@@ -55,7 +55,7 @@
   (:specializer
    (ntype-subtypecase (wrapper-ntype number)
      ((not real) (abort-specialization))
-     (zero (wrap-default (type-specifier-ntype '(not null))))
+     (zero (wrap-default (true-ntype)))
      ((not zero) (wrap nil))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
 
