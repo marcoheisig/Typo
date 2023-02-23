@@ -57,7 +57,7 @@ supplied FUNCTION.
 ;;; Derived Functionality
 
 (defun infer-ntypes (function ntypes)
-;;; We represent wrappers as a (REQUIRED OPTIONAL REST) list.
+  ;; We represent wrappers as a (REQUIRED OPTIONAL REST) list.
   (flet ((wrapper-nth-value-ntype (index wrapper)
            (trivia:ematch wrapper
              ((list required optional rest)

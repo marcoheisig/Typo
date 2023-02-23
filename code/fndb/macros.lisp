@@ -58,11 +58,18 @@
                                 `((loop for arg in ,rest
                                         always (eql-ntype-p (wrapper-ntype arg))))))
                    (return-from ,(block-name function-name)
-                     (wrap-constant
-                      (apply
-                       (function ,function-name)
-                       (loop for wrapper in (list-of-arguments)
-                             collect (eql-ntype-object (wrapper-ntype wrapper)))))))
+                     (let ((values
+                             (multiple-value-list
+                              (apply
+                               (function ,function-name)
+                               (loop for wrapper in (list-of-arguments)
+                                     collect (eql-ntype-object (wrapper-ntype wrapper)))))))
+                       (if (= 1 (length values))
+                           (wrap-constant (first values))
+                           (wrap-function
+                            (ensure-fnrecord 'values)
+                            (mapcar #'wrap-constant values)
+                            (mapcar #'ntype-of values) '() nil)))))
                  ,@remaining-forms))))))))
 
 (declaim (notinline %abort-specialization))
