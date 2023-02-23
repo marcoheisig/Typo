@@ -25,6 +25,10 @@ number of optional values returned by the supplied VALUES-NTYPE."))
    "Returns the ntype of all rest values returned by the supplied
 VALUES-NTYPE, or NIL, if there are no rest values."))
 
+(defgeneric values-ntype-type-specifier (values-ntype)
+  (:documentation
+   "Returns the type specifier corresponding to the supplied VALUES-NTYPE."))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; VALUES-NTYPE
@@ -40,6 +44,33 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
 
 (defmethod values-ntype-rest-ntype ((values-ntype values-ntype))
   nil)
+
+(defmethod values-ntype-type-specifier ((values-ntype values-ntype))
+  (let* ((n-required (values-ntype-minimum-number-of-values values-ntype))
+         (n-optional (values-ntype-number-of-optional-values values-ntype))
+         (n-non-rest (values-ntype-number-of-non-rest-values values-ntype))
+         (required
+           (loop for n from 0 below n-required
+                 collect
+                 (ntype-type-specifier
+                  (values-ntype-nth-value-ntype n values-ntype))))
+         (optional
+           (loop for n from n-required below n-non-rest
+                 collect
+                 (ntype-type-specifier
+                  (values-ntype-nth-value-ntype n values-ntype))))
+         (rest
+           (if (values-ntype-rest-ntype values-ntype)
+               (ntype-type-specifier
+                (values-ntype-rest-ntype values-ntype))
+               nil)))
+    (if (not rest)
+        (if (zerop n-optional)
+            `(values ,@required &optional)
+            `(values ,@required &optional ,@optional))
+        (if (zerop n-optional)
+            `(values ,@required &rest ,rest)
+            `(values ,@required &optional ,@optional &rest ,rest)))))
 
 (defmethod print-object ((values-ntype values-ntype) stream)
   (flet ((nth-value-type (n)

@@ -68,6 +68,7 @@
      #:values-ntype-number-of-optional-values
      #:values-ntype-number-of-non-rest-values
      #:values-ntype-rest-ntype
+     #:values-ntype-type-specifier
      #:values-type-specifier-values-ntype
      #:make-values-ntype
      #:make-single-value-values-ntype)
@@ -145,15 +146,19 @@
      #:coerce-to-complex-single-float
      #:coerce-to-complex-double-float
      #:coerce-to-complex-long-float
+     #:short-float-from-integer
      #:short-float-from-single-float
      #:short-float-from-double-float
      #:short-float-from-long-float
+     #:single-float-from-integer
      #:single-float-from-short-float
      #:single-float-from-double-float
      #:single-float-from-long-float
+     #:double-float-from-integer
      #:double-float-from-short-float
      #:double-float-from-single-float
      #:double-float-from-long-float
+     #:long-float-from-integer
      #:long-float-from-short-float
      #:long-float-from-single-float
      #:long-float-from-double-float

@@ -9,12 +9,14 @@
   (:differentiator _ (declare (ignore x)) (wrap 1S0))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
+     (integer (wrap (short-float-from-integer x)))
      (short-float (wrap x))
      (single-float (wrap (short-float-from-single-float x)))
      (double-float (wrap (short-float-from-double-float x)))
      (long-float (wrap (short-float-from-long-float x)))
      (t (wrap-default (type-specifier-ntype 'short-float))))))
 
+(define-simple-instruction (coerce-to-short-float short-float-from-integer) (short-float) (integer))
 (define-simple-instruction (coerce-to-short-float short-float-from-single-float) (short-float) (single-float))
 (define-simple-instruction (coerce-to-short-float short-float-from-double-float) (short-float) (double-float))
 (define-simple-instruction (coerce-to-short-float short-float-from-long-float) (short-float) (long-float))
@@ -24,12 +26,14 @@
   (:differentiator _ (declare (ignore x)) (wrap 1F0))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
+     (integer (wrap (single-float-from-integer x)))
      (single-float (wrap x))
      (short-float (wrap (single-float-from-short-float x)))
      (double-float (wrap (single-float-from-double-float x)))
      (long-float (wrap (single-float-from-long-float x)))
      (t (wrap-default (type-specifier-ntype 'single-float))))))
 
+(define-simple-instruction (coerce-to-single-float single-float-from-integer) (single-float) (integer))
 (define-simple-instruction (coerce-to-single-float single-float-from-short-float) (single-float) (short-float))
 (define-simple-instruction (coerce-to-single-float single-float-from-double-float) (single-float) (double-float))
 (define-simple-instruction (coerce-to-single-float single-float-from-long-float) (single-float) (long-float))
@@ -39,12 +43,14 @@
   (:differentiator _ (declare (ignore x)) (wrap 1D0))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
+     (integer (wrap (double-float-from-integer x)))
      (double-float (wrap x))
      (short-float (wrap (double-float-from-short-float x)))
      (single-float (wrap (double-float-from-single-float x)))
      (long-float (wrap (double-float-from-long-float x)))
      (t (wrap-default (type-specifier-ntype 'double-float))))))
 
+(define-simple-instruction (coerce-to-double-float double-float-from-integer) (double-float) (integer))
 (define-simple-instruction (coerce-to-double-float double-float-from-short-float) (double-float) (short-float))
 (define-simple-instruction (coerce-to-double-float double-float-from-single-float) (double-float) (single-float))
 (define-simple-instruction (coerce-to-double-float double-float-from-long-float) (double-float) (long-float))
@@ -54,12 +60,14 @@
   (:differentiator _ (declare (ignore x)) (wrap 1L0))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
+     (integer (wrap (long-float-from-integer x)))
      (long-float (wrap x))
      (short-float (wrap (long-float-from-short-float x)))
      (single-float (wrap (long-float-from-single-float x)))
      (double-float (wrap (long-float-from-double-float x)))
      (t (wrap-default (type-specifier-ntype 'long-float))))))
 
+(define-simple-instruction (coerce-to-long-float long-float-from-integer) (long-float) (integer))
 (define-simple-instruction (coerce-to-long-float long-float-from-short-float) (long-float) (short-float))
 (define-simple-instruction (coerce-to-long-float long-float-from-single-float) (long-float) (single-float))
 (define-simple-instruction (coerce-to-long-float long-float-from-double-float) (long-float) (double-float))
