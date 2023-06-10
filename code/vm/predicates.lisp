@@ -30,7 +30,7 @@
 (define-predicate-fnrecord streamp stream)
 
 ;;; The remaining rules cannot be handled by DEFINE-PREDICATE-FNRECORD,
-;;; because the domain of these functions is limited to certain numbers.
+;;; because the domain of these functions is limited to a certain type.
 
 (define-fnrecord minusp (real)
   (:properties :foldable :movable)
@@ -72,3 +72,56 @@
    (ntype-subtypecase (wrapper-ntype integer)
      ((not real) (abort-specialization))
      (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+
+(define-fnrecord alpha-char-p (char)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype char)
+     ((not character) (abort-specialization))
+     (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+
+(define-fnrecord digit-char-p (char &optional (radix nil radix-supplied-p))
+  (:properties :foldable :movable)
+  (:specializer
+   (when radix-supplied-p
+     (ntype-subtypecase radix
+       ((not radix) (abort-specialization))))
+   (ntype-subtypecase (wrapper-ntype char)
+     ((not character) (abort-specialization))
+     (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+
+(define-fnrecord graphic-char-p (char)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype char)
+     ((not character) (abort-specialization))
+     (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+
+(define-fnrecord standard-char-p (char)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype char)
+     ((not character) (abort-specialization))
+     (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+
+(define-fnrecord upper-case-p (char)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype char)
+     ((not character) (abort-specialization))
+     (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+
+(define-fnrecord lower-case-p (char)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype char)
+     ((not character) (abort-specialization))
+     (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+
+(define-fnrecord both-case-p (char)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype char)
+     ((not character) (abort-specialization))
+     (t (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+

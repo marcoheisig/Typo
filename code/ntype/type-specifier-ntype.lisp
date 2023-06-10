@@ -466,8 +466,8 @@
     ((or (and (list) (<> size '*))
          (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
      (make-array-ntype
-      :element-type 'base-string
-      :dimensions size))
+      :element-type (find-primitive-ntype 'base-char)
+      :dimensions (list size)))
     (_ (call-next-method))))
 
 (defmethod compound-type-specifier-ntype ((_ (eql 'simple-base-string)) rest whole)
@@ -475,8 +475,8 @@
     ((or (and (list) (<> size '*))
          (and (list (and size (or '* (type (and fixnum unsigned-byte)))))))
      (make-array-ntype
-      :element-type 'base-string
-      :dimensions size
+      :element-type (find-primitive-ntype 'base-char)
+      :dimensions (list size)
       :simplep t))
     (_ (call-next-method))))
 

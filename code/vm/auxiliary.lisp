@@ -103,3 +103,9 @@
 (declaim (inline or-fn))
 (defun or-fn (&rest args)
   (loop for arg in args thereis arg))
+
+(defun map-unique-pairs (fn list)
+  (loop for sublist on list
+        for a = (first sublist) do
+          (loop for b in (rest sublist) do
+            (funcall fn a b))))

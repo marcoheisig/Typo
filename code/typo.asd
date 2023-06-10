@@ -61,6 +61,7 @@
      (:file "abs")
      (:file "add")
      (:file "array")
+     (:file "char")
      (:file "cmpeq")
      (:file "cmpneq")
      (:file "cmpx")
@@ -76,4 +77,5 @@
      (:file "sin")
      (:file "sub")
      (:file "sqrt")
+     (:file "string")
      (:file "tan")))))

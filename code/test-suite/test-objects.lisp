@@ -42,6 +42,9 @@
 (defparameter *test-numbers*
   (append *test-integers* *test-floats* *test-complex-numbers*))
 
+(defparameter *test-characters*
+  '(#\a #\z #\A #\Z #\1 #\0 #\9 #\! #\space #\~))
+
 (defparameter *test-arrays*
   (loop for dimensions in '(() (1) (10) (2 2) (2 0 3) (2 3 4) (4 3 2 1))
         append
@@ -61,6 +64,7 @@
                      (single-float 42f0)
                      (double-float 42d0)
                      (long-float   42l0)
+                     (base-char    #\X)
                      (character    #\X))
               append
               (loop for adjustable in '(nil t)
@@ -70,4 +74,4 @@
                                         :adjustable adjustable)))))
 
 (defparameter *test-objects*
-  (append *test-numbers* *test-arrays*))
+  (append *test-numbers* *test-characters* *test-arrays*))

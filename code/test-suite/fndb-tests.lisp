@@ -101,3 +101,14 @@ subexpressions match those predicted by Typo."
   (loop for fn in '(sin cos tan asin acos atan log exp sqrt) do
     (loop for number-1 in *test-numbers* do
       (eval-and-test `(,fn ,number-1)))))
+
+(define-test character-tests
+  (loop for fn in '(char= char/= char< char> char<= char>=
+                    char-equal char-not-equal char-greaterp char-lessp
+                    char-not-greaterp char-not-lessp)
+        do
+           (loop for char1 in *test-characters* do
+             (eval-and-test `(,fn ,char1))
+             (loop for char2 in *test-characters* do
+               (eval-and-test `(,fn ,char1 ,char2))
+               (eval-and-test `(,fn ,char1 ,char2 ,char1))))))

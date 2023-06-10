@@ -29,3 +29,17 @@
 (defconstant +double-float-bits+ (float-bits most-positive-double-float))
 
 (defconstant +long-float-bits+ (float-bits most-positive-long-float))
+
+(defconstant +character-bits+ (integer-length (1- char-code-limit)))
+
+(defconstant base-char-code-limit
+  (loop for code from 0 below char-code-limit do
+    (etypecase (code-char code)
+      (base-char)
+      (null)
+      (character (return code)))))
+
+(defconstant +base-char-bits+
+  (if (subtypep 'character 'base-char)
+      +character-bits+
+      (integer-length (1- base-char-code-limit))))

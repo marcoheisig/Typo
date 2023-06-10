@@ -32,6 +32,9 @@
      #:+single-float-bits+
      #:+double-float-bits+
      #:+long-float-bits+
+     #:+character-bits+
+     #:+base-char-bits+
+     #:base-char-code-limit
      #:ntype
      #:ntypep
      #:ntype-type-specifier
@@ -133,6 +136,31 @@
      #:single-float-row-major-aref
      #:double-float-row-major-aref
      #:long-float-row-major-aref
+     ;; char.lisp
+     #:two-arg-char=
+     #:two-arg-base-char=
+     #:two-arg-char-equal
+     #:two-arg-base-char-equal
+     #:two-arg-char/=
+     #:two-arg-base-char/=
+     #:two-arg-char-not-equal
+     #:two-arg-base-char-not-equal
+     #:two-arg-char<
+     #:two-arg-base-char<
+     #:two-arg-char>
+     #:two-arg-base-char>
+     #:two-arg-char<=
+     #:two-arg-base-char<=
+     #:two-arg-char>=
+     #:two-arg-base-char>=
+     #:two-arg-char-lessp
+     #:two-arg-base-char-lessp
+     #:two-arg-char-greaterp
+     #:two-arg-base-char-greaterp
+     #:two-arg-char-not-greaterp
+     #:two-arg-base-char-not-greaterp
+     #:two-arg-char-not-lessp
+     #:two-arg-base-char-not-lessp
      ;; auxiliary.lisp
      #:and-fn
      #:or-fn

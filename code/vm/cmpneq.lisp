@@ -19,12 +19,6 @@
           (list* number more-numbers))
          value))))
 
-(defun map-unique-pairs (fn list)
-  (loop for sublist on list
-        for a = (first sublist) do
-          (loop for b in (rest sublist) do
-            (funcall fn a b))))
-
 (define-simple-instruction (/= two-arg-short-float/=) (generalized-boolean) (short-float short-float))
 (define-simple-instruction (/= two-arg-single-float/=) (generalized-boolean) (single-float single-float))
 (define-simple-instruction (/= two-arg-double-float/=) (generalized-boolean) (double-float double-float))
@@ -82,7 +76,3 @@
     (t
      (wrap-default
       (type-specifier-ntype 'generalized-boolean)))))
-
-
-
-

@@ -73,5 +73,3 @@
     (t
      (wrap-default
       (type-specifier-ntype 'generalized-boolean)))))
-
-

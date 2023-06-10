@@ -14,6 +14,8 @@
    (wrap-default
     (type-specifier-ntype 'unsigned-byte))))
 
+;;; row—major—aref
+
 (define-fnrecord row-major-aref (array index)
   (:properties :foldable)
   (:specializer
@@ -56,12 +58,14 @@
       (assert-wrapper-type value long-float)
       (wrap (setf (long-float-row-major-aref array index) value)))
      (t
-      (wrap-default (universal-ntype))))))
+      (wrap-default (wrapper-ntype value))))))
 
 (define-simple-instruction ((setf row-major-aref) (setf short-float-row-major-aref)) (single-float) (short-float (array short-float) unsigned-byte))
 (define-simple-instruction ((setf row-major-aref) (setf single-float-row-major-aref)) (single-float) (single-float (array single-float) unsigned-byte))
 (define-simple-instruction ((setf row-major-aref) (setf double-float-row-major-aref)) (double-float) (double-float (array double-float) unsigned-byte))
 (define-simple-instruction ((setf row-major-aref) (setf long-float-row-major-aref)) (long-float) (long-float (array long-float) unsigned-byte))
+
+;;; aref
 
 (define-fnrecord aref (array &rest indices)
   (:properties :foldable)
@@ -125,4 +129,22 @@
                         (wrap (+ row-major-index (* stride index)))))
           (wrap (setf (row-major-aref array row-major-index) value))))
        (t
-        (wrap-default (universal-ntype)))))))
+        (wrap-default (wrapper-ntype value)))))))
+
+;;; svref
+
+(define-fnrecord svref (simple-vector index)
+  (:properties :foldable)
+  (:specializer
+   (assert-wrapper-type index unsigned-byte)
+   (etypecase (wrapper-ntype simple-vector)
+     ((not simple-vector) (abort-specialization))
+     (t (wrap-default (universal-ntype))))))
+
+(define-fnrecord (setf svref) (value simple-vector index)
+  (:properties :foldable)
+  (:specializer
+   (assert-wrapper-type index unsigned-byte)
+   (etypecase (wrapper-ntype simple-vector)
+     ((not simple-vector) (abort-specialization))
+     (t (wrap-default (wrapper-ntype value))))))
