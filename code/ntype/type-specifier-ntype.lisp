@@ -243,6 +243,9 @@
                `(cond
                   ,@(loop for primitive-ntype across *primitive-ntypes*
                           for type = (primitive-ntype-type-specifier primitive-ntype)
+                          when (eq type 'bit)
+                            collect `((<= bits 1)
+                                      (values (find-primitive-ntype ',type) t))
                           when (and (consp type)
                                     (= 2 (length type))
                                     (subtypep type 'unsigned-byte))
