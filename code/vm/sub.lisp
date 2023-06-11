@@ -5,7 +5,7 @@
   (:differentiator
    index
    (declare (ignore number))
-   (if (and (zerop index)
+   (choose (and (zerop index)
             (not (null more-numbers)))
        (wrap 1)
        (wrap -1)))

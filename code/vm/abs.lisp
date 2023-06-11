@@ -2,7 +2,7 @@
 
 (define-fnrecord abs (x)
   (:properties :foldable :movable)
-  (:differentiator _ (wrap (if (< 0 x) 1 -1)))
+  (:differentiator _ (wrap (choose (< 0 x) 1 -1)))
   (:specializer
    (ntype-subtypecase (wrapper-ntype x)
      ((not number)

@@ -84,7 +84,7 @@
    (%properties
     :initarg :properties
     :initform (alexandria:required-argument :properties)
-    :type boolean
+    :type list
     :reader fnrecord-properties)
    (%specializer
     :initarg :specializer
@@ -113,7 +113,7 @@
      &rest initargs
      &key
        (name (fnrecord-name instance))
-       (function (fdefinition name))
+       (function (ensure-fdefinition name))
        (lambda-list (function-lambda-list function))
        (min-arguments (nth-value 0 (lambda-list-arity lambda-list)))
        (max-arguments (nth-value 1 (lambda-list-arity lambda-list)))
@@ -142,6 +142,23 @@
          :specializer specializer
          :differentiator differentiator
          initargs))
+
+(defun ensure-fdefinition (function-name)
+  (declare (function-name function-name))
+  (if (fboundp function-name)
+      (fdefinition function-name)
+      (trivia:match function-name
+        ((list 'setf (and name (type symbol)))
+         (if (eq (symbol-package name)
+                 (find-package "CL"))
+             (let* ((package (find-package "TYPO.CL-STUBS"))
+                    (new-name (intern (symbol-name name) package)))
+               (eval `(progn (declare (inline (setf ,new-name)))
+                             (defun (setf ,new-name) (value array index)
+                               (setf (,name array index) value))))
+               (fdefinition `(setf ,new-name)))
+             (trivia.fail:fail)))
+        (_ (error "Cannot find fdefinition of ~S." function-name)))))
 
 (defstruct (fndb
             (:predicate fndbp)
@@ -190,7 +207,8 @@
               (make-instance 'minimal-fnrecord
                 :name fnrecord-designator
                 :function
-                (if (fboundp fnrecord-designator)
+                (if (and (fboundp fnrecord-designator)
+                         (functionp (fdefinition fnrecord-designator)))
                     (fdefinition fnrecord-designator)
                     (lambda (&rest args)
                       (declare (ignore args))

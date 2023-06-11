@@ -21,8 +21,8 @@
               ((list* :differentiator index body)
                (list
                 :differentiator
-                `(define-differentiator ,function-name ,lambda-list ,index ,@body)))
+                `(differentiator-lambda ,function-name ,lambda-list ,index ,@body)))
               ((list* :specializer body)
                (list
                 :specializer
-                `(define-specializer ,function-name ,lambda-list ,@body)))))))
+                `(specializer-lambda ,function-name ,lambda-list ,@body)))))))

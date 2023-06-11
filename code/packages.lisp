@@ -384,4 +384,7 @@
   (defpackage #:typo.vm
     (:use #:closer-common-lisp #:typo)
     (:import-from #:trivia #:place #:<> #:access)
-    #3#))
+    #3#)
+
+  (defpackage #:typo.cl-stubs
+    (:use)))

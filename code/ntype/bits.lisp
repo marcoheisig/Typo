@@ -33,11 +33,13 @@
 (defconstant +character-bits+ (integer-length (1- char-code-limit)))
 
 (defconstant base-char-code-limit
-  (loop for code from 0 below char-code-limit do
-    (etypecase (code-char code)
-      (base-char)
-      (null)
-      (character (return code)))))
+  (if (alexandria:type= 'base-char 'character)
+      char-code-limit
+      (loop for code from 0 below char-code-limit do
+        (etypecase (code-char code)
+          (base-char)
+          (null)
+          (character (return code))))))
 
 (defconstant +base-char-bits+
   (if (subtypep 'character 'base-char)

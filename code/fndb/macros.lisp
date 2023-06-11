@@ -5,7 +5,7 @@
     ((list 'setf name) name)
     ((type function-name) function-name)))
 
-(defmacro define-specializer (function-name lambda-list &body body)
+(defmacro specializer-lambda (function-name lambda-list &body body)
   (multiple-value-bind (required optional rest keyword)
       (alexandria:parse-ordinary-lambda-list lambda-list)
     (unless (null keyword)
@@ -61,7 +61,7 @@
                      (let ((values
                              (multiple-value-list
                               (apply
-                               (function ,function-name)
+                               (fnrecord-function ,fnrecord)
                                (loop for wrapper in (list-of-arguments)
                                      collect (eql-ntype-object (wrapper-ntype wrapper)))))))
                        (if (= 1 (length values))
@@ -83,7 +83,7 @@
   `(ntype-subtypecase (wrapper-ntype ,wrapper)
      ((not ,type) (abort-specialization))))
 
-(defmacro define-differentiator (function-name lambda-list index &body body)
+(defmacro differentiator-lambda (function-name lambda-list index &body body)
   (multiple-value-bind (required optional rest keyword)
       (alexandria:parse-ordinary-lambda-list lambda-list)
     (unless (null keyword)
@@ -110,7 +110,11 @@
        (declaim (inline ,instruction-name))
        (defun ,instruction-name ,arguments
          (the (values ,@result-types &optional)
-              (funcall (function ,parent-name) ,@arguments))))
+              ,(trivia:match parent-name
+                 ((list 'setf (and function-name (type non-nil-symbol)))
+                  `(setf (,function-name ,@(rest arguments)) ,(first arguments)))
+                 ((and function-name (type non-nil-symbol))
+                  `(,function-name ,@arguments))))))
      (define-fnrecord ,instruction-name ,arguments
        (:parent ,parent-name)
        (:specializer ,@body))))

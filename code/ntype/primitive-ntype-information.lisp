@@ -38,7 +38,7 @@
       (non-nil-symbol ,+word-bits+)
       (null ,+word-bits+)
       (symbol ,+word-bits+)
-      (cons ,(* 2 +word-bits+))
+      (cons ,+word-bits+)
       (list ,+word-bits+)
       (base-char ,+base-char-bits+)
       (character ,+character-bits+)

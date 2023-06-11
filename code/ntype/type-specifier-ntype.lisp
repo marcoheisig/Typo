@@ -92,10 +92,24 @@
 
 (defmethod type-specifier-ntype ((class class))
   (if (subtypep class 'array)
-      (make-array-ntype
-       :simplep (subtypep class 'simple-array)
-       :dimensions (if (subtypep class 'vector) '(*) '*)
-       :element-type (array-element-type (class-prototype class)))
+      (let* ((simplep (subtypep class 'simple-array))
+             (dimensions (if (subtypep class 'vector) '(*) '*))
+             (element-type
+               (or (loop for primitive-ntype across *primitive-ntypes*
+                         for element-type = (ntype-type-specifier primitive-ntype)
+                         when (subtypep class `(array ,element-type))
+                           do (return element-type))
+                   '*)))
+        (values
+         (make-array-ntype
+          :simplep simplep
+          :dimensions dimensions
+          :element-type element-type)
+         (subtypep
+          `(,(if simplep 'simple-array 'array)
+            ,element-type
+            ,dimensions)
+          class)))
       (find-primitive-ntype class)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
