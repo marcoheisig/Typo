@@ -39,13 +39,23 @@
 (defmethod ntype-subtypepc2
     ((ntype1 eql-ntype)
      (ntype2 eql-ntype))
-  (not (eql (eql-ntype-object ntype1)
-            (eql-ntype-object ntype2))))
+  (values
+   (not (eql (eql-ntype-object ntype1)
+             (eql-ntype-object ntype2)))
+   t))
 
 (defmethod ntype-subtypepc2
     ((ntype1 eql-ntype)
      (ntype2 ntype))
   (if (typep (eql-ntype-object ntype1)
              (ntype-type-specifier ntype2))
+      (values nil t)
+      (values t t)))
+
+(defmethod ntype-subtypepc2
+    ((ntype1 ntype)
+     (ntype2 eql-ntype))
+  (if (typep (eql-ntype-object ntype2)
+             (ntype-type-specifier ntype1))
       (values nil t)
       (values t t)))
