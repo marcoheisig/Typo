@@ -87,10 +87,15 @@
 
 (declaim (inline choose))
 (defun choose (boolean a b)
-  (the (values generalized-boolean &optional)
-       (if boolean
-           a
-           b)))
+  (declare (generalized-boolean boolean))
+  (if boolean a b))
+
+(declaim (inline cswap))
+(defun cswap (boolean a b)
+  (declare (generalized-boolean boolean))
+  (if boolean
+      (values a b)
+      (values b a)))
 
 (declaim (inline prog2-fn))
 (defun prog2-fn (a b)

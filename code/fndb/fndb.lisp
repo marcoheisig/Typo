@@ -149,6 +149,8 @@
       (fdefinition function-name)
       (trivia:match function-name
         ((list 'setf (and name (type symbol)))
+         ;; The CL standard doesn't guarantee that every (setf foo) therein is
+         ;; a function, so we use the equivalent Typo functions.
          (if (eq (symbol-package name)
                  (find-package "CL"))
              (let* ((package (find-package "TYPO.CL-STUBS"))
@@ -158,7 +160,16 @@
                                (setf (,name array index) value))))
                (fdefinition `(setf ,new-name)))
              (trivia.fail:fail)))
-        (_ (error "Cannot find fdefinition of ~S." function-name)))))
+        ((and name (type symbol))
+         (when (macro-function name)
+           (error "The symbol ~S denotes a macro, not a function." name))
+         (when (special-operator-p name)
+           (lambda (&rest args)
+             (declare (ignore args))
+             (error "Call to special operator ~A as if it was a function."
+                    name))))
+        (_
+         (error "Cannot find fdefinition of ~S." function-name)))))
 
 (defstruct (fndb
             (:predicate fndbp)
@@ -197,23 +208,29 @@
             (t nil)))))
 
 (defun ensure-fnrecord (fnrecord-designator)
-  (if (fnrecordp fnrecord-designator)
-      fnrecord-designator
-      (or (find-fnrecord fnrecord-designator nil)
-          (if (functionp fnrecord-designator)
-              (make-instance 'minimal-fnrecord
-                :name (function-name fnrecord-designator)
-                :function fnrecord-designator)
-              (make-instance 'minimal-fnrecord
-                :name fnrecord-designator
-                :function
-                (if (and (fboundp fnrecord-designator)
-                         (functionp (fdefinition fnrecord-designator)))
-                    (fdefinition fnrecord-designator)
-                    (lambda (&rest args)
-                      (declare (ignore args))
-                      (error "Call to unbound function ~S."
-                             fnrecord-designator))))))))
+  (cond ((fnrecordp fnrecord-designator)
+         fnrecord-designator)
+        ((find-fnrecord fnrecord-designator nil))
+        ((functionp fnrecord-designator)
+         (make-instance 'minimal-fnrecord
+           :name (function-name fnrecord-designator)
+           :function fnrecord-designator))
+        ((typep fnrecord-designator 'function-name)
+         (make-instance 'minimal-fnrecord
+           :name fnrecord-designator
+           :function
+           (if (and (fboundp fnrecord-designator)
+                    (not (and (symbolp fnrecord-designator)
+                              (or (macro-function fnrecord-designator)
+                                  (special-operator-p fnrecord-designator))))
+                    (functionp (fdefinition fnrecord-designator)))
+               (fdefinition fnrecord-designator)
+               (lambda (&rest args)
+                 (declare (ignore args))
+                 (error "Call to unbound function ~S."
+                        fnrecord-designator)))))
+        (t
+         (error "Invalid function designator: ~S" fnrecord-designator))))
 
 (define-compiler-macro ensure-fnrecord (&whole form fnrecord-designator)
   (if (constantp fnrecord-designator)

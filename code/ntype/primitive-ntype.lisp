@@ -23,6 +23,10 @@
   (declare (ntype-index index))
   (aref *primitive-ntypes* index))
 
+(defun primitive-ntypes ()
+  (loop for index below +primitive-ntype-limit+
+        collect (primitive-ntype-from-index index)))
+
 (defmethod ntype-primitive-ntype
     ((ntype ntype))
   (values (primitive-ntype-from-index (ntype-index ntype)) nil))

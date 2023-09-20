@@ -104,42 +104,75 @@
 ;;;
 ;;; Control Flow Directives
 
- (define-fnrecord choose (boolean a b)
-   (:properties :foldable :movable)
-   (:specializer
-    (ntype-subtypecase (wrapper-ntype boolean)
-      (null (wrap b))
-      ((not null) (wrap a))
-      (t (wrap-default (ntype-union (wrapper-ntype a) (wrapper-ntype b)))))))
+(define-fnrecord choose (boolean a b)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype boolean)
+     (null (wrap b))
+     ((not null) (wrap a))
+     (t (wrap-default (ntype-union (wrapper-ntype a) (wrapper-ntype b)))))))
+
+(define-fnrecord cswap (boolean a b)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype boolean)
+     ((not null)
+      (wrap (values a b)))
+     (null
+      (wrap (values b a)))
+     (t
+      (let ((union (ntype-union (wrapper-ntype a) (wrapper-ntype b))))
+        (wrap-default union union))))))
 
 (define-fnrecord and-fn (&rest args)
   (:properties :foldable :movable)
   (:specializer
-   (let ((sure t))
-     (loop for arg in args do
+   (let ((filtered-args '()))
+     (loop for (arg . rest) on args do
        (ntype-subtypecase (wrapper-ntype arg)
+         ;; If any of the arguments is always NIL, return NIL.
          (null (return-from and-fn (wrap nil)))
-         ((not null))
-         (t (setf sure nil))))
-     (if sure
-         (wrap t)
-         (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+         ;; If an argument is never NIL, and it isn't the last form, it can be
+         ;; filtered out.
+         ((not null)
+          (when (null rest)
+            (push arg filtered-args)))
+         (t
+          (push arg filtered-args))))
+     (let ((n-before (length args))
+           (n-after (length filtered-args)))
+       (cond ((= n-after 0)
+              (wrap t))
+             ((= n-after 1)
+              (first filtered-args))
+             ((< n-after n-before)
+              (apply (function-specializer 'and-fn) (reverse filtered-args)))
+             (t (wrap-default
+                 (ntype-union
+                  (type-specifier-ntype 'null)
+                  (wrapper-ntype (first filtered-args))))))))))
 
 (define-fnrecord or-fn (&rest args)
   (:properties :foldable :movable)
   (:specializer
-   (let ((sure t))
-     (loop for arg in args do
-       (ntype-subtypecase (wrapper-ntype arg)
-         ((not null)
-          (if sure
-              (return-from or-fn arg)
-              (wrap-default (true-ntype))))
-         (null)
-         (t (setf sure nil))))
-     (if sure
-         (wrap nil)
-         (wrap-default (type-specifier-ntype 'generalized-boolean))))))
+   (let ((filtered-args (remove (ntype-of nil) args :key #'wrapper-ntype :test #'ntype=)))
+     (let ((n-before (length args))
+           (n-after (length filtered-args)))
+       (cond ((= n-after 0)
+              (wrap nil))
+             ((= n-after 1)
+              (first filtered-args))
+             ((< n-after n-before)
+              (apply (function-specializer 'or-fn) filtered-args))
+             (t
+              (let ((result-ntype (empty-ntype)))
+                (loop for arg in args do
+                  (let ((arg-ntype (wrapper-ntype arg)))
+                    (setf result-ntype (ntype-union result-ntype arg-ntype))
+                    (ntype-subtypecase arg-ntype
+                      ((not null)
+                       (loop-finish)))))
+                (wrap-default result-ntype))))))))
 
  (define-fnrecord prog2-fn (a b)
    (:properties :foldable :movable)
@@ -147,3 +180,17 @@
     (wrap-function
      (ensure-fnrecord 'prog2-fn)
      (list a b) (list (wrapper-ntype b)) '() nil)))
+
+(define-fnrecord if (test then &optional (else (wrap nil)))
+   (:properties :movable)
+  (:specializer (wrap (if-fn test then else))))
+
+(define-fnrecord or (&rest args)
+  (:properties :movable)
+  (:specializer
+   (apply (function-specializer 'or-fn) args)))
+
+(define-fnrecord and (&rest args)
+  (:properties :movable)
+  (:specializer
+   (apply (function-specializer 'and-fn) args)))

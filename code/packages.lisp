@@ -50,6 +50,7 @@
      #:ntype-primitive-ntype
      #:+primitive-ntype-limit+
      #:primitive-ntype
+     #:primitive-ntypes
      #:primitive-ntype-p
      #:primitive-ntype-from-index
      #:eql-ntype-p
@@ -162,6 +163,8 @@
      #:two-arg-char-not-lessp
      #:two-arg-base-char-not-lessp
      ;; auxiliary.lisp
+     #:choose
+     #:cswap
      #:and-fn
      #:or-fn
      #:prog2-fn
