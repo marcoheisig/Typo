@@ -27,7 +27,7 @@
 (define-simple-instruction (/= two-arg-complex-single-float/=) (generalized-boolean) (complex-single-float complex-single-float))
 (define-simple-instruction (/= two-arg-complex-double-float/=) (generalized-boolean) (complex-double-float complex-double-float))
 (define-simple-instruction (/= two-arg-complex-long-float/=) (generalized-boolean) (complex-long-float complex-long-float))
-(define-instruction (= two-arg/=) (generalized-boolean) (a b)
+(define-instruction (/= two-arg/=) (generalized-boolean) (a b)
   (ntype-subtypecase
       (ntype-contagion
        (wrapper-ntype a)
