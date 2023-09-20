@@ -8,7 +8,7 @@
   '(and symbol (not null)))
 
 (deftype function-name ()
-  '(or non-nil-symbol (cons (eql setf) (cons non-nil-symbol))))
+  '(or non-nil-symbol (cons (eql setf) (cons non-nil-symbol null))))
 
 (deftype variable-name ()
   'non-nil-symbol)
