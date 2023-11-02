@@ -4,17 +4,16 @@
 ;;;
 ;;; COMPLEX
 
-(define-fnrecord complex (realpart &optional (imagpart nil imagpart-supplied-p))
+(define-fnrecord complex
+    (realpart &optional (imagpart 0))
   (:properties :foldable :movable)
   (:specializer
    (let* ((realpart-ntype (wrapper-ntype realpart))
-          (imagpart-ntype
-            (if imagpart-supplied-p
-                (wrapper-ntype imagpart)
-                (coerce 0 (ntype-type-specifier (upgraded-complex-part-ntype realpart-ntype))))))
+          (imagpart-ntype (wrapper-ntype imagpart)))
      (if (and (eql-ntype-p imagpart)
-              (eql (eql-ntype-object imagpart) 0))
-         (wrap realpart)
+              (eql (eql-ntype-object imagpart) 0)
+              (ntype-subtypep realpart-ntype (type-specifier-ntype 'rational)))
+         realpart
          (ntype-subtypecase (ntype-contagion realpart-ntype imagpart-ntype)
            (short-float
             (wrap
