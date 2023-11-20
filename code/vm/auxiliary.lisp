@@ -97,6 +97,12 @@
       (values a b)
       (values b a)))
 
+(defun cswap2 (boolean a1 a2 b1 b2)
+  (declare (generalized-boolean boolean))
+  (if boolean
+      (values a1 a2 b1 b2)
+      (values b1 b2 a1 a2)))
+
 (declaim (inline prog2-fn))
 (defun prog2-fn (a b)
   (prog2 a b))

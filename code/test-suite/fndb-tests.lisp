@@ -39,25 +39,18 @@ subexpressions match those predicted by Typo."
             #'alexandria:map-product
             ;; Check that each value matches its predicted type.
             (lambda (&rest ntypes)
-              (multiple-value-bind (required optional rest)
-                  (infer-ntypes first ntypes)
-                (let ((n-required (length required))
-                      (n-optional (length optional))
-                      (restp (not (null rest))))
-                  (is (<= n-required n-values))
-                  (when (not restp)
-                    (is (<= n-values (+ n-required n-optional))))
-                  (loop for index from 0 below n-required do
-                    (let ((value (nth index values)))
-                      (unless (and (numberp value) (zerop value))
-                        (is (lax-typep (nth index values)
-                                       (ntype-type-specifier (nth index required)))))))
-                  (loop for index from 0 below n-optional do
-                    (is (lax-typep (nth (+ n-required index) values)
-                                   (ntype-type-specifier (nth index optional)))))
-                  (when restp
-                    (loop for value in (nthcdr (+ n-required n-optional) values) do
-                      (is (lax-typep value (ntype-type-specifier rest))))))))
+              (let* ((values-ntype (infer-values-ntype first ntypes))
+                     (n-required (values-ntype-minimum-number-of-values values-ntype))
+                     (n-optional (values-ntype-number-of-optional-values values-ntype))
+                     (restp (not (null (values-ntype-rest-ntype values-ntype)))))
+                (is (<= n-required n-values))
+                (when (not restp)
+                  (is (<= n-values (+ n-required n-optional))))
+                (loop for value in values for n from 0 do
+                  (is (lax-typep
+                       value
+                       (ntype-type-specifier
+                        (values-ntype-nth-value-ntype n values-ntype)))))))
             (loop for ntype in (mapcar #'ntype-of args)
                   collect
                   (if (eql-ntype-p ntype)

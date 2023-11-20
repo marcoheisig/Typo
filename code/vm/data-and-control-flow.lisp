@@ -124,6 +124,25 @@
       (let ((union (ntype-union (wrapper-ntype a) (wrapper-ntype b))))
         (wrap-default union union))))))
 
+(define-fnrecord cswap2 (boolean a1 a2 b1 b2)
+  (:properties :foldable :movable)
+  (:specializer
+   (ntype-subtypecase (wrapper-ntype boolean)
+     ((not null)
+      (wrap (values a1 a2 b1 b2)))
+     (null
+      (wrap (values b1 b2 a1 a2)))
+     (t
+      (if (and (eql a1 a2)
+               (eql b1 b2))
+          (let* ((x (wrap (cswap boolean a1 b1)))
+                 (l (wrapper-nth-value 0 x))
+                 (r (wrapper-nth-value 1 x)))
+            (wrap (values l l r r)))
+          (let ((union1 (ntype-union (wrapper-ntype a1) (wrapper-ntype b1)))
+                (union2 (ntype-union (wrapper-ntype a2) (wrapper-ntype b2))))
+            (wrap-default union1 union2 union1 union2)))))))
+
 (define-fnrecord and-fn (&rest args)
   (:properties :foldable :movable)
   (:specializer

@@ -100,6 +100,7 @@
      #:wrap-default
      #:wrap-default*
      #:wrapper-ntype
+     #:wrapper-nth-value
      #:wrap-constant
      #:wrap-function
      #:assert-wrapper-type
@@ -109,7 +110,7 @@
      #:function-differentiator
      #:specialize
      #:differentiate
-     #:infer-ntypes)
+     #:infer-values-ntype)
     ;; Typo VM Operations
     #3=
     (:export
@@ -165,6 +166,7 @@
      ;; auxiliary.lisp
      #:choose
      #:cswap
+     #:cswap2
      #:and-fn
      #:or-fn
      #:prog2-fn

@@ -23,7 +23,7 @@
 (define-special-function (wrap-function *wrap-function*)
     (fnrecord wrappers required-ntypes optional-ntypes rest-ntype))
 
-(define-special-function (wrapper-nth-value-ntype *wrapper-nth-value-ntype*)
+(define-special-function (wrapper-nth-value *wrapper-nth-value*)
   (n wrapper))
 
 (define-special-function (wrapper-ntype *wrapper-ntype*)

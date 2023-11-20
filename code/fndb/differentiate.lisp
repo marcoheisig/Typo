@@ -3,12 +3,14 @@
 (defun differentiate
     (function wrappers index
      &key
-       wrap-constant wrap-function wrapper-nth-value-ntype
-       (wrapper-ntype (lambda (w) (funcall wrapper-nth-value-ntype 0 w))))
+       wrap-constant
+       wrap-function
+       wrapper-ntype
+       wrapper-nth-value)
   (check-type index argument-index)
   (let ((*wrap-constant* wrap-constant)
         (*wrap-function* wrap-function)
-        (*wrapper-nth-value-ntype* wrapper-ntype)
+        (*wrapper-nth-value* wrapper-nth-value)
         (*wrapper-ntype* wrapper-ntype)
         (fnrecord (find-fnrecord function nil)))
     (unless (< -1 index (length wrappers))
@@ -27,30 +29,29 @@
         (apply (fnrecord-differentiator fnrecord) index wrappers))))
 
 (defun diff (function arguments n)
+  ;; We represent wrappers as list of the form (expression values-ntype)
   (flet ((wrap-constant (object)
-           (list object (list (ntype-of object)) '() nil))
+           (list object
+                 (make-values-ntype (list (ntype-of object)) '() nil)))
          (wrap-function (function arguments required optional rest)
-           (list (list* function (mapcar #'first arguments)) required optional rest))
-         (wrapper-nth-value-ntype (index wrapper)
-           (trivia:ematch wrapper
-             ((list _ required optional rest)
-              (let ((n-required (length required)))
-                (if (< index n-required)
-                    (nth index required)
-                    (let ((n-optional (length optional)))
-                      (if (< index (+ n-required n-optional))
-                          (nth (- index n-required) optional)
-                          (if (null rest)
-                              (type-specifier-ntype 'null)
-                              rest)))))))))
-    (destructuring-bind (expression required optional rest)
+           (list `(,function ,@(mapcar #'first arguments))
+                 (make-values-ntype required optional rest)))
+         (wrapper-ntype (wrapper)
+           (values-ntype-nth-value-ntype 0 (second wrapper)))
+         (wrapper-nth-value (index wrapper)
+           (list `(nth-value ,index ,(first wrapper))
+                 (make-values-ntype
+                  (list (values-ntype-nth-value-ntype index (second wrapper)))
+                  '()
+                  nil))))
+    (destructuring-bind (expression values-ntype)
         (differentiate
          function
-         (loop for (expr . ntype) in arguments
+         (loop for (expr ntype) in arguments
                collect
-               (list expr (list ntype) '() nil))
+               (list expr (make-values-ntype (list ntype) '() nil)))
          n
          :wrap-constant #'wrap-constant
          :wrap-function #'wrap-function
-         :wrapper-nth-value-ntype #'wrapper-nth-value-ntype)
-      (values expression required optional rest))))
+         :wrapper-nth-value #'wrapper-nth-value)
+      (values expression values-ntype))))
