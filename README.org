@@ -29,6 +29,21 @@ type specifiers is fast and mostly non-consing:
 ;;; Evaluation took:
 ;;;  0.539 seconds of real time
 ;;;  0 bytes consed
+
+(dolist (t1 '(single-float double-float))
+  (dolist (t2 '(complex rational string))
+    (let ((nt1 (type-specifier-ntype t1))
+          (nt2 (type-specifier-ntype t2)))
+      (time
+       (loop repeat (expt 10 6) do
+         (ntype-union nt1 nt2)))
+      (time
+       (loop repeat (expt 10 6) do
+         (ntype-contagion nt1 nt2)))
+      (time
+       (loop repeat (expt 10 6) do
+         (ntype-intersection nt1 nt2))))))
+;; => 15-33 nanoseconds per operation, 0 bytes consed
 #+END_SRC
 
 Also, reasoning about ntypes is much faster than reasoning about type

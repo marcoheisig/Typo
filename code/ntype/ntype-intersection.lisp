@@ -129,7 +129,9 @@
                              collect (if (eq a '*) b a))))))))
            (simplep (or (array-ntype-simplep ntype1)
                         (array-ntype-simplep ntype2))))
-      (make-array-ntype
-       :element-type element-type
-       :dimensions dimensions
-       :simplep simplep))))
+      (values
+       (make-array-ntype
+        :element-type element-type
+        :dimensions dimensions
+        :simplep simplep)
+       t))))
