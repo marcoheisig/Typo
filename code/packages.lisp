@@ -361,6 +361,17 @@
      #:the-real
      #:the-rational
      #:the-integer
+     #:the-bit
+     #:the-unsigned-byte
+     #:the-unsigned-byte-8
+     #:the-unsigned-byte-16
+     #:the-unsigned-byte-32
+     #:the-unsigned-byte-64
+     #:the-signed-byte
+     #:the-signed-byte-8
+     #:the-signed-byte-16
+     #:the-signed-byte-32
+     #:the-signed-byte-64
      #:the-float
      #:the-short-float
      #:the-single-float

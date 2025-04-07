@@ -78,4 +78,5 @@
      (:file "sub")
      (:file "sqrt")
      (:file "string")
-     (:file "tan")))))
+     (:file "tan")
+     (:file "int-ops")))))
