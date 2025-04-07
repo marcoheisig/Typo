@@ -93,7 +93,7 @@
                   ((not ,type)
                    (abort-specialization))
                   ((eql ,(coerce 0 type))
-                   (assert-wrapper-type b double-float)
+                   (assert-wrapper-type b ,type)
                    (return-from ,name b)))
                 (ntype-subtypecase (wrapper-ntype b)
                   ((not ,type)
