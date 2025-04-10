@@ -41,13 +41,13 @@
      (:file "complex-part-ntype")))
    (:module "fndb"
     :components
-    ((:file "function-lambda-lists")
-     (:file "function-name")
+    ((:file "function-info")
      (:file "conditions")
      (:file "wrap")
      (:file "fndb")
      (:file "define-fnrecord")
      (:file "macros")
+     (:file "lambda-expression-specializer")
      (:file "specialize")
      (:file "differentiate")))
    (:module "vm"

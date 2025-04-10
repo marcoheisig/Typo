@@ -5,7 +5,7 @@
    "Returns the ntype corresponding to the Nth argument of the supplied
 VALUES-NTYPE."))
 
-(defgeneric values-ntype-mininum-number-of-values (values-ntype)
+(defgeneric values-ntype-minimum-number-of-values (values-ntype)
   (:documentation
    "Returns an integer that is the mininum number of values returned by the
 supplied VALUES-NTYPE."))
@@ -29,6 +29,10 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
   (:documentation
    "Returns the type specifier corresponding to the supplied VALUES-NTYPE."))
 
+(defgeneric values-ntype-union (vn1 vn2)
+  (:documentation
+   "Returns the values ntype that is the union of the two supplied ones."))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; VALUES-NTYPE
@@ -39,8 +43,9 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
             (:constructor nil)))
 
 (defmethod values-ntype-nth-value-ntype ((n integer) (values-ntype values-ntype))
-  (error "Out-of-bounds access to position ~D of the values ntype ~S."
-         n values-ntype))
+  (if (< n 0)
+      (error "Index must be non-negative, got ~D." n)
+      (ntype-of nil)))
 
 (defmethod values-ntype-rest-ntype ((values-ntype values-ntype))
   nil)
@@ -134,6 +139,13 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
 (defmethod values-ntype-number-of-non-rest-values ((single-value-values-ntype single-value-values-ntype))
   1)
 
+(defmethod values-ntype-union ((svvn1 single-value-values-ntype)
+                               (svvn2 single-value-values-ntype))
+  (make-single-value-values-ntype
+   (ntype-union
+    (single-value-values-ntype-ntype svvn1)
+    (single-value-values-ntype-ntype svvn2))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; FULL-VALUES-NTYPE
@@ -200,6 +212,28 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
 
 (defmethod values-ntype-rest-ntype ((full-values-ntype full-values-ntype))
   (full-values-ntype-rest full-values-ntype))
+
+(defmethod values-ntype-union ((vn1 values-ntype)
+                               (vn2 values-ntype))
+  (let* ((minimum (min (values-ntype-minimum-number-of-values vn1)
+                       (values-ntype-minimum-number-of-values vn2)))
+         (nonrest1 (values-ntype-number-of-non-rest-values vn1))
+         (nonrest2 (values-ntype-number-of-non-rest-values vn2))
+         (rest1 (values-ntype-rest-ntype vn1))
+         (rest2 (values-ntype-rest-ntype vn1)))
+    (make-values-ntype
+     (loop for index below minimum
+           collect (ntype-union (values-ntype-nth-value-ntype index vn1)
+                                (values-ntype-nth-value-ntype index vn2)))
+     (loop for index from minimum below (max nonrest1 nonrest2)
+           collect (ntype-union
+                    (values-ntype-nth-value-ntype index vn1)
+                    (values-ntype-nth-value-ntype index vn2)))
+     (cond ((and (ntypep rest1)
+                 (ntypep rest2))
+            (ntype-union rest1 rest2))
+           ((ntypep rest1) rest1)
+           ((ntypep rest2) rest2)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

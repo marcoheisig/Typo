@@ -16,4 +16,5 @@
    (:file "test-suite")
    (:file "test-objects")
    (:file "ntype-tests")
-   (:file "fndb-tests")))
+   (:file "fndb-tests")
+   (:file "lambda-tests")))

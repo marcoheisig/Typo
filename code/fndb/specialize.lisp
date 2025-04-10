@@ -43,6 +43,7 @@ supplied FUNCTION.
         (*wrapper-nth-value* wrapper-nth-value)
         (fnrecord (ensure-fnrecord function)))
     (handler-case (apply (fnrecord-specializer fnrecord) wrappers)
+      #+(or)
       (program-error (e)
         (if (not (<= (fnrecord-min-arguments fnrecord)
                      (length wrappers)

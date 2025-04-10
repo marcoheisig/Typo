@@ -1,5 +1,14 @@
 (in-package #:typo.fndb)
 
+(declaim (ftype (function (function) (values (or null function-name) &optional))
+                function-name))
+(defun function-name (function)
+  (let ((maybe-name (nth-value 2 (function-lambda-expression function))))
+    (cond ((typep maybe-name 'function-name)
+           maybe-name)
+          ((null maybe-name)
+           nil))))
+
 (defun function-lambda-list (function &optional (errorp t))
   "Return the lambda list of FUNCTION, or an approximation thereof."
   (let ((arglist (trivial-arguments:arglist function)))

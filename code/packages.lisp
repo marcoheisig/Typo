@@ -73,6 +73,7 @@
      #:values-ntype-number-of-non-rest-values
      #:values-ntype-rest-ntype
      #:values-ntype-type-specifier
+     #:values-ntype-union
      #:values-type-specifier-values-ntype
      #:make-values-ntype
      #:make-single-value-values-ntype)

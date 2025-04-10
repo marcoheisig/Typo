@@ -8,6 +8,8 @@
 
 (defgeneric fnrecord-function-designator (fnrecord))
 
+(defgeneric fnrecord-lambda-list (fnrecord))
+
 (defgeneric fnrecord-min-arguments (fnrecord))
 
 (defgeneric fnrecord-max-arguments (fnrecord))
@@ -113,7 +115,9 @@
      &rest initargs
      &key
        (name (fnrecord-name instance))
-       (function (ensure-fdefinition name))
+       (function (if (not name)
+                     (fnrecord-function instance)
+                     (ensure-fdefinition name)))
        (lambda-list (function-lambda-list function))
        (min-arguments (nth-value 0 (lambda-list-arity lambda-list)))
        (max-arguments (nth-value 1 (lambda-list-arity lambda-list)))
