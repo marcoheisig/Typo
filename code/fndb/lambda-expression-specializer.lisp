@@ -174,27 +174,35 @@
                   (2 (values (first rest) (second rest) nil))
                   (3 (values-list rest))
                   (otherwise (error 'give-up)))
-              (let ((test-wrapper (process test env))
-                    (then-wrapper (process then env))
-                    (else-wrapper (process else env)))
+              (let ((test-wrapper (process test env)))
                 (ntype-subtypecase (wrapper-ntype test-wrapper)
-                  ((not null) then-wrapper)
-                  (null else-wrapper)
+                  ((not null)
+                   (process then env))
+                  (null
+                  (process else env))
                   (t
-                   (make-les-wrapper
-                    :values-ntype
-                    (values-ntype-union
-                     (les-wrapper-values-ntype then-wrapper)
-                     (les-wrapper-values-ntype else-wrapper))))))))
+                   (handler-case
+                       (make-les-wrapper
+                        :values-ntype
+                        (values-ntype-union
+                         (les-wrapper-values-ntype (process then env))
+                         (les-wrapper-values-ntype (process else env))))
+                     (error () (error 'give-up))))))))
            ;; FUNCTION special forms
            ((function)
             (unless (and (= 1 (length rest))
                          (typep (first rest) 'function-designator))
               (error 'give-up))
             (wrap-constant (fdefinition (first rest))))
+           ;; THE special forms
+           ((the)
+            (unless (= 2 (length rest))
+              (error 'give-up))
+            ;; TODO add type information
+            (process (second rest) env))
            ;; LET special forms
            ((let)
-            (unless (and (>= 1 (length rest))
+            (unless (and (<= 1 (length rest))
                          (listp (first rest))
                          (every
                           (lambda (binding)
@@ -211,7 +219,7 @@
                            (cons (first binding)
                                  (process (second binding) env))))
                      (first rest))))
-              (process-progn (cdr rest) (append env-entries env))))
+              (process-progn (alexandria:parse-body (cdr rest)) (append env-entries env))))
            ;; BLOCK special forms
            ((block) (process-progn (cdr rest) env))
            ;; MULTIPLE-VALUE-BIND special forms
@@ -236,7 +244,7 @@
               ;; macros
               ((macro-function symbol)
                (multiple-value-bind (expansion expanded-p)
-                   (macroexpand-1 `(symbol ,@rest))
+                   (macroexpand-1 `(,symbol ,@rest))
                  (if expanded-p
                      (process expansion env)
                      (error 'give-up))))

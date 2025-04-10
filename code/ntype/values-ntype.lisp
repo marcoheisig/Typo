@@ -90,7 +90,7 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
            (print-spec
              (if (not rest)
                  (if (zerop n-optional)
-                     `((values-ntype ,@required))
+                     `((values-ntype ,@required &optional))
                      `((values-ntype ,@required)
                        (&optional ,@optional)))
                  (if (zerop n-optional)
