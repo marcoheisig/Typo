@@ -20,6 +20,23 @@
 
 (defmethod initialize-instance :after ((fnrecord minimal-fnrecord) &key &allow-other-keys)
   "Attempt to turn the minimal fnrecord into a full fnrecord via introspection."
+  ;; Attempt to obtain the function's ftype declaration
+  (alexandria:when-let (name (fnrecord-name fnrecord))
+    (multiple-value-bind (category local-p decls) (trivial-cltl2:function-information name)
+      (declare (ignore category local-p))
+      (alexandria:when-let* ((ftype (alexandria:assoc-value decls 'ftype))
+                             (specializer (ftype-specializer fnrecord ftype)))
+        (let ((lambda-list (function-lambda-list name)))
+          (multiple-value-bind (min-arguments max-arguments)
+              (lambda-list-arity lambda-list)
+            ;; Turn into a full fnrecord
+            (change-class fnrecord 'full-fnrecord
+                          :name name
+                          :lambda-list lambda-list
+                          :min-arguments min-arguments
+                          :max-arguments max-arguments
+                          :specializer specializer)
+            (return-from initialize-instance nil))))))
   (let ((function (fnrecord-function fnrecord)))
     ;; Attempt to obtain the function's lambda expression
     (multiple-value-bind (lambda-expression closure-p maybe-name)
@@ -127,6 +144,57 @@
 (define-condition give-up (serious-condition)
   ()
   (:documentation "Signaled to give up lambda expression type inference."))
+
+(defun values-ntype-components (values-ntype)
+  "Return required, optional and rest ntypes as three values for VALUES-NTYPE."
+  (values (mapcar (alexandria:rcurry #'values-ntype-nth-value-ntype values-ntype)
+                  (alexandria:iota (values-ntype-minimum-number-of-values values-ntype)))
+          (mapcar (alexandria:rcurry #'values-ntype-nth-value-ntype values-ntype)
+                  (alexandria:iota (values-ntype-number-of-optional-values values-ntype)
+                                   :start (values-ntype-minimum-number-of-values values-ntype)))
+          (values-ntype-rest-ntype values-ntype)))
+
+(defun ftype-specializer (fnrecord ftype)
+  "Returns a specializer according to FTYPE, or nil if unable."
+  (trivia:match ftype
+    ((list 'function arg-typespec value-typespec)
+     (unless (or (member '&key arg-typespec)
+                 (eql value-typespec '*))
+       ;; Parse arg-typespec into ntypes. We don't currently support keyword
+       ;; arguments, so we can reuse values-ntype machinary.
+       (multiple-value-bind (required-args optional-args rest-args)
+           (values-ntype-components (values-type-specifier-values-ntype (cons 'values arg-typespec)))
+         ;; Parse value-typespec into ntypes.
+         (multiple-value-bind (required-values optional-values rest-values)
+             (values-ntype-components (values-type-specifier-values-ntype
+                                       (typecase value-typespec
+                                         ((cons (eql values)) value-typespec)
+                                         (t (cons 'values value-typespec)))))
+           (lambda (&rest args)
+             (handler-case
+                 (progn
+                   ;; Check argument types according to arg-typespec
+                   (let ((args args)
+                         (required required-args)
+                         (optional optional-args)
+                         (rest rest-args))
+                     (loop (unless args
+                             (when required (error 'give-up))
+                             (return))
+                           (let ((arg (pop args)))
+                             (cond (required
+                                    (unless (ntype-subtypep (wrapper-ntype arg) (pop required))
+                                      (error 'give-up)))
+                                   (optional
+                                    (unless (ntype-subtypep (wrapper-ntype arg) (pop optional))
+                                      (error 'give-up)))
+                                   (rest
+                                    (unless (ntype-subtypep (wrapper-ntype arg) rest)
+                                      (error 'give-up)))
+                                   (t (error 'give-up))))))
+                   (wrap-function fnrecord args required-values optional-values rest-values))
+               (give-up ()
+                 (wrap-function fnrecord args '() '() (universal-ntype)))))))))))
 
 (defun lambda-expression-specializer (fnrecord lambda-expression)
   "Returns a suitable specializer for the supplied lambda expression."
