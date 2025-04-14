@@ -9,7 +9,8 @@
    "introspect-environment"
    "trivia"
    "trivial-arguments"
-   "trivial-garbage")
+   "trivial-garbage"
+   "trivial-cltl2")
 
   :in-order-to ((test-op (test-op "typo.test-suite")))
 
