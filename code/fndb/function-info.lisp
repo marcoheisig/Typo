@@ -1,5 +1,13 @@
 (in-package #:typo.fndb)
 
+(declaim (list *anything*))
+(defparameter *anything* '())
+
+(declaim (notinline anything))
+(defun anything (&rest rest)
+  (declare (ignore rest))
+  (values-list *anything*))
+
 (declaim (ftype (function (function) (values (or null function-name) &optional))
                 function-name))
 (defun function-name (function)
@@ -39,7 +47,7 @@ in a way that incorporates any available FTYPE information."
                    (listp (second ftype)))
         (return-from annotated-function-lambda-expression
           (values lambda-expression closure-p name)))
-      ;; Ensure the lambda expression is available and well formed.
+      ;; Check whether the lambda expression is available and well formed.
       (if (and (consp lambda-expression)
                (eql (first lambda-expression) 'lambda)
                (consp (rest lambda-expression))
@@ -60,16 +68,13 @@ in a way that incorporates any available FTYPE information."
                  name))))
           ;; Lambda expression is not available, create a dummy lambda
           ;; expression that captures ftype information.
-
-          ;; FIXME: handle the case where `function-lambda-list' is not
-          ;; available either
-          (let ((lambda-list (function-lambda-list function)))
+          (let ((lambda-list (function-lambda-list function nil)))
             (multiple-value-bind (ftype-declarations values-type)
                 (ftype-declarations-and-values-type ftype lambda-list)
               (values
                `(lambda ,lambda-list
                   ,@ftype-declarations
-                  (the ,values-type %anything%))
+                  (the ,values-type (anything)))
                closure-p
                name)))))))
 
@@ -81,34 +86,42 @@ in a way that incorporates any available FTYPE information."
         (alexandria:parse-ordinary-lambda-list lambda-list)
       (declare (ignore aaok aaux))
       (values
-       `(;; required
-         ,@(loop for type in treq
-                 for argument in areq
-                 collect
-                 `(declare (type ,type ,argument)))
-         ;; &optional
-         ,@(loop for type in topt
-                 for (argument init) in aopt
-                 when (constantp init)
-                   collect
-                 `(declare (type (or ,type (eql ,(eval init))) ,argument)))
-         ;; &key
-         ,@(when (and tkeyp akeyp)
-             (list
-              (loop for (keyword type) in tkey
-                    for entry = (find keyword akey :key #'caar)
-                    when (and entry (constantp (second entry)))
-                      collect
-                    `(declare (type (or ,type (eql ,(eval (second entry))))
-                                    ,(second (first entry)))))))
-         ;; &rest
-         ,@(when (and trest arest)
-             `((declare (type (or null
-                                  (cons ,trest null)
-                                  (cons ,trest (cons ,trest null))
-                                  (cons ,trest (cons ,trest (cons ,trest null)))
-                                  (cons ,trest (cons ,trest (cons ,trest (cons ,trest)))))
-                              ,arest)))))
+       ;; Only emit declarations when ftype and the lambda list are compatible.
+       (when (and (= (length treq)
+                     (length areq))
+                  (= (length topt)
+                     (length aopt))
+                  (or (and arest trest)
+                      (and (not arest)
+                           (not trest))))
+           `(;; required
+             ,@(loop for type in treq
+                     for argument in areq
+                     collect
+                     `(declare (type ,type ,argument)))
+             ;; &optional
+             ,@(loop for type in topt
+                     for (argument init) in aopt
+                     when (constantp init)
+                       collect
+                     `(declare (type (or ,type (eql ,(eval init))) ,argument)))
+             ;; &key
+             ,@(when (and tkeyp akeyp)
+                 (list
+                  (loop for (keyword type) in tkey
+                        for entry = (find keyword akey :key #'caar)
+                        when (and entry (constantp (second entry)))
+                          collect
+                        `(declare (type (or ,type (eql ,(eval (second entry))))
+                                        ,(second (first entry)))))))
+             ;; &rest
+             ,@(when (and trest arest)
+                 `((declare (type (or null
+                                      (cons ,trest null)
+                                      (cons ,trest (cons ,trest null))
+                                      (cons ,trest (cons ,trest (cons ,trest null)))
+                                      (cons ,trest (cons ,trest (cons ,trest (cons ,trest)))))
+                                  ,arest))))))
        tvalues))))
 
 (defun parse-ftype-arg-typespec (arg-typespec)
