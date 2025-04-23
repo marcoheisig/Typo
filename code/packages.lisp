@@ -75,6 +75,7 @@
      #:values-ntype-type-specifier
      #:values-ntype-union
      #:values-type-specifier-values-ntype
+     #:type-specifier-values-ntype
      #:make-values-ntype
      #:make-single-value-values-ntype)
     ;; The Function Database

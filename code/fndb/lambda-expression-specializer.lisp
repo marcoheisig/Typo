@@ -23,7 +23,7 @@
   (let ((function (fnrecord-function fnrecord)))
     ;; Attempt to obtain the function's lambda expression
     (multiple-value-bind (lambda-expression closure-p maybe-name)
-        (function-lambda-expression function)
+        (annotated-function-lambda-expression function)
       (declare (ignore closure-p))
       (unless (and (consp lambda-expression)
                    (eql (first lambda-expression) 'lambda)
@@ -124,10 +124,6 @@
                  collect (values-ntype-nth-value-ntype index values-ntype))
            (values-ntype-rest-ntype values-ntype))))))
 
-(define-condition give-up (serious-condition)
-  ()
-  (:documentation "Signaled to give up lambda expression type inference."))
-
 (defun lambda-expression-specializer (fnrecord lambda-expression)
   "Returns a suitable specializer for the supplied lambda expression."
   ;; Abort if the argument is not a lambda expression.
@@ -140,7 +136,17 @@
     (return-from lambda-expression-specializer
       (fnrecord-specializer fnrecord)))
   (labels
-      ((process (form env)
+      ((give-up ()
+         ;; Return a universal les wrapper
+         (make-les-wrapper
+          :values-ntype
+          (make-values-ntype nil nil (universal-ntype))))
+       (give-up-single ()
+         ;; Return a universal les wrapper for single value
+         (make-les-wrapper
+          :values-ntype
+          (make-values-ntype nil (universal-ntype) nil)))
+       (process (form env)
          #+(or) (format *trace-output* "~&Processing ~S~%" form)
          ;; dispatch on the form
          (cond ((atom form)
@@ -148,7 +154,7 @@
                ((and (consp form)
                      (symbolp (first form)))
                 (process-compound-form (first form) (rest form) env))
-               (t (error 'give-up))))
+               (t (give-up))))
        (process-progn (forms env)
          (cond ((null forms)
                 (wrap-constant nil))
@@ -163,7 +169,7 @@
              (if (symbolp form)
                  (let ((entry (assoc form env)))
                    (if (not entry)
-                       (error 'give-up)
+                       (give-up-single)
                        (cdr entry))))))
        (process-compound-form (symbol rest env)
          (case symbol
@@ -173,7 +179,7 @@
                 (case (length rest)
                   (2 (values (first rest) (second rest) nil))
                   (3 (values-list rest))
-                  (otherwise (error 'give-up)))
+                  (otherwise (return-from process-compound-form (give-up))))
               (let ((test-wrapper (process test env)))
                 (ntype-subtypecase (wrapper-ntype test-wrapper)
                   ((not null)
@@ -187,58 +193,60 @@
                         (values-ntype-union
                          (les-wrapper-values-ntype (process then env))
                          (les-wrapper-values-ntype (process else env))))
-                     (error () (error 'give-up))))))))
+                     (error () (give-up))))))))
            ;; FUNCTION special forms
            ((function)
-            (unless (and (= 1 (length rest))
-                         (typep (first rest) 'function-designator))
-              (error 'give-up))
-            (wrap-constant (fdefinition (first rest))))
+            (if (and (= 1 (length rest))
+                     (typep (first rest) 'function-designator))
+                (wrap-constant (fdefinition (first rest)))
+                (give-up)))
            ;; THE special forms
            ((the)
-            (unless (= 2 (length rest))
-              (error 'give-up))
-            ;; TODO add type information
-            (process (second rest) env))
+            (if (= 2 (length rest))
+                ;; TODO: process subexpression and compute values type intersection
+                (make-les-wrapper
+                 :values-ntype
+                 (type-specifier-values-ntype (first rest)))
+                (give-up)))
            ;; LET special forms
            ((let)
-            (unless (and (<= 1 (length rest))
-                         (listp (first rest))
-                         (every
-                          (lambda (binding)
-                            (typep binding
-                                   '(or non-nil-symbol
-                                     (cons non-nil-symbol (cons t null)))))
-                          (first rest)))
-              (error 'give-up))
-            (let ((env-entries
-                    (mapcar
-                     (lambda (binding)
-                       (if (symbolp binding)
-                           (cons binding (wrap-constant nil))
-                           (cons (first binding)
-                                 (process (second binding) env))))
-                     (first rest))))
-              (process-progn (alexandria:parse-body (cdr rest)) (append env-entries env))))
+            (if (and (<= 1 (length rest))
+                     (listp (first rest))
+                     (every
+                      (lambda (binding)
+                        (typep binding
+                               '(or non-nil-symbol
+                                 (cons non-nil-symbol (cons t null)))))
+                      (first rest)))
+                (let ((env-entries
+                        (mapcar
+                         (lambda (binding)
+                           (if (symbolp binding)
+                               (cons binding (wrap-constant nil))
+                               (cons (first binding)
+                                     (process (second binding) env))))
+                         (first rest))))
+                  (process-progn (alexandria:parse-body (cdr rest)) (append env-entries env)))
+                (give-up)))
            ;; BLOCK special forms
            ((block) (process-progn (cdr rest) env))
            ;; MULTIPLE-VALUE-BIND special forms
            ((multiple-value-bind)
-            (unless (and (<= 2 (length rest))
-                         (listp (first rest))
-                         (every (lambda (x)
-                                  (and (symbolp x)
-                                       (not (null x))))
-                                (first rest)))
-              (error 'give-up))
-            (let ((values-wrapper (process (second rest) env)))
-              (process-progn
-               (alexandria:parse-body (cddr rest))
-               (append
-                (loop for symbol in (first rest)
-                      for n from 0
-                      collect (cons symbol (wrapper-nth-value n values-wrapper)))
-                env))))
+            (if (and (<= 2 (length rest))
+                     (listp (first rest))
+                     (every (lambda (x)
+                              (and (symbolp x)
+                                   (not (null x))))
+                            (first rest)))
+                (let ((values-wrapper (process (second rest) env)))
+                  (process-progn
+                   (alexandria:parse-body (cddr rest))
+                   (append
+                    (loop for symbol in (first rest)
+                          for n from 0
+                          collect (cons symbol (wrapper-nth-value n values-wrapper)))
+                    env)))
+                (give-up)))
            (otherwise
             (cond
               ;; macros
@@ -247,12 +255,12 @@
                    (macroexpand-1 `(,symbol ,@rest))
                  (if expanded-p
                      (process expansion env)
-                     (error 'give-up))))
+                     (give-up))))
               ;; function calls
               ((fboundp symbol)
                (apply (function-specializer symbol)
                       (mapcar (lambda (x) (process x env)) rest)))
-              (t (error 'give-up)))))))
+              (t (give-up)))))))
     (let ((lambda-list (second lambda-expression))
           ;; Use alexandria to skip declarations.
           (body (alexandria:parse-body (rest (rest lambda-expression)))))
@@ -262,10 +270,7 @@
           (%abort-specialization (fnrecord-function fnrecord) args))
         (let* ((wrapped-args (mapcar #'ensure-les-wrapper args))
                (env (mapcar #'cons lambda-list wrapped-args)))
-          (handler-case
-              (unpack-les-wrapper
-               (with-encapsulated-wrappers
-                 (process-progn body env))
-               fnrecord args)
-            (give-up ()
-              (wrap-function fnrecord args '() '() (universal-ntype)))))))))
+          (unpack-les-wrapper
+           (with-encapsulated-wrappers
+             (process-progn body env))
+           fnrecord args))))))

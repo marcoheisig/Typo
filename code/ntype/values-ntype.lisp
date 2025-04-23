@@ -284,6 +284,12 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
     (_
      (error "Not a valid values type specifier: ~S" type-specifier))))
 
+(defun type-specifier-values-ntype (type-specifier)
+  (if (and (consp type-specifier) (eq (car type-specifier) 'values))
+      (values-type-specifier-values-ntype type-specifier)
+      (make-single-value-values-ntype
+       (type-specifier-ntype type-specifier))))
+
 (define-compiler-macro values-type-specifier-values-ntype (&whole whole type-specifier)
   (if (not (constantp type-specifier))
       whole
