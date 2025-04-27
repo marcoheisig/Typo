@@ -33,6 +33,10 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
   (:documentation
    "Returns the values ntype that is the union of the two supplied ones."))
 
+(defgeneric values-ntype-intersection (vn1 vn2)
+  (:documentation
+   "Returns the values ntype that is the intersection of the two supplied ones."))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; VALUES-NTYPE
@@ -232,6 +236,35 @@ VALUES-NTYPE, or NIL, if there are no rest values."))
      (cond ((and (ntypep rest1)
                  (ntypep rest2))
             (ntype-union rest1 rest2))
+           ((ntypep rest1) rest1)
+           ((ntypep rest2) rest2)))))
+
+(defmethod values-ntype-intersection ((vn1 values-ntype)
+                                      (vn2 values-ntype))
+  (let* ((required (max (values-ntype-minimum-number-of-values vn1)
+                        (values-ntype-minimum-number-of-values vn2)))
+         (nonrest1 (values-ntype-number-of-non-rest-values vn1))
+         (nonrest2 (values-ntype-number-of-non-rest-values vn2))
+         (rest1 (values-ntype-rest-ntype vn1))
+         (rest2 (values-ntype-rest-ntype vn1)))
+    ;; When one values ntype has fewer non-rest entries than the other, it must
+    ;; have a rest entry or the intersection is empty.
+    (when (or (and (< nonrest1 nonrest2) (not rest1))
+              (and (< nonrest2 nonrest1) (not rest2)))
+      (return-from values-ntype-intersection
+        (make-values-ntype '() '() (empty-ntype))))
+    (make-values-ntype
+     (loop for index below required
+           collect (ntype-intersection
+                    (values-ntype-nth-value-ntype index vn1)
+                    (values-ntype-nth-value-ntype index vn2)))
+     (loop for index from required below (max nonrest1 nonrest2)
+           collect (ntype-intersection
+                    (values-ntype-nth-value-ntype index vn1)
+                    (values-ntype-nth-value-ntype index vn2)))
+     (cond ((and (ntypep rest1)
+                 (ntypep rest2))
+            (ntype-intersection rest1 rest2))
            ((ntypep rest1) rest1)
            ((ntypep rest2) rest2)))))
 
