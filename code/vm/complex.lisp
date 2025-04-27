@@ -38,7 +38,7 @@
            (t
             (ntype-subtypecase imagpart-ntype
               ((not rational) (wrap-default 'complex))
-              (t (wrap-default 'number)))))))))
+              (t (wrap-default (type-specifier-ntype 'number))))))))))
 
 (define-simple-instruction (complex short-float-complex) (complex-short-float) (short-float short-float))
 (define-simple-instruction (complex single-float-complex) (complex-single-float) (single-float single-float))
@@ -121,7 +121,11 @@
            ((rational 0 *) (wrap 0))
            ((float * (0e0)) (wrap (float #.pi number)))
            ((rational * (0)) (wrap-constant (coerce pi 'single-float)))
-           ((complex float) (wrap-default (complex-part-ntype ntype)))
+           ((complex short-float) (wrap-default (type-specifier-ntype 'short-float)))
+           ((complex single-float) (wrap-default (type-specifier-ntype 'single-float)))
+           ((complex double-float) (wrap-default (type-specifier-ntype 'double-float)))
+           ((complex long-float) (wrap-default (type-specifier-ntype 'long-float)))
+           ((complex rational) (wrap-default (type-specifier-ntype 'single-float)))
            (t (wrap-default (type-specifier-ntype 'number))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
