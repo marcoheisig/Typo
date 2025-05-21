@@ -247,6 +247,10 @@
                           collect (cons symbol (wrapper-nth-value n values-wrapper)))
                     env)))
                 (give-up)))
+           ((quote)
+            (if (= 1 (length rest))
+                (wrap-constant (car rest))
+                (give-up)))
            (otherwise
             (cond
               ;; macros
