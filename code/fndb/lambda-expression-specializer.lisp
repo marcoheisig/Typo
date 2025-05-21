@@ -140,12 +140,12 @@
          ;; Return a universal les wrapper
          (make-les-wrapper
           :values-ntype
-          (make-values-ntype nil nil (universal-ntype))))
+          (make-values-ntype nil nil (list (universal-ntype)))))
        (give-up-single ()
          ;; Return a universal les wrapper for single value
          (make-les-wrapper
           :values-ntype
-          (make-values-ntype nil (universal-ntype) nil)))
+          (make-values-ntype (list (universal-ntype)) nil nil)))
        (process (form env)
          #+(or) (format *trace-output* "~&Processing ~S~%" form)
          ;; dispatch on the form
