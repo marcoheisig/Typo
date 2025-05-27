@@ -140,7 +140,7 @@
          ;; Return a universal les wrapper
          (make-les-wrapper
           :values-ntype
-          (make-values-ntype nil nil (list (universal-ntype)))))
+          (make-values-ntype nil nil (universal-ntype))))
        (give-up-single ()
          ;; Return a universal les wrapper for single value
          (make-les-wrapper
