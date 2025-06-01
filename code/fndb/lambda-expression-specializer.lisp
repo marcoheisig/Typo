@@ -39,6 +39,7 @@
           ;; Turn into a full fnrecord
           (change-class fnrecord 'full-fnrecord
             :name name
+            :function function
             :lambda-list lambda-list
             :min-arguments min-arguments
             :max-arguments max-arguments
