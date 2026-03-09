@@ -28,8 +28,11 @@
 
 (defun function-ftype (function)
   "Returns an available ftype declaration for the supplied function, or NIL."
+  (declare (ignorable function))
   (multiple-value-bind (category local-p declarations)
-      (trivial-cltl2:function-information (function-name function))
+      #.(if (fboundp 'trivial-cltl2:function-information)
+            `(trivial-cltl2:function-information (function-name function))
+            `(values nil nil '()))
     (declare (ignore category local-p))
     (values
      (alexandria:assoc-value declarations 'ftype))))

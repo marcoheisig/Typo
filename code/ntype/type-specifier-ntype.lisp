@@ -528,5 +528,10 @@
 
 ;;; Populate the Caches
 
-(mapc #'type-specifier-ntype *standardized-atomic-type-specifiers*)
+(loop for sats in *standardized-atomic-type-specifiers* do
+  (unless (gethash sats *atomic-type-specifier-table*)
+    (setf (gethash sats *atomic-type-specifier-table*)
+          (multiple-value-list
+           (find-primitive-ntype sats)))))
+
 (mapc #'type-specifier-ntype *built-in-classes*)
