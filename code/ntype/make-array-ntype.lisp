@@ -29,9 +29,13 @@
 (define-compiler-macro make-array-ntype (&whole form &rest args)
   (if (and (evenp (length args))
            (every #'constantp args))
-      `(load-time-value
-        (locally (declare (notinline make-array-ntype))
-          (make-array-ntype ,@args)))
+      `(values
+        (load-time-value
+         (locally (declare (notinline make-array-ntype))
+           (nth-value 0 (make-array-ntype ,@args))))
+        (load-time-value
+         (locally (declare (notinline make-array-ntype))
+           (nth-value 1 (make-array-ntype ,@args)))))
       form))
 
 (defun canonicalize-array-dimension-specifier (dimensions)
